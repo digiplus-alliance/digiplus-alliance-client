@@ -4,9 +4,9 @@ import { IoCheckmarkDoneCircleOutline } from "react-icons/io5";
 
 export default function AssessmentSection() {
   return (
-  <section className="w-full py-12 md:py-24 px-4 md:px-0">
+    <section className="w-full py-4 md:py-24">
       <div className="mx-auto max-w-6xl px-4">
-  <div className="flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-12">
+        <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
           {/* Image column */}
           <div className="w-full md:w-1/2">
             <Image
@@ -20,10 +20,13 @@ export default function AssessmentSection() {
 
           {/* Text column */}
           <div className="w-full md:w-1/2">
-            <div className="mt-6 md:mt-0 prose prose-sm md:prose-base max-w-none text-[#5E5B5B]">
-              <p className="text-[#5E5B5B]">
+            <div className="mt-6 prose prose-sm md:prose-base max-w-none text-[#5E5B5B]">
+              <p>
                 You can't grow what you don't measure. Let's help you move from
                 hustle to structure — the digital way.
+              </p>
+              <p>
+                Let's help you move from hustle to structure — the digital way.
               </p>
               <p className="mt-4">This quick self-assessment will help you:</p>
 
@@ -49,9 +52,11 @@ export default function AssessmentSection() {
                   </span>
                 </li>
               </ul>
-            </div>
-            <div className="mt-8 justify-left gap-4">
-              <Button className="px-6" size="lg">
+
+              <Button
+                className="w-full sm:w-auto px-6 py-3 my-4 text-xs sm:text-base"
+                size="lg"
+              >
                 Take the Digital Maturity Assessment Test
               </Button>
             </div>

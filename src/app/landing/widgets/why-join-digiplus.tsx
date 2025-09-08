@@ -19,7 +19,7 @@ export default function WhyJoinDigiplus() {
 
           {/* Text column */}
           <div className="w-full md:w-1/2">
-            <h2 className="text-2xl md:text-4xl text-[#3D3A3A] font-normal text-center md:text-left">
+            <h2 className="text-2xl md:text-4xl text-[#3D3A3A] font-normal text-left">
               Why Join <span className="text-[#D63A3A]">Digiplus</span>?
             </h2>
 
