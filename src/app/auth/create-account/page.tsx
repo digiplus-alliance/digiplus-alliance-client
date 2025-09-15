@@ -47,13 +47,13 @@ export default function RegisterPage() {
               className="mx-auto mb-4"
             />
           </Link>
-          <h1 className="text-2xl font-bold">Join the Digiplus Community</h1>
-          <p className="mt-1 text-sm md:text-lg text-[#5E5B5B] max-w-lg">
+          <h1 className="text-lg md:text-2xl font-bold">Join the Digiplus Community</h1>
+          <p className="mt-1 text-xs md:text-lg text-[#5E5B5B] md:max-w-lg w-[70%] md:w-full mx-auto">
             Create a free account to access trainings, apply for programs, and
             track your progress.
           </p>
 
-          <p className="py-8 text-[#5E5B5B] text-sm">
+          <p className="py-8 text-[#5E5B5B] text-xs md:text-sm">
             Already have an account?{" "}
             <span className="text-[#176E8E] hover:underline">
               <Link href="/auth/login">Log in</Link>
@@ -61,7 +61,7 @@ export default function RegisterPage() {
           </p>
         </div>
         {/* Social login */}
-        <div className="flex gap-4 items-center justify-center">
+        <div className="hidden md:flex gap-4 items-center justify-center">
           <Button
             variant="ghost"
             className="text-[#171616] text-base px-8 py-4 font-normal border border-[#D6D4D4] flex items-center gap-3"
@@ -84,12 +84,12 @@ export default function RegisterPage() {
           </Button>
         </div>
 
-        <div className="my-2 text-center text-base text-[#706C6C]">or</div>
+        <div className="hidden md:flex md:justify-center my-2 text-center text-base text-[#706C6C]">or</div>
       </div>
-      <div className="w-full max-w-lg rounded-lg bg-white shadow">
+      <div className="w-full max-w-lg md:rounded-lg md:bg-white md:shadow">
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-8">
-          <div className="flex gap-2">
+          <div className="md:flex gap-2 space-y-4 md:space-y-0">
             <div className="w-full">
               <label htmlFor="firstName" className="text-sm font-normal text-[#706C6C] block mb-1">First Name</label>
               <Input id="firstName" placeholder="First Name" {...register("firstName")} />
@@ -110,7 +110,7 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="md:flex gap-2 space-y-4 md:space-y-0">
             <div className="w-full">
               <label htmlFor="companyName" className="text-sm font-normal text-[#706C6C] block mb-1">Company Name</label>
               <Input id="companyName" placeholder="Company Name" {...register("companyName")} />
@@ -166,6 +166,31 @@ export default function RegisterPage() {
           </Button>
         </form>
       </div>
+
+      {/* Social login */}
+        <div className="flex flex-col md:hidden gap-2 items-center justify-center">
+          <Button
+            variant="ghost"
+            className="text-[#171616] text-base px-8 py-4 font-normal border border-[#D6D4D4] flex items-center gap-3"
+          >
+            <FaFacebook className="w-12 h-12 text-[#3D3A3A]" />
+            <span>Continue with Facebook</span>
+          </Button>
+           <div className="flex text-center text-base text-[#706C6C]">or</div>
+          <Button
+            variant="ghost"
+            className="text-[#171616] text-base px-8 py-4 font-normal border border-[#D6D4D4] flex items-center gap-3"
+          >
+            {/* <FcGoogle className="w-5 h-5" /> */}
+            <Image
+              src="/google-logo.svg"
+              alt="Google Logo"
+              width={18}
+              height={18}
+            />
+            <span>Continue with Google</span>
+          </Button>
+        </div>
     </div>
   );
 }

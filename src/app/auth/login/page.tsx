@@ -45,29 +45,29 @@ export default function LoginPage() {
             />
           </Link>
           <h1 className="text-2xl font-bold">Welcome back,</h1>
-          <p className="mt-1 text-sm md:text-lg text-[#5E5B5B] max-w-lg">
+          <p className="mt-1 text-sm text-center md:text-lg text-[#5E5B5B]">
             We just want to confirm its you.
           </p>
 
           <p className="py-8 text-[#5E5B5B] text-sm">
-            Already have an account?{" "}
+            Don’t have an account?{" "}
             <span className="text-[#176E8E] hover:underline">
               <Link href="/auth/create-account">Create an account</Link>
             </span>
           </p>
         </div>
         {/* Social login */}
-        <div className="flex gap-4 items-center justify-center">
+        <div className="flex flex-col md:flex-row gap-4 items-center justify-center">
           <Button
             variant="ghost"
-            className="text-[#171616] text-base px-8 py-4 font-normal border border-[#D6D4D4] flex items-center gap-3"
+            className="text-[#171616] text-base md:w-auto w-full py-4 font-normal border border-[#D6D4D4] flex items-center gap-3"
           >
             <FaFacebook className="w-12 h-12 text-[#3D3A3A]" />
             <span>Continue with Facebook</span>
           </Button>
           <Button
             variant="ghost"
-            className="text-[#171616] text-base px-8 py-4 font-normal border border-[#D6D4D4] flex items-center gap-3"
+            className="text-[#171616] text-base  md:w-auto w-full  py-4 font-normal border border-[#D6D4D4] flex items-center gap-3"
           >
             {/* <FcGoogle className="w-5 h-5" /> */}
             <Image
@@ -82,7 +82,7 @@ export default function LoginPage() {
 
         <div className="my-2 text-center text-base text-[#706C6C]">or</div>
       </div>
-      <div className="w-full max-w-lg rounded-lg bg-white shadow">
+      <div className="w-full max-w-lg md:rounded-lg md:bg-white md:shadow">
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-8">
           <div>
@@ -126,7 +126,7 @@ export default function LoginPage() {
             need to log in again.
           </p>
 
-          <Button type="submit" className="w-full mt-4">
+          <Button type="submit" className="w-full my-4">
             Go to your dashboard
           </Button>
         </form>
