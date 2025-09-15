@@ -77,7 +77,7 @@ export default function ServiceHero({
           <>
             {/* Left Image */}
             {sideImages[0] && (
-              <div className="absolute left-2 sm:left-4 md:left-40 top-1/2 md:top-2/3 transform -translate-y-1/2 w-24 sm:w-40 md:w-52 h-20 sm:h-28 md:h-32 rounded-lg overflow-hidden shadow-lg z-10">
+              <div className="hidden xl:block absolute left-2 sm:left-4 md:left-40 top-1/2 md:top-2/3 transform -translate-y-1/2 w-24 sm:w-40 md:w-52 h-20 sm:h-28 md:h-32 rounded-lg overflow-hidden shadow-lg z-10">
                 <Image
                   src={sideImages[0]}
                   alt="Side Image 1"
@@ -88,7 +88,7 @@ export default function ServiceHero({
             )}
             {/* Right Image */}
             {sideImages[1] && (
-              <div className="absolute right-[-20px] sm:right-40 md:right-40 top-1/2 transform -translate-y-1/2 w-24 sm:w-36 md:w-40 h-24 sm:h-40 md:h-48 rounded-lg overflow-hidden shadow-lg z-10">
+              <div className="hidden xl:block absolute right-[-20px] sm:right-40 md:right-40 top-1/2 transform -translate-y-1/2 w-24 sm:w-36 md:w-40 h-24 sm:h-40 md:h-48 rounded-lg overflow-hidden shadow-lg z-10">
                 <Image
                   src={sideImages[1]}
                   alt="Side Image 2"
