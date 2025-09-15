@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +28,7 @@ const navItems = [
 export function Navbar() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname() || "/";
+  const router = useRouter();
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -35,8 +36,8 @@ export function Navbar() {
   };
 
   return (
-    <header className="w-full border-b bg-background px-4 md:px-10 pt-4 pb-2">
-      <div className="container flex h-16 items-center justify-between">
+    <header className="border-b bg-background px-4 md:px-10 pt-4 pb-2">
+      <div className="w-full flex h-16 items-center justify-between">
         {/* Logo */}
         <Link href="/" className="font-bold text-xl">
           <Image
@@ -67,7 +68,9 @@ export function Navbar() {
 
         {/* Desktop Buttons */}
         <div className="hidden md:flex items-center space-x-3">
-          <Button className="font-normal">Sign In</Button>
+          <Button className="font-normal" onClick={() => router.push("/auth/create-account")}>
+            Sign In
+          </Button>
           <Button variant="outline" className="text-[#3D3A3A] font-normal">
             Contact Us
           </Button>

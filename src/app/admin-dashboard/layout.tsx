@@ -2,7 +2,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
   return (
     <div>
       <h3>Admin Dashboard</h3>
-      <main>{children}</main>
+      <main className="w-max-[1440px] flex items-center justify-center">{children}</main>
     </div>
   );
 }

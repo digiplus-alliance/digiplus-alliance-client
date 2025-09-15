@@ -25,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${rubik.variable} ${geistSans.variable} antialiased w-max-[1440px] flex items-center justify-center`}>{children}</body>
+      <body className={`${rubik.variable} ${geistSans.variable} antialiased`}>{children}</body>
     </html>
   );
 }
