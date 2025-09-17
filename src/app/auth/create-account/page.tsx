@@ -1,7 +1,6 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,28 +8,46 @@ import { PasswordInput } from "@/components/ui/password-input";
 import Image from "next/image";
 import Link from "next/link";
 import { FaFacebook } from "react-icons/fa";
-
-const schema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  companyName: z.string().min(1, "Company name is required"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-type FormValues = z.infer<typeof schema>;
+import { useSignup } from "@/app/api/auth/useSignup";
+import NotificationModal from "@/components/NotificationModal";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import SpinnerIcon from "@/components/icons/spinner";
+import { signUpSchema, SignUpValues } from "@/types/auth";
 
 export default function RegisterPage() {
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
-  } = useForm<FormValues>({
-    resolver: zodResolver(schema),
+  } = useForm<SignUpValues>({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: { role: "client" },
   });
+  const { mutate: signup, isPending } = useSignup();
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const router = useRouter();
 
-  const onSubmit = (data: FormValues) => {
-    console.log("Form submitted:", data);
+  const onSubmit = (data: SignUpValues) => {
+    signup(data, {
+      onSuccess: () => {
+        setShowSuccessModal(true);
+      },
+      onError: (error: unknown) => {
+        console.error("Signup error:", error);
+        const message =
+          error &&
+          typeof error === "object" &&
+          "message" in error &&
+          typeof (error as { message: string }).message === "string"
+            ? (error as { message: string }).message
+            : "An error occurred during signup.";
+        setErrorMessage(message);
+      },
+    });
   };
 
   return (
@@ -47,7 +64,9 @@ export default function RegisterPage() {
               className="mx-auto mb-4"
             />
           </Link>
-          <h1 className="text-lg md:text-2xl font-bold">Join the Digiplus Community</h1>
+          <h1 className="text-lg md:text-2xl font-bold">
+            Join the Digiplus Community
+          </h1>
           <p className="mt-1 text-xs md:text-lg text-[#5E5B5B] md:max-w-lg w-[70%] md:w-full mx-auto">
             Create a free account to access trainings, apply for programs, and
             track your progress.
@@ -84,27 +103,50 @@ export default function RegisterPage() {
           </Button>
         </div>
 
-        <div className="hidden md:flex md:justify-center my-2 text-center text-base text-[#706C6C]">or</div>
+        <div className="hidden md:flex md:justify-center my-2 text-center text-base text-[#706C6C]">
+          or
+        </div>
       </div>
       <div className="w-full max-w-lg md:rounded-lg md:bg-white md:shadow">
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 p-8">
+          {errorMessage && (
+            <p className="mb-4 text-sm text-red-600">{errorMessage}</p>
+          )}
           <div className="md:flex gap-2 space-y-4 md:space-y-0">
             <div className="w-full">
-              <label htmlFor="firstName" className="text-sm font-normal text-[#706C6C] block mb-1">First Name</label>
-              <Input id="firstName" placeholder="First Name" {...register("firstName")} />
-              {errors.firstName && (
+              <label
+                htmlFor="first_name"
+                className="text-sm font-normal text-[#706C6C] block mb-1"
+              >
+                First Name
+              </label>
+              <Input
+                id="first_name"
+                placeholder="First Name"
+                {...register("first_name")}
+              />
+              {errors.first_name && (
                 <p className="mt-1 text-xs text-red-500">
-                  {errors.firstName.message}
+                  {errors.first_name.message}
                 </p>
               )}
             </div>
             <div className="w-full">
-              <label htmlFor="lastName" className="text-sm font-normal text-[#706C6C] block mb-1">Last Name</label>
-              <Input id="lastName" placeholder="Last Name" {...register("lastName")} />
-              {errors.lastName && (
+              <label
+                htmlFor="last_name"
+                className="text-sm font-normal text-[#706C6C] block mb-1"
+              >
+                Last Name
+              </label>
+              <Input
+                id="last_name"
+                placeholder="Last Name"
+                {...register("last_name")}
+              />
+              {errors.last_name && (
                 <p className="mt-1 text-xs text-red-500">
-                  {errors.lastName.message}
+                  {errors.last_name.message}
                 </p>
               )}
             </div>
@@ -112,16 +154,30 @@ export default function RegisterPage() {
 
           <div className="md:flex gap-2 space-y-4 md:space-y-0">
             <div className="w-full">
-              <label htmlFor="companyName" className="text-sm font-normal text-[#706C6C] block mb-1">Company Name</label>
-              <Input id="companyName" placeholder="Company Name" {...register("companyName")} />
-              {errors.companyName && (
+              <label
+                htmlFor="business_name"
+                className="text-sm font-normal text-[#706C6C] block mb-1"
+              >
+                Business Name
+              </label>
+              <Input
+                id="business_name"
+                placeholder="Business Name"
+                {...register("business_name")}
+              />
+              {errors.business_name && (
                 <p className="mt-1 text-xs text-red-500">
-                  {errors.companyName.message}
+                  {errors.business_name.message}
                 </p>
               )}
             </div>
             <div className="w-full">
-              <label htmlFor="email" className="text-sm font-normal text-[#706C6C] block mb-1">Email</label>
+              <label
+                htmlFor="email"
+                className="text-sm font-normal text-[#706C6C] block mb-1"
+              >
+                Email
+              </label>
               <Input
                 id="email"
                 placeholder="yourregemail@company.com"
@@ -137,13 +193,36 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="text-sm font-normal text-[#706C6C] block mb-1">Password</label>
+            <label
+              htmlFor="password"
+              className="text-sm font-normal text-[#706C6C] block mb-1"
+            >
+              Password
+            </label>
             <PasswordInput
               id="password"
               placeholder="********"
               {...register("password")}
               error={errors.password?.message}
             />
+          </div>
+
+          {/* Role selector: Business owner checkbox (sets role) */}
+          <div className="flex items-center gap-3">
+            {/* register hidden role field so its value is submitted */}
+            <input type="hidden" {...register("role")} />
+            <input
+              id="business_owner"
+              type="checkbox"
+              className="w-4 h-4"
+              checked={watch("role") === "business_owner"}
+              onChange={(e) =>
+                setValue("role", e.target.checked ? "business_owner" : "client")
+              }
+            />
+            <label htmlFor="business_owner" className="text-sm text-[#706C6C]">
+              Business owner
+            </label>
           </div>
 
           <p className="text-xs text-[#5E5B5B]">
@@ -158,39 +237,49 @@ export default function RegisterPage() {
             .
           </p>
 
-          <Button
-            type="submit"
-            className="w-full mt-4"
-          >
-            Create an account
+          <Button type="submit" className="w-full mt-4">
+            {isPending ? <SpinnerIcon /> : "Create an account"}
           </Button>
         </form>
       </div>
 
       {/* Social login */}
-        <div className="flex flex-col md:hidden gap-2 items-center justify-center">
-          <Button
-            variant="ghost"
-            className="text-[#171616] text-base px-8 py-4 font-normal border border-[#D6D4D4] flex items-center gap-3"
-          >
-            <FaFacebook className="w-12 h-12 text-[#3D3A3A]" />
-            <span>Continue with Facebook</span>
-          </Button>
-           <div className="flex text-center text-base text-[#706C6C]">or</div>
-          <Button
-            variant="ghost"
-            className="text-[#171616] text-base px-8 py-4 font-normal border border-[#D6D4D4] flex items-center gap-3"
-          >
-            {/* <FcGoogle className="w-5 h-5" /> */}
-            <Image
-              src="/google-logo.svg"
-              alt="Google Logo"
-              width={18}
-              height={18}
-            />
-            <span>Continue with Google</span>
-          </Button>
-        </div>
+      <div className="flex flex-col md:hidden gap-2 items-center justify-center">
+        <Button
+          variant="ghost"
+          className="text-[#171616] text-base px-8 py-4 font-normal border border-[#D6D4D4] flex items-center gap-3"
+        >
+          <FaFacebook className="w-12 h-12 text-[#3D3A3A]" />
+          <span>Continue with Facebook</span>
+        </Button>
+        <div className="flex text-center text-base text-[#706C6C]">or</div>
+        <Button
+          variant="ghost"
+          className="text-[#171616] text-base px-8 py-4 font-normal border border-[#D6D4D4] flex items-center gap-3"
+        >
+          {/* <FcGoogle className="w-5 h-5" /> */}
+          <Image
+            src="/google-logo.svg"
+            alt="Google Logo"
+            width={18}
+            height={18}
+          />
+          <span>Continue with Google</span>
+        </Button>
+      </div>
+
+      {showSuccessModal && (
+        <NotificationModal
+          open={showSuccessModal}
+          variant="success"
+          title="Account Created Successfully"
+          description="Kindly check your email for a verification link to activate your account."
+          buttonLabel="Proceed to Login"
+          onButtonClick={() => {
+            router.push("/auth/login");
+          }}
+        />
+      )}
     </div>
   );
 }

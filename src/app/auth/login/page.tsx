@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,8 +27,28 @@ export default function LoginPage() {
     resolver: zodResolver(schema),
   });
 
-  const onSubmit = (data: FormValues) => {
-    console.log("Form submitted:", data);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  const onSubmit = async (data: FormValues) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("../api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const json = await res.json().catch(() => ({}));
+
+      // Expecting { message, user }
+      console.log("Login response message:", json.message);
+      console.log("Login response user:", json.user);
+    } catch (err) {
+      console.error("Login request failed:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

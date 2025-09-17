@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Rubik } from "next/font/google";
 import "./globals.css";
+import { AppProviders } from "@/lib/provider";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,7 +27,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${rubik.variable} ${geistSans.variable} antialiased`}>{children}</body>
+      <body className={`${rubik.variable} ${geistSans.variable} antialiased`}>
+        <AppProviders>
+          {children}
+          <Toaster position="bottom-right" theme="light" richColors />
+        </AppProviders>
+      </body>
     </html>
   );
 }
