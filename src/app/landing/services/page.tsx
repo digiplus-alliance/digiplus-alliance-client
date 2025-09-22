@@ -1,8 +1,11 @@
+import FeaturesSection from "./widgets/feature-section";
+import ServicesHero from "./widgets/services-hero";
+
 export default function ServicesPage() {
   return (
     <div>
-      <h1>Our Services</h1>
-      <p>Welcome to the Services page.</p>
+      <ServicesHero />
+      <FeaturesSection />
     </div>
   );
 }
