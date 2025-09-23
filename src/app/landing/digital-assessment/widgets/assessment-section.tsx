@@ -22,11 +22,11 @@ export default function AssessmentSection() {
           <div className="w-full md:w-1/2">
             <div className="mt-6 prose prose-sm md:prose-base max-w-none text-[#5E5B5B]">
               <p>
-                You can't grow what you don't measure. Let's help you move from
+                You can&apos;t grow what you don&apos;t measure. Let&apos;s help you move from
                 hustle to structure — the digital way.
               </p>
               <p>
-                Let's help you move from hustle to structure — the digital way.
+                Let&apos;s help you move from hustle to structure — the digital way.
               </p>
               <p className="mt-4">This quick self-assessment will help you:</p>
 

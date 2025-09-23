@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import React from "react";
 import { IoCheckmarkDoneCircleOutline } from "react-icons/io5";
 
@@ -105,9 +106,11 @@ const InfoSection: React.FC<SectionProps> = ({
         {/* Right Image */}
         <div className={`${imageWidth} flex justify-center`}>
           {typeof image === "string" ? (
-            <img
+            <Image
               src={image}
               alt="Section visual"
+              width={600}
+              height={400}
               className={`w-full rounded-lg object-cover ${
                 imageHeight
                   ? imageHeight

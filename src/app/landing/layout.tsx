@@ -13,10 +13,12 @@ type Props = {
 
 export default function RootLayout({ children }: Props) {
   return (
-    <div >
+    <>
       <Navbar />
-      <main>{children}</main>
-      <Footer />
-    </div>
+      <div className="w-full max-w-[1500px] flex items-center justify-center flex-col mx-auto">
+        <main className="w-full">{children}</main>
+        <Footer />
+      </div>
+    </>
   );
 }

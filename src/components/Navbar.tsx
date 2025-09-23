@@ -36,8 +36,8 @@ export function Navbar() {
   };
 
   return (
-    <header className="w-full border-b bg-background px-4 md:px-10 pt-4 pb-2">
-      <div className="container flex h-16 items-center justify-between">
+    <header className="border-b   bg-background px-4 md:px-10 pt-4 pb-2 w-full max-w-[1500px] mx-auto">
+      <div className="w-full flex h-16 items-center justify-between">
         {/* Logo */}
         <Link href="/" className="font-bold text-xl">
           <Image
@@ -55,7 +55,7 @@ export function Navbar() {
               key={item.href}
               href={item.href}
               aria-current={isActive(item.href) ? "page" : undefined}
-              className={`text-base font-normal transition-colors ${
+              className={`text-xs lg:text-base font-normal transition-colors ${
                 isActive(item.href)
                   ? "underline underline-offset-4 text-[#227C9D]"
                   : "text-[#5E5B5B] hover:text-foreground"
@@ -68,12 +68,10 @@ export function Navbar() {
 
         {/* Desktop Buttons */}
         <div className="hidden md:flex items-center space-x-3">
-          <Button className="font-normal">Sign In</Button>
-          <Button
-            variant="outline"
-            className="text-[#3D3A3A] font-normal"
-            onClick={() => router.push("/landing/contact")}
-          >
+          <Button className="font-normal" onClick={() => router.push("/auth/login")}>
+            Sign In
+          </Button>
+          <Button variant="outline" className="text-[#3D3A3A] font-normal">
             Contact Us
           </Button>
         </div>
@@ -98,7 +96,7 @@ export function Navbar() {
                     href={item.href}
                     onClick={() => setOpen(false)}
                     aria-current={isActive(item.href) ? "page" : undefined}
-                    className={`text-base font-normal transition-colors flex justify-center ${
+                    className={`text-sm font-normal transition-colors flex justify-center ${
                       isActive(item.href)
                         ? "underline underline-offset-4 text-[#227C9D]"
                         : "text-[#5E5B5B] hover:text-foreground"
@@ -110,7 +108,7 @@ export function Navbar() {
               </div>
 
               <div className="mt-6 px-10 flex flex-col space-y-3">
-                <Button className="font-normal">Sign In</Button>
+                <Button className="font-normal" onClick={() => router.push("/auth/login")}>Sign In</Button>
                 <Button
                   variant="outline"
                   className="text-[#3D3A3A] font-normal"

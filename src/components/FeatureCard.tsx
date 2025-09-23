@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
-import { link } from "fs";
 
 interface FeatureCardProps {
   title: string;
