@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +29,7 @@ const navItems = [
 export function Navbar() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname() || "/";
+  const router = useRouter();
   const router = useRouter();
 
   const isActive = (href: string) => {
@@ -112,6 +114,7 @@ export function Navbar() {
                 <Button
                   variant="outline"
                   className="text-[#3D3A3A] font-normal"
+                  onClick={() => router.push("/landing/contact")}
                 >
                   Contact Us
                 </Button>
