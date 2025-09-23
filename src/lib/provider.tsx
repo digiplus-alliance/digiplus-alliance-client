@@ -49,8 +49,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
         maxAge: 1000 * 60 * 60 * 24, 
         dehydrateOptions: {
           shouldDehydrateQuery: (query) => {
-            // @typescript-eslint/no-explicit-any
-            return (query.meta as any)?.persist === true;
+            return (query.meta as { persist?: boolean })?.persist === true;
           },
         },
       }}

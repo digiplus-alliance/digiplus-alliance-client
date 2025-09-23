@@ -59,13 +59,11 @@ const useSend = <RequestBodyType, TData = unknown, TContext = unknown>({
   const queryClient = useQueryClient();
 
   const defaultQueryKey = generateQueryKey({ url, baseUrl, hasAuth });
-  const defaultIndex = defaultQueryKey.join("::");
   const parseResponseData = (data?: QueryResponse<TData>): TData | undefined => {
     if (!data) return undefined;
     if (!schema) return (data as unknown) as TData;
     try {
-      // @typescript-eslint/no-explicit-any
-      const target = "data" in data ? (data as any).data : data;
+      const target = 'data' in data ? (data as Record<string, unknown>).data : data;
       return (schema as z.ZodSchema<TData>).parse(target);
     } catch (e) {
       console.error("Zod parsing error:", e);
@@ -98,10 +96,8 @@ const useSend = <RequestBodyType, TData = unknown, TContext = unknown>({
       let message: string | React.ReactNode = "An unexpected error occurred.";
       if (error instanceof Error) {
         message = error.message;
-        // @typescript-eslint/no-explicit-any
-      } else if ((error as any)?.message) {
-        // @typescript-eslint/no-explicit-any
-        message = (error as any).message;
+      } else if (typeof error === 'object' && error !== null && 'message' in error) {
+        message = (error as { message: string }).message;
       }
       const displayMessage = errorMessage || message;
       if (showErrorMessage) {
@@ -129,8 +125,7 @@ const useSend = <RequestBodyType, TData = unknown, TContext = unknown>({
         }
       }
       if (options.onSettled) {
-        // @typescript-eslint/no-explicit-any
-        (options.onSettled as any)(data, error, variables, context);
+        options.onSettled(data, error, variables, context);
       }
     },
   });

@@ -28,7 +28,6 @@ export async function POST(req: NextRequest) {
 
     return res;
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error("Logout handler error:", error);
 
     return new NextResponse(JSON.stringify({ message: "Logout failed" }), {

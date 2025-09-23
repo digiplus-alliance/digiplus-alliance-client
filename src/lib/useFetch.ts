@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useQueryClient, UseQueryOptions } from "@tanstack/react-query";
+import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { toast } from "sonner";
 import * as z from "zod";
 import { useEffect } from "react";

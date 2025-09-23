@@ -30,11 +30,6 @@ export default function DigitalInfrastructureSupport() {
           "Online marketplace/storefront setup (1 platform)",
           "2 digital talents FREE for 1 month",
         ]}
-        children={
-          <p className="text-[#5E5B5B] text-sm md:text-base">
-            Note: Monthly compensation after the free month is not included)
-          </p>
-        }
         pricing={{
           price: "350,000 NGN",
           note: "Pricing can be negotiated depending on scope or specific needs",
@@ -42,7 +37,11 @@ export default function DigitalInfrastructureSupport() {
         }}
         image="/services/digital-support/what.png"
         background="bg-white"
-      />
+      >
+        <p className="text-[#5E5B5B] text-sm md:text-base">
+          Note: Monthly compensation after the free month is not included)
+        </p>
+      </InfoSection>
 
       <Value
         title="Promised Value"

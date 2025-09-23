@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     const responseData = await response.json().catch(() => ({}));
 
     if (response.ok) {
-      const { accessToken, refreshToken, message, user } = responseData as any;
+      const { accessToken, refreshToken, message, user } = responseData;
 
       // Only return message and user in the response body
       const res = new NextResponse(JSON.stringify({ message, user }), {
