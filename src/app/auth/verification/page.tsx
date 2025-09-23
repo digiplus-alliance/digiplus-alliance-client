@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -15,24 +15,29 @@ import {
 } from "@/components/ui/dialog";
 import SpinnerIcon from "@/components/icons/spinner";
 import { useVerification } from "@/app/api/auth/useVerification";
-import { useRequestVerification, type VerificationRequest, type VerificationResponse } from "@/app/api/auth/useRequestVerification";
+import { useRequestVerification } from "@/app/api/auth/useRequestVerification";
 import { useLogout } from "@/lib/logout";
 
 export default function VerificationPage() {
   const [isVerificationSuccess, setIsVerificationSuccess] = useState(false);
   const [countdown, setCountdown] = useState(5);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+  const [token, setToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    setToken(params.get("token"));
+  }, []);
   const animationFrameRef = useRef<number>(0);
   const startTimeRef = useRef<number>(0);
   const { mutate: verify } = useVerification();
   const { mutate: requestVerification, isPending: requestingVerification } = useRequestVerification();
   const { mutate: logoutMutate } = useLogout();
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     logoutMutate();
-  };
+  }, [logoutMutate]);
 
   const userVerified = false;
 
@@ -78,7 +83,7 @@ export default function VerificationPage() {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [isVerificationSuccess]);
+  }, [isVerificationSuccess, handleLogout]);
 
   useEffect(() => {
     if (token) {
