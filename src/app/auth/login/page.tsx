@@ -14,6 +14,7 @@ import Link from "next/link";
 import { FaFacebook } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useAuthStore, User } from "@/store/auth";
+import { toast } from "sonner";
 
 const schema = z.object({
   email: z.string().email("Invalid email address"),
@@ -53,10 +54,13 @@ export default function LoginPage() {
       return json as { message?: string; user?: unknown };
     },
     onSuccess(data) {
-      router.push("/admin-dashboard");
+      toast.success("Login successful! Redirecting to dashboard...");
       useAuthStore.getState().setUser(data.user as User);
+      // Short delay to show the success message before redirect
+      setTimeout(() => router.push("/admin-dashboard"), 500);
     },
     onError(error) {
+      toast.error(error.message || "Failed to login. Please try again.");
       console.error("Login request failed:", error);
     },
   });
