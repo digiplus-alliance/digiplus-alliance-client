@@ -4,12 +4,12 @@ import { useAuthStore } from "@/store/auth";
 import { toast } from "sonner";
 
 export function signOutCompletelyClientSide() {
-  useAuthStore.setState({ user: null } as any);
+  useAuthStore.setState({ user: null });
 }
 
 export function useLogout() {
   const queryClient = useQueryClient();
-  const setUser = useAuthStore((s) => s.setUser);
+  const clearUser = useAuthStore((s) => s.clearUser);
   const router = useRouter();
   signOutCompletelyClientSide();
 
@@ -24,7 +24,7 @@ export function useLogout() {
     },
     onSuccess() {
       // Clear client state and cached queries
-      setUser(null as any);
+      clearUser();
       queryClient.clear();
       toast.success("Logged out");
       router.push("/auth/login");
@@ -33,7 +33,7 @@ export function useLogout() {
       console.error("Logout failed:", err);
       toast.error("Logout failed");
       // still clear client state to avoid stuck sessions
-      setUser(null as any);
+      clearUser();
       queryClient.clear();
       router.push("/auth/login");
     },

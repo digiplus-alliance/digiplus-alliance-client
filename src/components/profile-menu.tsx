@@ -14,13 +14,13 @@ import {
 import { useLogout } from "@/lib/logout";
 
 export default function ProfileMenu({ className }: { className?: string }) {
-  const { mutate: logoutMutate, isPending } = useLogout();
+  const { mutate: logoutMutate } = useLogout();
   const handleLogout = () => {
     logoutMutate();
   };
 
-  let userName = "Opeyemi Bioku";
-  let role = "admin";
+  const userName = "Opeyemi Bioku";
+  const role = "admin";
 
   const avatarUrl = "",
     name = "EN";

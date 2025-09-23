@@ -19,6 +19,7 @@ export default function DigitalAssessmentPage() {
               <div className="mt-6 prose prose-sm md:prose-base max-w-none text-[#5E5B5B]">
                 <p className="text-sm md:text-base">
                   Grow where it matters. Whether you're running a physical shop,
+                    Grow where it matters. Whether you&apos;re running a physical shop,
                   growing a delivery business, or managing your team on
                   WhatsApp, every business today needs digital structure to
                   thrive.
@@ -57,10 +58,15 @@ export default function DigitalAssessmentPage() {
                   where your business is on the digital journey and gives you a
                   clear, personalised roadmap to grow smarter, faster, and
                   stronger. This is not a test you can fail. It's a practical
+                    Our Digital Maturity Assessment Tool helps you figure out
+                    where your business is on the digital journey and gives you a
+                    clear, personalised roadmap to grow smarter, faster, and
+                    stronger. This is not a test you can fail. It&apos;s a practical
                   self-check to help you plan smarter not guess.
                 </p>
                 <p className="text-sm md:text-base pt-4 italic">
                   Note: We don’t collect personal or sensitive data. Your responses are used only to guide you, and in anonymized format to improve our support to MSMEs like yours. Your business, your data, your pace.
+                    Note: We don&apos;t collect personal or sensitive data. Your responses are used only to guide you, and in anonymized format to improve our support to MSMEs like yours. Your business, your data, your pace.
                 </p>
               </div>
             </div>

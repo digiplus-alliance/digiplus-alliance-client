@@ -64,6 +64,7 @@ const useSend = <RequestBodyType, TData = unknown, TContext = unknown>({
     if (!data) return undefined;
     if (!schema) return (data as unknown) as TData;
     try {
+      // @typescript-eslint/no-explicit-any
       const target = "data" in data ? (data as any).data : data;
       return (schema as z.ZodSchema<TData>).parse(target);
     } catch (e) {
@@ -97,7 +98,9 @@ const useSend = <RequestBodyType, TData = unknown, TContext = unknown>({
       let message: string | React.ReactNode = "An unexpected error occurred.";
       if (error instanceof Error) {
         message = error.message;
+        // @typescript-eslint/no-explicit-any
       } else if ((error as any)?.message) {
+        // @typescript-eslint/no-explicit-any
         message = (error as any).message;
       }
       const displayMessage = errorMessage || message;
@@ -126,6 +129,7 @@ const useSend = <RequestBodyType, TData = unknown, TContext = unknown>({
         }
       }
       if (options.onSettled) {
+        // @typescript-eslint/no-explicit-any
         (options.onSettled as any)(data, error, variables, context);
       }
     },

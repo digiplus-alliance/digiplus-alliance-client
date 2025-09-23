@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import SpinnerIcon from "@/components/icons/spinner";
 import { useVerification } from "@/app/api/auth/useVerification";
-import { useRequestVerification } from "@/app/api/auth/useRequestVerification";
+import { useRequestVerification, type VerificationRequest, type VerificationResponse } from "@/app/api/auth/useRequestVerification";
 import { useLogout } from "@/lib/logout";
 
 export default function VerificationPage() {
@@ -26,17 +26,29 @@ export default function VerificationPage() {
   const token = searchParams.get("token");
   const animationFrameRef = useRef<number>(0);
   const startTimeRef = useRef<number>(0);
-  const { mutate: verify, isPending: verifying } = useVerification();
-  const { data: requestVerification, isPending: requestingVerification } = useRequestVerification();
-  const { mutate: logoutMutate, isPending } = useLogout();
+  const { mutate: verify } = useVerification();
+  const { mutate: requestVerification, isPending: requestingVerification } = useRequestVerification();
+  const { mutate: logoutMutate } = useLogout();
+
   const handleLogout = () => {
     logoutMutate();
   };
 
-  let userVerified = false;
+  const userVerified = false;
 
-  const handleResend = async () => {
-    console.log("Resend verification email");
+  const handleResend = () => {
+    requestVerification(
+      {},
+      {
+        onSuccess: ({ message }) => {
+          toast.success(message);
+          setIsVerificationSuccess(true);
+        },
+        onError: (error) => {
+          toast.error(error instanceof Error ? error.message : "Failed to send verification email");
+        }
+      }
+    );
   };
 
   useEffect(() => {
@@ -87,7 +99,7 @@ export default function VerificationPage() {
         }
       );
     }
-  }, [token, router, verify]);
+  }, [token, router, verify, handleLogout]);
 
   if (token) {
     return (

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Image from "next/image";
 
 export default function AdminDashboard() {
   const [users] = useState([
@@ -52,7 +53,7 @@ export default function AdminDashboard() {
             {[1, 2].map((i) => (
               <div key={i} className="flex justify-between items-center p-3 border rounded-md">
                 <div className="flex items-center gap-3">
-                  <img src="/avatar.png" alt="user" className="w-10 h-10 rounded-full" />
+                  <Image src="/avatar.png" alt="user" width={40} height={40} className="rounded-full" />
                   <div>
                     <p className="font-medium">Service Name</p>
                     <p className="text-xs text-gray-500">
@@ -76,7 +77,7 @@ export default function AdminDashboard() {
             {[1, 2].map((i) => (
               <div key={i} className="flex justify-between items-center p-3 border rounded-md">
                 <div className="flex items-center gap-3">
-                  <img src="/avatar.png" alt="user" className="w-10 h-10 rounded-full" />
+                  <Image src="/avatar.png" alt="user" width={40} height={40} className="rounded-full" />
                   <div>
                     <p className="font-medium">Name of Company</p>
                     <p className="text-xs text-gray-500">April 20, 2022 at 04:00 PM</p>
@@ -142,7 +143,7 @@ export default function AdminDashboard() {
             {[1, 2, 3].map((i) => (
               <div key={i} className="flex items-center justify-between p-2 border rounded-md">
                 <div className="flex items-center gap-3">
-                  <img src="/avatar.png" alt="author" className="w-8 h-8 rounded-full" />
+                  <Image src="/avatar.png" alt="author" width={32} height={32} className="rounded-full" />
                   <div>
                     <p className="font-medium">Post Title</p>
                     <span

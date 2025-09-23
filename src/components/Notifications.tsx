@@ -10,7 +10,6 @@ import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -18,7 +17,7 @@ import {
 } from "./ui/dropdown-menu";
 
 export default function Notifications() {
-  const [notifications, setNotifications] = useState<
+  const [notifications] = useState<
     { id: number; title: string; description: string; date: string; time: string; section: string; type: "form" | "application" }[]
   >([
     {
@@ -59,7 +58,7 @@ export default function Notifications() {
     },
   ]);
 
-  const [isPending, setIsPending] = useState(false);
+  const [isPending] = useState(false);
 
   return (
     <DropdownMenu modal={false}>

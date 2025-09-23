@@ -128,7 +128,6 @@ const InitiateChangePassword: React.FC<{
 
 const VerifyCode: React.FC<{ email: string; onBack?: () => void }> = ({
   email,
-  onBack,
 }) => {
   const {
     register,

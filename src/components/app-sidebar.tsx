@@ -27,8 +27,6 @@ interface SidebarItem {
 
 interface SidebarLayoutProps extends React.ComponentProps<typeof Sidebar> {
   logoHref?: string;
-  logoSrc?: string;
-  iconLogo?: string;
   navItems: SidebarItem[];
   personalizationItems: SidebarItem[];
   basePath?: string;
@@ -41,8 +39,6 @@ export default function SidebarLayout({
   navItems,
   personalizationItems,
   logoHref = "/",
-  logoSrc,
-  iconLogo,
   basePath = "",
   footer,
   showProfileMenu = false,

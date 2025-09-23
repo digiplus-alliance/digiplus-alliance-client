@@ -52,7 +52,6 @@ const useFetch = <TData = unknown>({
   onSettled,
   reactQueryOptions,
 }: IUseFetchOptions<TData>) => {
-  const queryClient = useQueryClient();
 
   const defaultQueryKey = queryKey || generateQueryKey({ url, baseUrl, hasAuth });
 
