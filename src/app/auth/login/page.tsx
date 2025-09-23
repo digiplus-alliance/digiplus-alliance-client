@@ -1,15 +1,19 @@
 "use client";
 
 import React from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/password-input";
+import SpinnerIcon from "@/components/icons/spinner";
 import Image from "next/image";
 import Link from "next/link";
 import { FaFacebook } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+import { useAuthStore, User } from "@/store/auth";
 
 const schema = z.object({
   email: z.string().email("Invalid email address"),
@@ -26,29 +30,39 @@ export default function LoginPage() {
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
   });
+  const router = useRouter();
 
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-
-  const onSubmit = async (data: FormValues) => {
-    if (isSubmitting) return;
-    setIsSubmitting(true);
-    try {
-      const res = await fetch("../api/auth/login", {
+  const mutation = useMutation<
+    { message?: string; user?: unknown },
+    Error,
+    FormValues
+  >({
+    mutationFn: async (payload: FormValues) => {
+      const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
 
       const json = await res.json().catch(() => ({}));
 
-      // Expecting { message, user }
-      console.log("Login response message:", json.message);
-      console.log("Login response user:", json.user);
-    } catch (err) {
-      console.error("Login request failed:", err);
-    } finally {
-      setIsSubmitting(false);
-    }
+      if (!res.ok) {
+        throw new Error(json?.message || "Login failed");
+      }
+
+      return json as { message?: string; user?: unknown };
+    },
+    onSuccess(data) {
+      router.push("/admin-dashboard");
+      useAuthStore.getState().setUser(data.user as User);
+    },
+    onError(error) {
+      console.error("Login request failed:", error);
+    },
+  });
+
+  const onSubmit = (data: FormValues) => {
+    mutation.mutate(data);
   };
 
   return (
@@ -139,7 +153,11 @@ export default function LoginPage() {
               {...register("password")}
               error={errors.password?.message}
             />
-            <Link href="/auth/forgot-password"><p className="py-2 text-end text-[#D63A3A] text-sm">Forgot password?</p></Link>
+            <Link href="/auth/forgot-password">
+              <p className="py-2 text-end text-[#D63A3A] text-sm">
+                Forgot password?
+              </p>
+            </Link>
           </div>
 
           <p className="text-xs text-center text-[#5E5B5B]">
@@ -147,8 +165,18 @@ export default function LoginPage() {
             need to log in again.
           </p>
 
-          <Button type="submit" className="w-full my-4">
-            Go to your dashboard
+          <Button
+            type="submit"
+            className="w-full my-4"
+            disabled={mutation.isPending}
+          >
+            {mutation.isPending ? (
+              <>
+                <SpinnerIcon /> Logging in...
+              </>
+            ) : (
+              "Go to your dashboard"
+            )}
           </Button>
         </form>
       </div>
