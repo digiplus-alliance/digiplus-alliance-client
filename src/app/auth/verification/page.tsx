@@ -15,8 +15,8 @@ import {
 } from "@/components/ui/dialog";
 import SpinnerIcon from "@/components/icons/spinner";
 import { useVerification } from "@/app/api/auth/useVerification";
-import { signOutCompletely } from "@/lib/logout";
 import { useRequestVerification } from "@/app/api/auth/useRequestVerification";
+import { useLogout } from "@/lib/logout";
 
 export default function VerificationPage() {
   const [isVerificationSuccess, setIsVerificationSuccess] = useState(false);
@@ -28,6 +28,10 @@ export default function VerificationPage() {
   const startTimeRef = useRef<number>(0);
   const { mutate: verify, isPending: verifying } = useVerification();
   const { data: requestVerification, isPending: requestingVerification } = useRequestVerification();
+  const { mutate: logoutMutate, isPending } = useLogout();
+  const handleLogout = () => {
+    logoutMutate();
+  };
 
   let userVerified = false;
 
@@ -51,7 +55,7 @@ export default function VerificationPage() {
       if (remaining > 0) {
         animationFrameRef.current = requestAnimationFrame(startCountdown);
       } else {
-        signOutCompletely();
+        handleLogout();
       }
     };
 
@@ -73,12 +77,12 @@ export default function VerificationPage() {
             toast.success("Verification successful!");
             setIsVerificationSuccess(true);
             setTimeout(() => {
-              signOutCompletely();
+              handleLogout();
             }, 2000);
           },
           onError: () => {
             toast.error("Verification failed");
-            signOutCompletely();
+            handleLogout();
           },
         }
       );
@@ -96,7 +100,7 @@ export default function VerificationPage() {
 
   if (isVerificationSuccess) {
     return (
-      <Dialog open={true} onOpenChange={() => signOutCompletely()}>
+      <Dialog open={true} onOpenChange={() => handleLogout()}>
         <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-md pointer-events-none" />
         <DialogContent>
           <DialogHeader>
@@ -134,7 +138,7 @@ export default function VerificationPage() {
           </DialogHeader>
           <DialogFooter>
             <Button
-              className="w-full bg-[#007070] text-white"
+              className="w-full"
               onClick={handleResend}
               disabled={requestingVerification}
               variant="secondary"
@@ -148,8 +152,8 @@ export default function VerificationPage() {
               )}
             </Button>
             <Button
-              className="w-full bg-[#007070] text-white"
-              onClick={() => signOutCompletely()}
+              className="w-full"
+              onClick={() => handleLogout()}
               variant="destructive"
             >
               Logout
