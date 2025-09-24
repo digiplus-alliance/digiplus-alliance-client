@@ -26,9 +26,9 @@ export default function WhyJoinDigiplus() {
             <div className="mt-6 prose prose-sm md:prose-base max-w-none text-[#5E5B5B]">
               <p className="text-[#D63A3A]">No Matter What You Do, Digiplus is Built for You.</p>
               <p>
-                Whether you're a trader in need of structure, a transporter
+                Whether you&apos;re a trader in need of structure, a transporter
                 trying to go digital, a startup chasing growth, or a growing
-                MSME looking for stability, we’re here for you.
+                MSME looking for stability, we&apos;re here for you.
               </p>
 
               <ul className="mt-4 space-y-3 list-none">
