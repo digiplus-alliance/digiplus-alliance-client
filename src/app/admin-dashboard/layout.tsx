@@ -14,13 +14,13 @@ import Navbar from "./widgets/navbar";
 const items = [
   {
     title: "Dashboard",
-    url: "home",
+    url: "/",
     icon: Home,
     iconLogo: "/icons/sidebar-icon-one.svg",
   },
   {
     title: "Users",
-    url: "users",
+    url: "/users",
     icon: Inbox,
     iconLogo: "/icons/sidebar-icon-two.svg",
   },
@@ -94,13 +94,15 @@ export default function AdminDashboardLayout({
         <SidebarLayout
           navItems={items}
           personalizationItems={personalizationItems}
-          basePath="/corporate-dashboard"
-          logoHref="/corporate-dashboard/home"
+          basePath="/admin-dashboard"
+          logoHref="/admin-dashboard/home"
           showProfileMenu
         />
         <SidebarInset className="overflow-hidden min-w-0 bg-white p-4 md:space-y-10 grow flex flex-col">
           <main className="flex flex-col mt-16 md:mt-0  h-[calc(100vh-4rem)] md:h-[calc(100vh-2.5rem)] overflow-auto max-w-7xl w-full">
-            <Navbar />
+            <div className="hidden md:block">
+              <Navbar />
+            </div>
             {children}
           </main>
         </SidebarInset>
