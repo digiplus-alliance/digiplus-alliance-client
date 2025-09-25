@@ -12,6 +12,14 @@ import { Trash2 } from "lucide-react";
 import UserInfoModal from "./profile-modal";
 import DeactivateUserModal from "./delete-modal";
 import { AdminUser } from "@/types/admin/user";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 // Extended type for table data that matches current structure
 type TableUser = {
@@ -154,7 +162,6 @@ export default function UsersTable() {
   };
 
   const confirmDeleteUser = () => {
-    // Add delete logic here
     console.log("Deleting user:", userToDelete);
     setDeleteModalOpen(false);
     setUserToDelete(null);
@@ -302,39 +309,39 @@ export default function UsersTable() {
 
   return (
     <>
-      <table className="w-full text-sm border-collapse">
-        <thead className="bg-[#FBFBFD]">
+      <Table>
+        <TableHeader className="bg-[#FBFBFD]">
           {table.getHeaderGroups().map((hg) => (
-            <tr
+            <TableRow
               key={hg.id}
               className="text-left text-[#B8B8B8] text-sm font-inter"
             >
               {hg.headers.map((header) => (
-                <th key={header.id} className="px-4 py-2">
+                <TableHead key={header.id} className="px-4 py-2 text-[#B8B8B8] font-bold">
                   {flexRender(
                     header.column.columnDef.header,
                     header.getContext()
                   )}
-                </th>
+                </TableHead>
               ))}
-            </tr>
+            </TableRow>
           ))}
-        </thead>
-        <tbody>
+        </TableHeader>
+        <TableBody>
           {table.getRowModel().rows.map((row) => (
-            <tr
+            <TableRow
               key={row.id}
               className="group border-t hover:bg-[#EBFBFF] hover:border-b-[#227C9D] hover:border-b-1"
             >
               {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="px-4 py-2 align-top">
+                <TableCell key={cell.id} className="px-4 py-2 align-top">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
+                </TableCell>
               ))}
-            </tr>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
       <div className="mt-4 flex flex-col md:flex-row md:justify-between md:items-center gap-2 px-4">
         <p className="text-sm text-[#667085] border border-[#EBFBFF] p-2 rounded-lg">
           10 List per Page
