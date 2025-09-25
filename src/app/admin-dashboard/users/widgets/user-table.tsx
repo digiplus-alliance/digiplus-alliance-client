@@ -3,6 +3,8 @@ import {
   useReactTable,
   getCoreRowModel,
   flexRender,
+  ColumnDef,
+  CellContext,
 } from "@tanstack/react-table";
 import Pagination from "@/components/Pagination";
 import { CiUser } from "react-icons/ci";
@@ -11,7 +13,18 @@ import UserInfoModal from "./profile-modal";
 import DeactivateUserModal from "./delete-modal";
 import { AdminUser } from "@/types/admin/user";
 
-const users = [
+// Extended type for table data that matches current structure
+type TableUser = {
+  id: string;
+  name: string;
+  email: string;
+  business: string;
+  timestamp: string;
+  applications: number;
+  assessmentStatus: string;
+};
+
+const users: TableUser[] = [
   {
     id: "AP/2030222",
     name: "Oyebode Anjoke",
@@ -124,18 +137,18 @@ const users = [
 
 export default function UsersTable() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+  const [selectedUser, setSelectedUser] = useState<TableUser | null>(null);
   const [userInfoModalOpen, setUserInfoModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<AdminUser | null>(null);
+  const [userToDelete, setUserToDelete] = useState<TableUser | null>(null);
   const pageSize = 10;
 
-  const handleViewUser = (user: AdminUser) => {
+  const handleViewUser = (user: TableUser) => {
     setSelectedUser(user);
     setUserInfoModalOpen(true);
   };
 
-  const handleDeleteUser = (user: AdminUser) => {
+  const handleDeleteUser = (user: TableUser) => {
     setUserToDelete(user);
     setDeleteModalOpen(true);
   };
@@ -172,19 +185,19 @@ export default function UsersTable() {
     const start = (currentPage - 1) * pageSize;
     return users.slice(start, start + pageSize);
   }, [currentPage]);
-  const columns = [
+  const columns: ColumnDef<TableUser>[] = [
     {
       accessorKey: "id",
       header: "User ID",
-      cell: (info: string) => (
-        <span className="text-[#06516C]">{info}</span>
+      cell: (info: CellContext<TableUser, unknown>) => (
+        <span className="text-[#06516C]">{info.getValue() as string}</span>
       ),
     },
     {
       id: "nameEmail",
       header: "Name/Email",
-      cell: (info: any) => {
-        const row = info.row.original as any;
+      cell: (info: CellContext<TableUser, unknown>) => {
+        const row = info.row.original;
         return (
           <div>
             <p className="font-medium text-[#000000] text-sm">{row.name}</p>
@@ -196,8 +209,8 @@ export default function UsersTable() {
     {
       id: "timestamp",
       header: "Timestamp",
-      cell: (info: any) => {
-        const row = info.row.original as any;
+      cell: (info: CellContext<TableUser, unknown>) => {
+        const row = info.row.original;
         return (
           <div>
             <p className="font-normal text-[#171616] text-xs">
@@ -210,9 +223,9 @@ export default function UsersTable() {
     {
       accessorKey: "business",
       header: "Business name",
-      cell: (info: any) => (
+      cell: (info: CellContext<TableUser, unknown>) => (
         <span className="text-[#117D70] bg-[#EBFFFC] p-2 w-fit items-center flex rounded-lg">
-          {info.getValue()}
+          {info.getValue() as string}
         </span>
       ),
     },
@@ -337,7 +350,7 @@ export default function UsersTable() {
       <UserInfoModal
         userInfoModalOpen={userInfoModalOpen}
         setUserInfoModalOpen={setUserInfoModalOpen}
-        selectedUser={selectedUser}
+        selectedUser={selectedUser as AdminUser | null}
       />
 
       {/* Delete Confirmation Modal */}

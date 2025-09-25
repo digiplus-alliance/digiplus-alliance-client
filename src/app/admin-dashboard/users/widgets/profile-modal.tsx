@@ -11,7 +11,7 @@ import Image from "next/image";
 type Props = {
   userInfoModalOpen: boolean;
   setUserInfoModalOpen: (open: boolean) => void;
-  selectedUser: AdminUser | null;
+  selectedUser?: AdminUser | null;
 };
 
 export default function UserInfoModal({
