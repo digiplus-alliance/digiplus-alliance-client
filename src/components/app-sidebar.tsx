@@ -23,6 +23,7 @@ interface SidebarItem {
   url: string;
   icon: Icon;
   iconLogo?: string;
+  onClick?: () => void;
 }
 
 interface SidebarLayoutProps extends React.ComponentProps<typeof Sidebar> {
@@ -70,8 +71,8 @@ export default function SidebarLayout({
                         <Link
                           href={url}
                           className={cn(
-                            'p-2 h-auto !rounded-4xl flex items-center gap-1 hover:bg-[#F1F8F8]',
-                            pathname.startsWith(url) && 'bg-[#F1F8F8]'
+                            "p-2 h-auto !rounded-4xl flex items-center gap-1 hover:bg-[#F1F8F8]",
+                            pathname.startsWith(url) && "bg-[#EBFBFF]"
                           )}
                         >
                           {item.iconLogo && (
@@ -96,26 +97,62 @@ export default function SidebarLayout({
                   const url = `${basePath}/${item.url}`;
                   return (
                     <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild onClick={() => setOpenMobile(false)}>
-                        <Link
-                          href={url}
-                          className={cn(
-                            'p-2 h-auto !rounded-4xl flex items-center gap-1 hover:bg-[#F1F8F8]',
-                            pathname.startsWith(url) && 'bg-[#F1F8F8]'
-                          )}
+                      {item.onClick ? (
+                        <SidebarMenuButton
+                          onClick={() => {
+                            if (item.onClick) {
+                              item.onClick();
+                            }
+                            setOpenMobile(false);
+                          }}
                         >
-                          {item.iconLogo && (
-                            <Image
-                              src={item.iconLogo}
-                              alt="Coming Soon"
-                              width={20}
-                              height={20}
-                              className="object-contain"
-                            />
-                          )}
-                          <span className="text-sm font-secondary text-[#706C6C]">{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
+                          <div
+                            className={cn(
+                              "h-auto !rounded-4xl flex items-center gap-1 hover:bg-[#F1F8F8] cursor-pointer w-full",
+                              pathname.startsWith(url) && "bg-[#F1F8F8]"
+                            )}
+                          >
+                            {item.iconLogo && (
+                              <Image
+                                src={item.iconLogo}
+                                alt="Coming Soon"
+                                width={20}
+                                height={20}
+                                className="object-contain"
+                              />
+                            )}
+                            <span className="text-sm font-secondary text-[#706C6C]">
+                              {item.title}
+                            </span>
+                          </div>
+                        </SidebarMenuButton>
+                      ) : (
+                        <SidebarMenuButton
+                          asChild
+                          onClick={() => setOpenMobile(false)}
+                        >
+                          <Link
+                            href={url}
+                            className={cn(
+                              "p-2 h-auto !rounded-4xl flex items-center gap-1 hover:bg-[#F1F8F8]",
+                              pathname.startsWith(url) && "bg-[#F1F8F8]"
+                            )}
+                          >
+                            {item.iconLogo && (
+                              <Image
+                                src={item.iconLogo}
+                                alt="Coming Soon"
+                                width={20}
+                                height={20}
+                                className="object-contain"
+                              />
+                            )}
+                            <span className="text-sm font-secondary text-[#706C6C]">
+                              {item.title}
+                            </span>
+                          </Link>
+                        </SidebarMenuButton>
+                      )}
                     </SidebarMenuItem>
                   );
                 })}

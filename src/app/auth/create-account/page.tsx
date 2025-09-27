@@ -24,7 +24,7 @@ export default function RegisterPage() {
     formState: { errors },
   } = useForm<SignUpValues>({
     resolver: zodResolver(signUpSchema),
-    defaultValues: { role: "client" },
+    defaultValues: { role: "business_owner" },
   });
   const { mutate: signup, isPending } = useSignup();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -208,8 +208,8 @@ export default function RegisterPage() {
           </div>
 
           {/* Role selector: Business owner checkbox (sets role) */}
-          <div className="flex items-center gap-3">
-            {/* register hidden role field so its value is submitted */}
+          {/* <div className="flex items-center gap-3">
+            register hidden role field so its value is submitted
             <input type="hidden" {...register("role")} />
             <input
               id="business_owner"
@@ -223,7 +223,7 @@ export default function RegisterPage() {
             <label htmlFor="business_owner" className="text-sm text-[#706C6C]">
               Business owner
             </label>
-          </div>
+          </div> */}
 
           <p className="text-xs text-[#5E5B5B]">
             By signing up, you agree with our{" "}

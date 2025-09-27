@@ -1,13 +1,10 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import React from "react";
-import UsersTable from "./widgets/user-table";
 import FilterButton from "@/components/FilterButton";
-import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import ApplicationTable from "./widgets/application-table";
 
-export default function page() {
-  const router = useRouter();
+export default function ApplicationsPage() {
   const handleFilterChange = (value: string) => {
     console.log("Selected filter:", value);
   };
@@ -16,7 +13,9 @@ export default function page() {
       {/* Header */}
       <div className="flex items-start md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl text-primary font-bold">Users</h1>
+          <h1 className="text-2xl text-primary font-bold">
+            Application Management
+          </h1>
         </div>
         <div className="hidden md:flex md:items-center md:gap-4">
           <FilterButton
@@ -28,11 +27,22 @@ export default function page() {
             ]}
             onChange={handleFilterChange}
           />
-          <Button onClick={() => router.push("/admin-dashboard/applications")}>View Applications</Button>
+          <Button>Export as CSV</Button>
         </div>
       </div>
+      <div className="flex gap-4">
+        <Button variant="ghost" className="text-[#227C9D]">
+          Create Application Questions
+        </Button>
+        <Button variant="ghost" className="text-[#227C9D]">
+          Edit Current Application
+        </Button>
+        <Button variant="outline" className="bg-white border-none">
+          Application List
+        </Button>
+      </div>
       <div className="overflow-x-auto bg-white rounded-tl-2xl p-4">
-        <UsersTable />
+        <ApplicationTable />
       </div>
     </div>
   );

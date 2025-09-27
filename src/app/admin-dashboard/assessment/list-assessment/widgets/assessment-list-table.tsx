@@ -7,11 +7,8 @@ import {
   CellContext,
 } from "@tanstack/react-table";
 import Pagination from "@/components/Pagination";
-import { CiUser } from "react-icons/ci";
-import { Trash2 } from "lucide-react";
-import UserInfoModal from "./profile-modal";
-import DeactivateUserModal from "./delete-modal";
-import { AdminUser } from "@/types/admin/user";
+import { IoLinkOutline } from "react-icons/io5";
+
 import {
   Table,
   TableBody,
@@ -20,6 +17,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { getAssessmentStatusStyles } from "@/lib/getStatusStyles";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Checkbox } from "@/components/ui/checkbox";
 
 // Extended type for table data that matches current structure
 type TableUser = {
@@ -143,48 +148,14 @@ const users: TableUser[] = [
   },
 ];
 
-export default function UsersTable() {
+const serviceOptions = ["View Details", "Edit Assessment", "Delete Assessment"];
+
+export default function AssessmentListTable() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedUser, setSelectedUser] = useState<TableUser | null>(null);
-  const [userInfoModalOpen, setUserInfoModalOpen] = useState(false);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<TableUser | null>(null);
+  const [selectionsById, setSelectionsById] = useState<
+    Record<string, string[]>
+  >({});
   const pageSize = 10;
-
-  const handleViewUser = (user: TableUser) => {
-    setSelectedUser(user);
-    setUserInfoModalOpen(true);
-  };
-
-  const handleDeleteUser = (user: TableUser) => {
-    setUserToDelete(user);
-    setDeleteModalOpen(true);
-  };
-
-  const confirmDeleteUser = () => {
-    console.log("Deleting user:", userToDelete);
-    setDeleteModalOpen(false);
-    setUserToDelete(null);
-  };
-
-  const getAssessmentStatusStyles = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case "submitted":
-        return "bg-[#EBFFFC] text-[#117D70]";
-      case "being processed":
-        return "bg-[#FFF6D3] text-[#5E5B5B]";
-      case "completed":
-        return "bg-[#EBFBFF] text-[#227C9D]";
-      case "rejected":
-        return "bg-[#FFEBEB] text-[#850C0C]";
-      case "approved":
-        return "bg-[#EBFFFC] text-[#117D70]";
-      case "not started":
-        return "bg-[#FFEBEB] text-[#850C0C]";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
 
   const totalPages = Math.ceil(users.length / pageSize);
 
@@ -237,8 +208,17 @@ export default function UsersTable() {
       ),
     },
     {
-      accessorKey: "applications",
-      header: "Applications",
+      accessorKey: "assessment",
+      header: "Assessment",
+      cell: (info: CellContext<TableUser, unknown>) => (
+        <span className="text-[#117D70] bg-[#EBFFFC] p-2 w-fit items-center flex rounded-lg">
+          {info.getValue() as string}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "score",
+      header: "Score",
       cell: (info: any) => {
         const row = info.row.original as any;
         return (
@@ -270,31 +250,58 @@ export default function UsersTable() {
     },
     {
       accessorKey: "more",
-      header: "More",
+      header: "Suggest",
       cell: (info: any) => {
         const row = info.row.original as any;
+
+        const handleToggleSelection = (rowId: string, option: string) => {
+          setSelectionsById((prev) => {
+            const prevList = prev[rowId] ?? [];
+            const exists = prevList.includes(option);
+            const nextList = exists
+              ? prevList.filter((p) => p !== option)
+              : [...prevList, option];
+            const next = { ...prev, [rowId]: nextList };
+            console.log({ id: rowId, selections: nextList });
+            return next;
+          });
+        };
+
         return (
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => handleViewUser(row)}
-              className="p-1 hover:bg-gray-100 rounded"
-              title="View user info"
-            >
-              <CiUser
-                className="text-[#A3A3A3] group-hover:text-[#06516C] transition-colors"
-                size={20}
-              />
-            </button>
-            <button
-              onClick={() => handleDeleteUser(row)}
-              className="p-1 hover:bg-gray-100 rounded"
-              title="Delete user"
-            >
-              <Trash2
-                size={16}
-                className="text-[#A3A3A3] group-hover:text-red-500 transition-colors"
-              />
-            </button>
+          <div className="relative inline-block">
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                className={`w-full text-left px-3 py-1 text-xs font-medium cursor-pointer flex items-center justify-between`}
+              >
+                <IoLinkOutline
+                  className="text-[#A3A3A3] group-hover:text-[#06516C] transition-colors"
+                  size={20}
+                />
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent className="w-40">
+                {serviceOptions.map((s) => {
+                  const selected = (selectionsById[row.id] ?? []).includes(s);
+                  return (
+                    <DropdownMenuItem
+                      key={s}
+                      className="text-sm"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <Checkbox
+                          checked={selected}
+                          onCheckedChange={() =>
+                            handleToggleSelection(row.id, s)
+                          }
+                        />
+                        <span className="text-sm text-[#7A7A7A]">{s}</span>
+                      </label>
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         );
       },
@@ -309,7 +316,7 @@ export default function UsersTable() {
 
   return (
     <>
-      <Table>
+      <Table className="border border-[#EBFBFF] rounded-lg">
         <TableHeader className="bg-[#FBFBFD]">
           {table.getHeaderGroups().map((hg) => (
             <TableRow
@@ -317,7 +324,10 @@ export default function UsersTable() {
               className="text-left text-[#B8B8B8] text-sm font-inter"
             >
               {hg.headers.map((header) => (
-                <TableHead key={header.id} className="px-4 py-2 text-[#B8B8B8] font-bold">
+                <TableHead
+                  key={header.id}
+                  className="px-4 py-2 text-[#B8B8B8] font-bold"
+                >
                   {flexRender(
                     header.column.columnDef.header,
                     header.getContext()
@@ -352,20 +362,6 @@ export default function UsersTable() {
           onPageChange={setCurrentPage}
         />
       </div>
-
-      {/* User Info Modal */}
-      <UserInfoModal
-        userInfoModalOpen={userInfoModalOpen}
-        setUserInfoModalOpen={setUserInfoModalOpen}
-        selectedUser={selectedUser as AdminUser | null}
-      />
-
-      {/* Delete Confirmation Modal */}
-      <DeactivateUserModal
-        deleteModalOpen={deleteModalOpen}
-        setDeleteModalOpen={setDeleteModalOpen}
-        confirmDeleteUser={confirmDeleteUser}
-      />
     </>
   );
 }
