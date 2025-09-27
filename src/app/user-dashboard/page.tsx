@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
+import { Profile } from "../admin-dashboard/profile/page";
+import ProfileMenu from "@/components/profile-menu";
 
 export default function UserDashboard() {
   const [users] = useState([
@@ -42,6 +44,7 @@ export default function UserDashboard() {
   return (
     <div className="p-6 space-y-6 font-secondary bg-[#EBEBEB] rounded-tl-2xl">
       {/* Header */}
+      <ProfileMenu />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl text-primary font-bold">Welcome Opeyemi</h1>

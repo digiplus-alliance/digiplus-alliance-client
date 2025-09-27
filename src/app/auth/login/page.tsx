@@ -12,9 +12,10 @@ import SpinnerIcon from "@/components/icons/spinner";
 import Image from "next/image";
 import Link from "next/link";
 import { FaFacebook } from "react-icons/fa";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore, User } from "@/store/auth";
 import { toast } from "sonner";
+import { getDefaultDashboard } from "@/lib/permissions";
 
 const schema = z.object({
   email: z.string().email("Invalid email address"),
@@ -24,6 +25,10 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function LoginPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirect');
+
   const {
     register,
     handleSubmit,
@@ -31,10 +36,9 @@ export default function LoginPage() {
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
   });
-  const router = useRouter();
 
   const mutation = useMutation<
-    { message?: string; user?: unknown },
+    { message?: string; user?: unknown; accessToken?: string },
     Error,
     FormValues
   >({
@@ -51,13 +55,26 @@ export default function LoginPage() {
         throw new Error(json?.message || "Login failed");
       }
 
-      return json as { message?: string; user?: unknown };
+      return json as { message?: string; user?: unknown; accessToken?: string };
     },
     onSuccess(data) {
       toast.success("Login successful! Redirecting to dashboard...");
-      useAuthStore.getState().setUser(data.user as User);
+      const authStore = useAuthStore.getState();
+      authStore.setUser(data.user as User);
+      if (data.accessToken) {
+        authStore.setAccessToken(data.accessToken);
+      }
+
+      console.log("User data stored in Zustand:", data.user);
+      console.log("Access token stored in Zustand:", data.accessToken);
+      
+      // Determine redirect destination
+      const user = data.user as User;
+      const defaultDashboard = getDefaultDashboard(user.role);
+      const destination = redirectTo || defaultDashboard;
+      
       // Short delay to show the success message before redirect
-      setTimeout(() => router.push("/admin-dashboard"), 500);
+      setTimeout(() => router.push(destination), 500);
     },
     onError(error) {
       toast.error(error.message || "Failed to login. Please try again.");

@@ -159,10 +159,6 @@ const users: TableUser[] = [
 
 export default function ApplicationTable() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedUser, setSelectedUser] = useState<TableUser | null>(null);
-  const [userInfoModalOpen, setUserInfoModalOpen] = useState(false);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<TableUser | null>(null);
   const [tableData, setTableData] = useState<TableUser[]>(users);
   const pageSize = 10;
 
@@ -190,23 +186,6 @@ export default function ApplicationTable() {
         user.id === userId ? { ...user, paymentStatus: newStatus } : user
       )
     );
-  };
-
-  const handleViewUser = (user: TableUser) => {
-    setSelectedUser(user);
-    setUserInfoModalOpen(true);
-  };
-
-  const handleDeleteUser = (user: TableUser) => {
-    setUserToDelete(user);
-    setDeleteModalOpen(true);
-  };
-
-  const confirmDeleteUser = () => {
-    // Add delete logic here
-    console.log("Deleting user:", userToDelete);
-    setDeleteModalOpen(false);
-    setUserToDelete(null);
   };
 
   const totalPages = Math.ceil(tableData.length / pageSize);

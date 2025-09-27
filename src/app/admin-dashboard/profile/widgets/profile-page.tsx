@@ -1,6 +1,6 @@
 "use client";
 
-import { AdminUser } from "@/types/admin/user";
+import { useGetAdminProfile } from "@/app/api/admin/profile/getProfile";
 import { Mail, Phone, Globe } from "lucide-react";
 import Image from "next/image";
 
@@ -16,6 +16,11 @@ const user = {
 };
 
 export default function ProfileModal() {
+  const  { isLoading, isError, data, error } = useGetAdminProfile();
+
+  console.log("Profile data:", data);
+
+
   return (
     <div className="max-w-xs w-[25rem] rounded-2xl bg-white items-center p-6">
       {user && (

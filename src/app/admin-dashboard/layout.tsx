@@ -6,6 +6,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { AuthGuard } from "@/components/AuthGuard";
 
 import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
 import Image from "next/image";
@@ -50,6 +51,12 @@ export default function AdminDashboardLayout({
       iconLogo: "/icons/sidebar-icon-two.svg",
     },
     {
+      title: "Services",
+      url: "services",
+      icon: Search,
+      iconLogo: "/icons/sidebar-icon-two.svg",
+    },
+    {
       title: "Trainings",
       url: "trainings",
       icon: Settings,
@@ -85,12 +92,13 @@ export default function AdminDashboardLayout({
     },
   ];
   return (
-    <div>
-      <SidebarProvider defaultOpen className="relative _max-w-[1392px] mx-auto">
-        <SidebarInset className="fixed top-0 left-0 w-full h-16 bg-background border-b z-10 md:hidden">
-          <div className="flex items-center justify-between px-4 h-full">
-            <Image
-              src="/mobile-logo.png"
+    <AuthGuard allowedRoles={['admin']}>
+      <div>
+        <SidebarProvider defaultOpen className="relative _max-w-[1392px] mx-auto">
+          <SidebarInset className="fixed top-0 left-0 w-full h-16 bg-background border-b z-10 md:hidden">
+            <div className="flex items-center justify-between px-4 h-full">
+              <Image
+                src="/mobile-logo.png"
               alt="App Logo"
               width={80}
               height={80}
@@ -119,5 +127,6 @@ export default function AdminDashboardLayout({
         </SidebarInset>
       </SidebarProvider>
     </div>
+    </AuthGuard>
   );
 }

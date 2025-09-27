@@ -17,8 +17,8 @@ export async function POST(req: NextRequest) {
     if (response.ok) {
       const { accessToken, refreshToken, message, user } = responseData;
 
-      // Only return message and user in the response body
-      const res = new NextResponse(JSON.stringify({ message, user }), {
+      // Return message, user, and accessToken in the response body
+      const res = new NextResponse(JSON.stringify({ message, user, accessToken }), {
         status: 200,
       });
 
