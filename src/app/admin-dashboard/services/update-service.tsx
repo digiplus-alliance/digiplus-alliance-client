@@ -5,7 +5,7 @@ export default function UpdateServiceForm({ serviceId }: { serviceId: string }) 
 
   const handleSubmit = (formData: UpdateServicePayload) => {
     updateService({
-      name: "Web Development Changed Name Version 2",
+      name: "Web Development Changed Name Version 3",
       service_type: "Digital Skills & Training",
       image: "https://example.com/image.jpg",
       price: 1500,
