@@ -2,15 +2,16 @@
 
 import { z } from 'zod';
 import useSend from '@/lib/useSend';
+import { useAuthStore } from '@/store/auth';
 
 export function useUpload() {
   return useSend<FormData, { message: string; success: boolean }>({
-    url: 'upload',
+    url: 'profile/uploadlogo',
     method: 'post',
     hasAuth: true,
     config: {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${useAuthStore.getState().accessToken}`,
       },
     },
   });

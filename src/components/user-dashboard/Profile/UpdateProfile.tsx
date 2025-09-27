@@ -11,6 +11,8 @@ import { useUpdateProfile, UpdateProfileRequest, UpdateProfileRequestSchema } fr
 import { useAuthStore } from '@/store/auth';
 import ProfileImageUpload from './ProfileImageUpload';
 import { ChevronLeft } from 'lucide-react';
+import { toast } from 'sonner';
+import { useUpload } from '@/app/api/profile/useUpload';
 
 interface UpdateProfileModalProps {
   onClose: () => void;
@@ -19,6 +21,29 @@ interface UpdateProfileModalProps {
 const UpdateProfileCompo = ({ onClose }: UpdateProfileModalProps) => {
   const { user, setUser } = useAuthStore();
   const { mutate: updateProfile, isPending } = useUpdateProfile();
+  const { mutate: uploadImage } = useUpload();
+
+  const handleImageUpload = async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append('orgLogo', file);
+
+      uploadImage(formData, {
+        onSuccess: (data) => {
+          toast.success('Image uploaded successfully');
+        },
+        onError: (error) => {
+          console.error('Image upload failed:', error);
+          toast.error('Image upload failed');
+        },
+      });
+    } catch (error) {
+      console.error('Image upload failed:', error);
+      toast.error('Image upload failed');
+    }
+  };
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -57,18 +82,36 @@ const UpdateProfileCompo = ({ onClose }: UpdateProfileModalProps) => {
     }
   }, [user, reset]);
 
-  const onSubmit = (data: UpdateProfileRequest) => {
-    updateProfile(data, {
-      onSuccess: (response) => {
-        if (response.user) {
-          setUser(response.user as any);
+  const onSubmit = async (data: UpdateProfileRequest) => {
+    setIsSubmitting(true);
+
+    await fetch('/api/profile/business', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.user) {
+          setUser(data.user as any);
+          toast.success('Profile updated successfully');
+        } else {
+          toast.error('Profile update failed');
+          return;
         }
+        setIsSubmitting(false);
         onClose();
-      },
-      onError: (error) => {
+      })
+      .catch((error) => {
         console.error('Profile update failed:', error);
-      },
-    });
+        setIsSubmitting(false);
+        toast.error('Profile update failed');
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+      });
   };
 
   const handleClose = () => {
@@ -101,6 +144,7 @@ const UpdateProfileCompo = ({ onClose }: UpdateProfileModalProps) => {
             onImageChange={(file) => {
               // TODO: Handle image upload
               console.log('Image selected:', file);
+              handleImageUpload(file);
             }}
           />
         </div>
@@ -206,10 +250,10 @@ const UpdateProfileCompo = ({ onClose }: UpdateProfileModalProps) => {
           {/* Submit Button */}
           <Button
             type="submit"
-            disabled={isPending}
+            disabled={isSubmitting}
             className="w-full h-12 bg-[#FF5C5C] mt-6 hover:bg-[#FF4444] text-white rounded-lg"
           >
-            {isPending ? 'Saving...' : 'Save Profile'}
+            {isSubmitting ? 'Saving...' : 'Save Profile'}
           </Button>
         </form>
       </div>

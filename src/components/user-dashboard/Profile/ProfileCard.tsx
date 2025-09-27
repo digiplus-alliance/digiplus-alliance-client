@@ -10,24 +10,26 @@ const ProfileCard = () => {
   const { user } = useAuthStore();
   console.log(user);
   return (
-    <div className=" w-full max-w-[400px] h-full">
-      <Card className="">
-        <CardContent className="pt-6">
-          <div className="flex flex-col items-center text-center space-y-0 gap-6">
-            <div className=" flex flex-col items-center text-center space-y-6">
+    <div className="w-full max-w-[400px] sm:max-w-[450px] lg:max-w-[500px] max-md:max-w-full h-full">
+      <Card className="shadow-lg">
+        <CardContent className="pt-4 sm:pt-6 p-4 sm:p-6">
+          <div className="flex flex-col items-center text-center space-y-0 gap-4 sm:gap-6">
+            <div className="flex flex-col items-center text-center space-y-4 sm:space-y-6">
               <div className="relative">
                 <Image
                   src={user?.profile_picture || '/about/team-placeholder-four.png'}
                   alt={`${user?.first_name} ${user?.last_name}` || 'Profile'}
-                  className="w-[100px] h-[100px] rounded-full object-cover ring-4 ring-green-100"
-                  width={100}
-                  height={100}
+                  className="w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] lg:w-[120px] lg:h-[120px] rounded-full object-cover ring-4 ring-green-100"
+                  width={120}
+                  height={120}
                 />
               </div>
-              <div className=" space-y-3">
-                <h3 className=" text-2xl capitalize">{user?.first_name + ' ' + user?.last_name}</h3>
-                <p className="text-sm text-[#8F8F8F] capitalize">{user?.role.split('_').join(' ')}</p>
-                <p className=" bg-[#EBFFFC] text-[#076C61] px-[24px] rounded-lg w-full text-center text-sm ">
+              <div className="space-y-2 sm:space-y-3">
+                <h3 className="text-xl sm:text-2xl lg:text-3xl capitalize">
+                  {user?.first_name + ' ' + user?.last_name}
+                </h3>
+                <p className="text-xs sm:text-sm text-[#8F8F8F] capitalize">{user?.role.split('_').join(' ')}</p>
+                <p className="bg-[#EBFFFC] text-[#076C61] px-4 sm:px-6 py-1 sm:py-2 rounded-lg w-full text-center text-xs sm:text-sm">
                   {user?.is_active ? 'Active' : 'Inactive'}
                 </p>
               </div>
@@ -66,25 +68,25 @@ const ProfileCard = () => {
                 </div>
               </div>
             )}
-            <div className="space-y-4 text-sm text-center flex flex-col items-center justify-start pt-10 w-full border-t border-[#D9D9D9]">
-              <div className="flex items-center gap-2 w-full max-w-[70%]">
-                <Mail className="w-5 h-5" color="#B8B8B8" />
-                <span className="">{user?.email}</span>
+            <div className="space-y-3 sm:space-y-4 text-xs sm:text-sm text-center flex flex-col items-center justify-start pt-6 sm:pt-8 lg:pt-10 w-full border-t border-[#D9D9D9]">
+              <div className="flex items-center gap-2 w-full max-w-[85%] sm:max-w-[70%]">
+                <Mail className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" color="#B8B8B8" />
+                <span className="truncate">{user?.email}</span>
               </div>
-              <div className="flex items-center gap-2 w-full max-w-[70%]">
-                <Phone className="w-5 h-5" color="#B8B8B8" />
-                <span className="">{(user as any)?.phone || 'Not provided'}</span>
+              <div className="flex items-center gap-2 w-full max-w-[85%] sm:max-w-[70%]">
+                <Phone className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" color="#B8B8B8" />
+                <span className="truncate">{(user as any)?.phone || 'Not provided'}</span>
               </div>
-              <div className="flex items-center gap-2 w-full max-w-[70%]">
-                <Globe className="w-5 h-5" color="#B8B8B8" />
-                <span className="">{(user as any)?.website || user?.business_name || 'Not provided'}</span>
+              <div className="flex items-center gap-2 w-full max-w-[85%] sm:max-w-[70%]">
+                <Globe className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" color="#B8B8B8" />
+                <span className="truncate">{(user as any)?.website || user?.business_name || 'Not provided'}</span>
               </div>
             </div>
-            <div className="space-y-4 text-sm text-center flex flex-col items-center justify-start pt-10  pb-0 w-full border-t border-[#D9D9D9]">
-              <div className="flex items-center justify-between gap-2 text-sm w-full max-w-[70%]">
-                <div className=" flex flex-col items-start gap-0.5 w-full max-w-[98%]">
-                  <span className="text-muted-foreground">Assessment</span>
-                  <p className=" bg-[#FFF6D3] text-[#5E5B5B] px-[24px] rounded-lg w-full text-center text-sm ">
+            <div className="space-y-3 sm:space-y-4 text-xs sm:text-sm text-center flex flex-col items-center justify-start pt-6 sm:pt-8 lg:pt-10 pb-0 w-full border-t border-[#D9D9D9]">
+              <div className="flex items-center justify-between gap-2 w-full max-w-[85%] sm:max-w-[70%]">
+                <div className="flex flex-col items-start gap-0.5 w-full max-w-[98%]">
+                  <span className="text-muted-foreground text-xs sm:text-sm">Assessment</span>
+                  <p className="bg-[#FFF6D3] text-[#5E5B5B] px-4 sm:px-6 py-1 sm:py-2 rounded-lg w-full text-center text-xs sm:text-sm">
                     Not taken
                   </p>
                 </div>

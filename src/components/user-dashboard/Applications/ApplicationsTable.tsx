@@ -96,49 +96,91 @@ const getStatusBadge = (status: string) => {
 export function ApplicationsTable() {
   return (
     <div className="space-y-4">
-      <Table>
-        <TableHeader className=" bg-[#FBFBFD] text-[#B8B8B8] rounded-xl">
-          <TableRow>
-            <TableHead>Application ID</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Submission Time</TableHead>
-            <TableHead>Paid</TableHead>
-            <TableHead>Timetable</TableHead>
-            <TableHead>Start Date</TableHead>
-            <TableHead>Status</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {applications.map((app) => (
-            <TableRow key={app.id} className=" hover:bg-[#EBFBFF] border-white">
-              <TableCell className="font-medium text-[#06516C]">{app.id}</TableCell>
-              <TableCell>
-                <div>
-                  <div className="font-medium">{app.name}</div>
-                  <div className="text-sm text-muted-foreground">{app.category}</div>
-                </div>
-              </TableCell>
-              <TableCell>{app.submissionTime}</TableCell>
-              <TableCell>{app.paid}</TableCell>
-              <TableCell>{app.timetable}</TableCell>
-              <TableCell>{app.startDate}</TableCell>
-              <TableCell>{getStatusBadge(app.status)}</TableCell>
+      {/* Desktop Table View */}
+      <div className="hidden lg:block">
+        <Table>
+          <TableHeader className="bg-[#FBFBFD] text-[#B8B8B8] rounded-xl">
+            <TableRow>
+              <TableHead className="text-xs xl:text-sm">Application ID</TableHead>
+              <TableHead className="text-xs xl:text-sm">Name</TableHead>
+              <TableHead className="text-xs xl:text-sm">Submission Time</TableHead>
+              <TableHead className="text-xs xl:text-sm">Paid</TableHead>
+              <TableHead className="text-xs xl:text-sm">Timetable</TableHead>
+              <TableHead className="text-xs xl:text-sm">Start Date</TableHead>
+              <TableHead className="text-xs xl:text-sm">Status</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {applications.map((app) => (
+              <TableRow key={app.id} className="hover:bg-[#EBFBFF] border-white">
+                <TableCell className="font-medium text-[#06516C] text-xs xl:text-sm">{app.id}</TableCell>
+                <TableCell>
+                  <div>
+                    <div className="font-medium text-xs xl:text-sm">{app.name}</div>
+                    <div className="text-xs text-muted-foreground">{app.category}</div>
+                  </div>
+                </TableCell>
+                <TableCell className="text-xs xl:text-sm">{app.submissionTime}</TableCell>
+                <TableCell className="text-xs xl:text-sm">{app.paid}</TableCell>
+                <TableCell className="text-xs xl:text-sm">{app.timetable}</TableCell>
+                <TableCell className="text-xs xl:text-sm">{app.startDate}</TableCell>
+                <TableCell>{getStatusBadge(app.status)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-[#706C6C] bg-white px-2.5 py-1 pr-6 rounded-lg">5 List per Page</div>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className=" border border-white">
-            <ChevronLeft className="w-4 h-4" />
+      {/* Mobile Card View */}
+      <div className="lg:hidden space-y-3">
+        {applications.map((app) => (
+          <div key={app.id} className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
+            <div className="flex justify-between items-start mb-3">
+              <div>
+                <h4 className="font-medium text-sm">{app.name}</h4>
+                <p className="text-xs text-muted-foreground">{app.category}</p>
+                <p className="text-xs font-medium text-[#06516C] mt-1">{app.id}</p>
+              </div>
+              {getStatusBadge(app.status)}
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <span className="text-muted-foreground">Submitted:</span>
+                <p className="font-medium">{app.submissionTime}</p>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Amount:</span>
+                <p className="font-medium">{app.paid}</p>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Timetable:</span>
+                <p className="font-medium">{app.timetable}</p>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Start Date:</span>
+                <p className="font-medium">{app.startDate}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Pagination */}
+      <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+        <div className="text-xs sm:text-sm text-[#706C6C] bg-white px-2.5 py-1 pr-6 rounded-lg">5 List per Page</div>
+        <div className="flex items-center justify-center gap-2">
+          <Button variant="ghost" size="icon" className="border border-white h-8 w-8 sm:h-10 sm:w-10">
+            <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4" />
           </Button>
-          <Button variant="ghost" size="sm" className=" px-4 py-2.5 bg-white text-[#706C6C] font-normal">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="px-3 py-1.5 sm:px-4 sm:py-2.5 bg-white text-[#706C6C] font-normal text-xs sm:text-sm"
+          >
             1
           </Button>
-          <Button variant="ghost" size="icon" className=" border border-white">
-            <ChevronRight className="w-4 h-4" />
+          <Button variant="ghost" size="icon" className="border border-white h-8 w-8 sm:h-10 sm:w-10">
+            <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
           </Button>
         </div>
       </div>

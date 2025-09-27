@@ -42,8 +42,17 @@ const ApplicationForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log('Form submitted:', formData);
+    const payload = {
+      responses: {
+        company_name: formData.company_name,
+        first_name: formData.fullName.split(' ')[0],
+        last_name: formData.fullName.split(' ')[1],
+        email: formData.email,
+        phone_number: formData.phone_number,
+        reason_for_applying: formData.reason_for_applying,
+      },
+      service: formData.service,
+    };
 
     // Show success modal
     setShowSuccessModal(true);
@@ -65,11 +74,13 @@ const ApplicationForm = () => {
         {/* Left Side - Information */}
         <div className="space-y-6">
           <div className="space-y-3">
-            <h1 className="text-xl font-medium text-[#5E5B5B]">One form. All the support you need.</h1>
+            <h1 className="text-base md:text-lg  lg:text-xl  font-medium text-[#5E5B5B]">
+              One form. All the support you need.
+            </h1>
 
-            <h2 className="text-xl  text-[#706C6C]">Ready to grow your business?</h2>
+            <h2 className="text-base md:text-lg  lg:text-xl   text-[#706C6C]">Ready to grow your business?</h2>
 
-            <p className="text-[#706C6C] leading-relaxed text-xl">
+            <p className="text-[#706C6C] leading-relaxed text-base md:text-lg  lg:text-xl ">
               Whether it&apos;s training, advisory, or digital tools you&apos;re just a few steps away from getting
               started.
             </p>

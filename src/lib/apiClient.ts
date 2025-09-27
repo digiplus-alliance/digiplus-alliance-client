@@ -16,9 +16,12 @@ export async function apiClient<T>(
     throw new Error('NEXT_PUBLIC_API_URL is not set and no baseUrl provided');
   }
 
-  const headers = new Headers({
-    'Content-Type': 'application/json',
-  });
+  const headers = new Headers();
+
+  // Only set Content-Type to application/json if body is not FormData
+  if (!(options?.body instanceof FormData)) {
+    headers.set('Content-Type', 'application/json');
+  }
 
   // Add additional headers if provided
   if (options?.headers) {

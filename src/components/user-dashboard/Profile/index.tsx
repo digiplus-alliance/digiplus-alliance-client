@@ -17,12 +17,14 @@ const ProfileComponent = () => {
   };
 
   return (
-    <div className="space-y-6 font-secondary w-full h-full">
-      <div className="flex items-center justify-between ">
+    <div className="space-y-4 sm:space-y-6 font-secondary w-full h-full">
+      <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <PageHeader title="Profile" />
         {!isEditing && (
           <div className="flex items-center gap-4">
-            <Button onClick={handleEditProfile}>Edit Profile</Button>
+            <Button onClick={handleEditProfile} className="w-full sm:w-auto">
+              Edit Profile
+            </Button>
           </div>
         )}
       </div>
@@ -30,7 +32,7 @@ const ProfileComponent = () => {
       {isEditing ? (
         <UpdateProfileCompo onClose={handleClose} />
       ) : (
-        <div className=" flex flex-col justify-center items-center w-full">
+        <div className="flex flex-col justify-center items-center w-full">
           <ProfileCard />
         </div>
       )}

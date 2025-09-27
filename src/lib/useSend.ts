@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import * as z from "zod";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import * as z from 'zod';
 
-import { apiClient } from "@/lib/apiClient";
-import { generateQueryKey } from "@/lib/generateQueryKey";
+import { apiClient } from '@/lib/apiClient';
+import { generateQueryKey } from '@/lib/generateQueryKey';
 
-type AllowedMethodType = "post" | "put" | "delete" | "get" | "PATCH";
+type AllowedMethodType = 'post' | 'put' | 'delete' | 'get' | 'PATCH';
 
 type QueryResponse<T> = {
   success: boolean;
@@ -61,23 +61,27 @@ const useSend = <RequestBodyType, TData = unknown, TContext = unknown>({
   const defaultQueryKey = generateQueryKey({ url, baseUrl, hasAuth });
   const parseResponseData = (data?: QueryResponse<TData>): TData | undefined => {
     if (!data) return undefined;
-    if (!schema) return (data as unknown) as TData;
+    if (!schema) return data as unknown as TData;
     try {
       const target = 'data' in data ? (data as Record<string, unknown>).data : data;
       return (schema as z.ZodSchema<TData>).parse(target);
     } catch (e) {
-      console.error("Zod parsing error:", e);
+      console.error('Zod parsing error:', e);
       return undefined;
     }
   };
 
   return useMutation<QueryResponse<TData>, unknown, RequestBodyType, TContext>({
-    
     mutationFn: async (variables: RequestBodyType): Promise<QueryResponse<TData>> => {
-      console.log("useSend called with:", { url, method, hasAuth, config });
+      console.log('useSend called with:', { url, method, hasAuth, config });
+      console.log('variables:', variables);
+
+      // Handle FormData differently - don't stringify it
+      const body = variables instanceof FormData ? variables : JSON.stringify(variables);
+
       const response = await apiClient<QueryResponse<TData>>(url, {
-        method: (method as unknown) as string,
-        body: JSON.stringify(variables),
+        method: method as unknown as string,
+        body,
         hasAuth,
         ...config,
       });
@@ -92,10 +96,10 @@ const useSend = <RequestBodyType, TData = unknown, TContext = unknown>({
       if (onSuccess && parsedData !== undefined) {
         onSuccess(parsedData);
       }
-  // no runtime registration; using generateQueryKey as single source of truth
+      // no runtime registration; using generateQueryKey as single source of truth
     },
     onError: (error: unknown, variables: RequestBodyType, context: TContext | undefined) => {
-      let message: string | React.ReactNode = "An unexpected error occurred.";
+      let message: string | React.ReactNode = 'An unexpected error occurred.';
       if (error instanceof Error) {
         message = error.message;
       } else if (typeof error === 'object' && error !== null && 'message' in error) {
