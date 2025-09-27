@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/select";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Camera } from "lucide-react";
+import { usePatchProfile } from "@/app/api/admin/profile/patchProfile";
+import SpinnerIcon from "@/components/icons/spinner";
 
 const profileSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -46,8 +48,14 @@ export default function UpdateProfileForm() {
     resolver: zodResolver(profileSchema),
   });
 
+  const { mutate: updateProfile, isPending } = usePatchProfile(); 
   const onSubmit = (data: ProfileFormData) => {
     console.log("Form data:", data);
+    updateProfile({
+      email: data.email,
+      phone_number: data.phone,
+      website: data.website
+    });
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -159,7 +167,7 @@ export default function UpdateProfileForm() {
         type="submit"
         className="font-normal w-full"
       >
-        Save Profile
+        {isPending ? <SpinnerIcon /> : "Save Profile"}
       </Button>
     </form>
   );

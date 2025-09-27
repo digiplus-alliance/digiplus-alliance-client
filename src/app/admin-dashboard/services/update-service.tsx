@@ -1,14 +1,11 @@
-'use client'
+import { useUpdateService, UpdateServicePayload } from "@/app/api/admin/services/update-services";
 
-import { useCreateService, CreateServicePayload } from "@/app/api/admin/services/create-service";
-import UpdateServiceForm from "./update-service";
+export default function UpdateServiceForm({ serviceId }: { serviceId: string }) {
+  const { mutate: updateService, isPending, error } = useUpdateService(serviceId);
 
-export default function ServicesPage() {
-  const { mutate: createService, isPending, error } = useCreateService();
-
-  const handleSubmit = (formData: CreateServicePayload) => {
-    createService({
-      name: "Web Development Training 2",
+  const handleSubmit = (formData: UpdateServicePayload) => {
+    updateService({
+      name: "Web Development Changed Name Version 2",
       service_type: "Digital Skills & Training",
       image: "https://example.com/image.jpg",
       price: 1500,
@@ -18,12 +15,11 @@ export default function ServicesPage() {
   };
 
   return (
-    <div>
-      <form onSubmit={(e) => {
+    <form onSubmit={(e) => {
       e.preventDefault();
       handleSubmit({
-        name: "Web Development",
-        service_type: "Digital Skills & Training",
+        name: "Web Development Changed Name Version 2",
+        service_type: "Digital Skills & Training", 
         image: "https://example.com/image.jpg",
         price: 1500,
         subtitle: "Professional web development services",
@@ -31,11 +27,8 @@ export default function ServicesPage() {
       });
     }}>
       <button type="submit" disabled={isPending}>
-        {isPending ? "Creating..." : "Create Service"}
+        {isPending ? "Updating..." : "Update Service"}
       </button>
     </form>
-
-    <UpdateServiceForm serviceId="68d813620b0ae7e088467348" />
-    </div>
   );
 }
