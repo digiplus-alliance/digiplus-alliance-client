@@ -8,11 +8,14 @@ const patchProfilePayloadSchema = z.object({
 });
 
 const patchProfileResponseSchema = z.object({
+  _id: z.string(),
+  user_id: z.string(),
   email: z.string(),
-  phone_number: z.string(),
-  website: z.string(),
-  message: z.string(),
-  success: z.boolean(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  __v: z.number(),
+  phone_number: z.string().optional(),
+  website: z.string().optional(),
 });
 
 // Type definitions
@@ -22,8 +25,8 @@ export type PatchProfileResponse = z.infer<typeof patchProfileResponseSchema>;
 // Custom hook
 export const usePatchProfile = () => {
   return useSend<PatchProfilePayload, PatchProfileResponse>({
-    url: "/admin/profile",
-    method: "patch",
+    url: "admin/profile",
+    method: "PATCH",
     hasAuth: true,
     schema: patchProfileResponseSchema,
     successMessage: "Profile updated successfully",
