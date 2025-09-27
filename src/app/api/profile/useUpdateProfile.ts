@@ -9,7 +9,23 @@ export const UpdateProfileRequestSchema = z.object({
   business_name: z.string().min(1, 'Company name is required').max(100),
   email: z.string().email('Invalid email address'),
   phone: z.string().optional(),
-  website: z.string().url('Invalid website URL').optional().or(z.literal('')),
+  website: z
+    .string()
+    .optional()
+    .refine(
+      (val) => {
+        if (!val) return true;
+        try {
+          new URL(val);
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      {
+        message: 'Invalid website URL',
+      }
+    ),
   address: z.string().optional(),
   role: z.string().optional(),
 });
@@ -49,9 +65,10 @@ export type UpdateProfileResponse = z.infer<typeof UpdateProfileResponseSchema>;
 
 export function useUpdateProfile() {
   return useSend<UpdateProfileRequest, UpdateProfileResponse>({
-    url: 'profile/business',
-    method: 'patch',
-    hasAuth: true,
+    url: '/api/profile/business',
+    method: 'PATCH',
+    hasAuth: false, // Set to false since we're using Next.js API route
+    baseUrl: '', // Use empty baseUrl to use the local API route
     schema: UpdateProfileResponseSchema,
     invalidateKeys: [['api', 'auth', '/auth/me'], ['profile']],
     showSuccessMessage: true,

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { Textarea } from '@/components/ui/textarea';
 import PageHeader from '@/components/PageHeader';
 import ApplicationSuccessModal from './ApplicationSuccessModal';
+import { useGetServiceTypes } from '@/app/api/services/useGetServiceTypes';
 
 const ApplicationForm = () => {
   const router = useRouter();
@@ -22,6 +23,15 @@ const ApplicationForm = () => {
     reason_for_applying: '',
   });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const { data, isLoading } = useGetServiceTypes();
+
+  const [serviceTypes, setServiceTypes] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (data) {
+      setServiceTypes(data.service_types);
+    }
+  }, [isLoading, data]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({
@@ -84,10 +94,11 @@ const ApplicationForm = () => {
                         <SelectValue placeholder="Select" className=" py-3" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="ecosystem-building">Ecosystem Building</SelectItem>
-                        <SelectItem value="digital-adoption">Digital Adoption</SelectItem>
-                        <SelectItem value="business-advisory">Business Advisory</SelectItem>
-                        <SelectItem value="training-program">Training Program</SelectItem>
+                        {serviceTypes.map((serviceType) => (
+                          <SelectItem key={serviceType} value={serviceType}>
+                            {serviceType}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>

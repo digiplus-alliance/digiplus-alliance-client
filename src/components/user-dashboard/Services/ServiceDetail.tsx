@@ -6,23 +6,30 @@ import ServiceCard from './ServiceCard';
 
 interface ServiceDetailProps {
   service: {
-    id: number;
-    subTitle: string;
-    description: string;
-    price: string;
-    image: string | StaticImageData;
-    fullDescription?: string;
-    serviceType: string;
+    _id: string;
     name: string;
+    service_type: string;
+    image: string;
+    images: string[];
+    price: number;
+    discounted_price: number;
+    short_description: string;
+    long_description: string;
+    createdAt: string;
+    updatedAt: string;
   };
   relatedServices: {
-    id: number;
-    subTitle: string;
-    description: string;
-    price: string;
-    image: string | StaticImageData;
-    serviceType: string;
+    _id: string;
     name: string;
+    service_type: string;
+    image: string;
+    images: string[];
+    price: number;
+    discounted_price: number;
+    short_description: string;
+    long_description: string;
+    createdAt: string;
+    updatedAt: string;
   }[];
   onApply?: () => void;
 }
@@ -37,16 +44,13 @@ Vivamus adipiscing nisl ut dolor dignissim semper. Nulla luctus malesuada tincid
     <div className=" space-y-12 p-6">
       {/* Header Section */}
       <div className=" flex flex-col lg:flex-row items-center gap-6">
-        <Image src={service.image} alt={service.subTitle} width={400} height={400} className="rounded-lg " />
+        <Image src={service.image} alt={service.name} width={400} height={400} className="rounded-lg " />
         <div className="text-start space-y-4">
           <h1 className="text-3xl font-bold text-gray-800">{service.name}</h1>
 
-          <p className="text-[#706C6C]  leading-relaxed">
-            Vivamus adipiscing nisl ut dolor dignissim semper. Nulla luctus malesuada tincidunt. Class aptent taciti
-            sociosqu ad litora torquent! Vivamus adipiscing nisl ut dolor dignissim semper.
-          </p>
+          <p className="text-[#706C6C]  leading-relaxed">{service.short_description}</p>
 
-          <div className="text-4xl font-bold text-[#D63A3A] mb-6">{service.price.replace('NGN', '').trim()} NGN</div>
+          <div className="text-4xl font-bold text-[#D63A3A] mb-6">{'NGN ' + service.price} NGN</div>
 
           <button
             onClick={onApply}
@@ -59,7 +63,7 @@ Vivamus adipiscing nisl ut dolor dignissim semper. Nulla luctus malesuada tincid
           <div className="space-y-4 mt-4">
             <h2 className="text-2xl font-semibold text-[#171616]">Description</h2>
             <div className="text-[#706C6C] leading-relaxed space-y-1">
-              <p>{service.fullDescription || defaultFullDescription}</p>
+              <p>{service.long_description}</p>
             </div>
           </div>
         </div>
@@ -70,7 +74,7 @@ Vivamus adipiscing nisl ut dolor dignissim semper. Nulla luctus malesuada tincid
         <h2 className="text-4xl text-center font-semibold text-[#171616]">More like this</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {relatedServices.slice(0, 4).map((relatedService) => (
-            <ServiceCard key={relatedService.id} {...relatedService} />
+            <ServiceCard key={relatedService._id} {...relatedService} />
           ))}
         </div>
       </div>

@@ -96,13 +96,34 @@ const services: {
   },
 ];
 
+interface ServiceCard {
+  _id: string;
+  name: string;
+  service_type: string;
+  image: string;
+  images: string[];
+  price: number;
+  discounted_price: number;
+  short_description: string;
+  long_description: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function ServicesComponent() {
   const router = useRouter();
-  const [selectedService, setSelectedService] = useState<(typeof services)[0] | null>(null);
+  const [selectedService, setSelectedService] = useState<ServiceCard | null>(null);
   const { data, isLoading } = useGetServices();
 
-  useEffect(() => {}, []);
-  const handleServiceClick = (service: (typeof services)[0]) => {
+  const [servicesAvailable, setServicesAvailable] = useState<ServiceCard[]>([]);
+
+  useEffect(() => {
+    if (data) {
+      setServicesAvailable(data as any);
+    }
+  }, [isLoading, data]);
+
+  const handleServiceClick = (service: ServiceCard) => {
     setSelectedService(service);
   };
 
@@ -112,13 +133,13 @@ export default function ServicesComponent() {
 
   const handleApply = () => {
     // Handle apply logic here
-    console.log('Apply for service:', selectedService?.subTitle);
+    console.log('Apply for service:', selectedService?.name);
     router.push('/user-dashboard/applications/apply');
   };
 
   // Get related services (exclude the selected one)
-  const getRelatedServices = (currentServiceId: number) => {
-    return services.filter((service) => service.id !== currentServiceId);
+  const getRelatedServices = (currentServiceId: string) => {
+    return servicesAvailable.filter((service) => service._id !== currentServiceId);
   };
 
   if (selectedService) {
@@ -137,7 +158,7 @@ export default function ServicesComponent() {
 
         <ServiceDetail
           service={selectedService}
-          relatedServices={getRelatedServices(selectedService.id)}
+          relatedServices={getRelatedServices(selectedService._id)}
           onApply={handleApply}
         />
       </div>
@@ -158,8 +179,8 @@ export default function ServicesComponent() {
 
       {/* Services Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {services.map((service) => (
-          <ServiceCard key={service.id} {...service} onClick={() => handleServiceClick(service)} />
+        {servicesAvailable.map((service) => (
+          <ServiceCard key={service._id} {...service} onClick={() => handleServiceClick(service)} />
         ))}
       </div>
     </div>
