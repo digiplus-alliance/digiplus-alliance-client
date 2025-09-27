@@ -7,10 +7,11 @@ import { StaticImageData } from 'next/image';
 import ServiceCard from './ServiceCard';
 import ServiceDetail from './ServiceDetail';
 import PageHeader from '@/components/PageHeader';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useGetServices } from '@/app/api/services/useGetServices';
 
 const services: {
   id: number;
@@ -98,7 +99,9 @@ const services: {
 export default function ServicesComponent() {
   const router = useRouter();
   const [selectedService, setSelectedService] = useState<(typeof services)[0] | null>(null);
+  const { data, isLoading } = useGetServices();
 
+  useEffect(() => {}, []);
   const handleServiceClick = (service: (typeof services)[0]) => {
     setSelectedService(service);
   };
@@ -137,6 +140,14 @@ export default function ServicesComponent() {
           relatedServices={getRelatedServices(selectedService.id)}
           onApply={handleApply}
         />
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
       </div>
     );
   }

@@ -25,8 +25,8 @@ const ProfileCard = () => {
                 />
               </div>
               <div className=" space-y-3">
-                <h3 className=" text-2xl">{user?.first_name + ' ' + user?.last_name}</h3>
-                <p className="text-sm text-[#8F8F8F]">{user?.role}</p>
+                <h3 className=" text-2xl capitalize">{user?.first_name + ' ' + user?.last_name}</h3>
+                <p className="text-sm text-[#8F8F8F] capitalize">{user?.role.split('_').join(' ')}</p>
                 <p className=" bg-[#EBFFFC] text-[#076C61] px-[24px] rounded-lg w-full text-center text-sm ">
                   {user?.is_active ? 'Active' : 'Inactive'}
                 </p>

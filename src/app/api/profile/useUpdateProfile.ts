@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import * as z from "zod";
-import useSend from "@/lib/useSend";
+import * as z from 'zod';
+import useSend from '@/lib/useSend';
 
 export const UpdateProfileRequestSchema = z.object({
-  first_name: z.string().min(1, "First name is required").max(100),
-  last_name: z.string().min(1, "Last name is required").max(100),
-  business_name: z.string().min(1, "Company name is required").max(100),
-  email: z.string().email("Invalid email address"),
+  first_name: z.string().min(1, 'First name is required').max(100),
+  last_name: z.string().min(1, 'Last name is required').max(100),
+  business_name: z.string().min(1, 'Company name is required').max(100),
+  email: z.string().email('Invalid email address'),
   phone: z.string().optional(),
-  website: z.string().url("Invalid website URL").optional().or(z.literal("")),
+  website: z.string().url('Invalid website URL').optional().or(z.literal('')),
   address: z.string().optional(),
   role: z.string().optional(),
 });
@@ -19,41 +19,43 @@ export type UpdateProfileRequest = z.infer<typeof UpdateProfileRequestSchema>;
 export const UpdateProfileResponseSchema = z.object({
   message: z.string(),
   success: z.boolean(),
-  user: z.object({
-    _id: z.string(),
-    email: z.string(),
-    role: z.string(),
-    business_name: z.string().optional().nullable(),
-    first_name: z.string().optional(),
-    last_name: z.string().optional(),
-    profile_picture: z.string().optional().nullable(),
-    is_verified: z.boolean(),
-    locked_until: z.string().optional().nullable(),
-    is_in_recovery: z.boolean(),
-    is_verified_for_recovery: z.boolean(),
-    login_attempts: z.number(),
-    is_active: z.boolean(),
-    createdAt: z.string().optional(),
-    updatedAt: z.string().optional(),
-    __v: z.number().optional(),
-    onboarded: z.boolean().optional(),
-    phone: z.string().optional(),
-    website: z.string().optional(),
-    address: z.string().optional(),
-  }).optional(),
+  user: z
+    .object({
+      _id: z.string(),
+      email: z.string(),
+      role: z.string(),
+      business_name: z.string().optional().nullable(),
+      first_name: z.string().optional(),
+      last_name: z.string().optional(),
+      profile_picture: z.string().optional().nullable(),
+      is_verified: z.boolean(),
+      locked_until: z.string().optional().nullable(),
+      is_in_recovery: z.boolean(),
+      is_verified_for_recovery: z.boolean(),
+      login_attempts: z.number(),
+      is_active: z.boolean(),
+      createdAt: z.string().optional(),
+      updatedAt: z.string().optional(),
+      __v: z.number().optional(),
+      onboarded: z.boolean().optional(),
+      phone: z.string().optional(),
+      website: z.string().optional(),
+      address: z.string().optional(),
+    })
+    .optional(),
 });
 
 export type UpdateProfileResponse = z.infer<typeof UpdateProfileResponseSchema>;
 
 export function useUpdateProfile() {
   return useSend<UpdateProfileRequest, UpdateProfileResponse>({
-    url: "profile/update",
-    method: "put",
+    url: 'profile/business',
+    method: 'patch',
     hasAuth: true,
     schema: UpdateProfileResponseSchema,
-    invalidateKeys: [["api", "auth", "/auth/me"], ["profile"]],
+    invalidateKeys: [['api', 'auth', '/auth/me'], ['profile']],
     showSuccessMessage: true,
-    successMessage: "Profile updated successfully",
+    successMessage: 'Profile updated successfully',
     showErrorMessage: true,
   });
 }
