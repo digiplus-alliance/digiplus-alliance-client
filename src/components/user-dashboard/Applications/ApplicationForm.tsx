@@ -15,11 +15,11 @@ const ApplicationForm = () => {
   const router = useRouter();
   const [formData, setFormData] = useState({
     service: '',
-    companyName: '',
+    company_name: '',
     fullName: '',
     email: '',
-    phone: '',
-    reason: '',
+    phone_number: '',
+    reason_for_applying: '',
   });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
@@ -98,8 +98,8 @@ const ApplicationForm = () => {
                       <label className="text-sm  text-[#706C6C]">Company Name</label>
                       <Input
                         placeholder="Company Name"
-                        value={formData.companyName}
-                        onChange={(e) => handleInputChange('companyName', e.target.value)}
+                        value={formData.company_name}
+                        onChange={(e) => handleInputChange('company_name', e.target.value)}
                         className="h-11 py-3 border-[#EBEBEB] rounded-lg placeholder:text-[#8F8F8F]"
                       />
                     </div>
@@ -131,8 +131,8 @@ const ApplicationForm = () => {
                       <Input
                         type="tel"
                         placeholder="+234 80 2121 2323"
-                        value={formData.phone}
-                        onChange={(e) => handleInputChange('phone', e.target.value)}
+                        value={formData.phone_number}
+                        onChange={(e) => handleInputChange('phone_number', e.target.value)}
                         className="h-11 py-4 border-[#EBEBEB] rounded-lg placeholder:text-[#8F8F8F]"
                       />
                     </div>
@@ -143,8 +143,8 @@ const ApplicationForm = () => {
                     <label className="text-sm  text-[#706C6C]">Reason for applying</label>
                     <Textarea
                       placeholder="Start typing"
-                      value={formData.reason}
-                      onChange={(e) => handleInputChange('reason', e.target.value)}
+                      value={formData.reason_for_applying}
+                      onChange={(e) => handleInputChange('reason_for_applying', e.target.value)}
                       className="min-h-[96px] border-[#EBEBEB] rounded-lg placeholder:text-[#8F8F8F] resize-none bg-white"
                     />
                   </div>

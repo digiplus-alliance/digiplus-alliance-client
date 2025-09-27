@@ -7,18 +7,22 @@ import ServiceCard from './ServiceCard';
 interface ServiceDetailProps {
   service: {
     id: number;
-    title: string;
+    subTitle: string;
     description: string;
     price: string;
     image: string | StaticImageData;
     fullDescription?: string;
+    serviceType: string;
+    name: string;
   };
   relatedServices: {
     id: number;
-    title: string;
+    subTitle: string;
     description: string;
     price: string;
     image: string | StaticImageData;
+    serviceType: string;
+    name: string;
   }[];
   onApply?: () => void;
 }
@@ -33,9 +37,9 @@ Vivamus adipiscing nisl ut dolor dignissim semper. Nulla luctus malesuada tincid
     <div className=" space-y-12 p-6">
       {/* Header Section */}
       <div className=" flex flex-col lg:flex-row items-center gap-6">
-        <Image src={service.image} alt={service.title} width={400} height={400} className="rounded-lg " />
+        <Image src={service.image} alt={service.subTitle} width={400} height={400} className="rounded-lg " />
         <div className="text-start space-y-4">
-          <h1 className="text-3xl font-bold text-gray-800">{service.title}</h1>
+          <h1 className="text-3xl font-bold text-gray-800">{service.name}</h1>
 
           <p className="text-[#706C6C]  leading-relaxed">
             Vivamus adipiscing nisl ut dolor dignissim semper. Nulla luctus malesuada tincidunt. Class aptent taciti

@@ -14,66 +14,84 @@ import { useRouter } from 'next/navigation';
 
 const services: {
   id: number;
-  title: string;
+  subTitle: string;
   description: string;
   price: string;
   image: string | StaticImageData;
+  serviceType: string;
+  name: string;
 }[] = [
   {
     id: 1,
-    title: 'Ecosystem Building',
+    subTitle: 'Ecosystem Building',
     description: 'Customised digital adoption plans',
     price: 'NGN 100 000',
     image: service1,
+    serviceType: 'Ecosystem Building',
+    name: 'Digital Transformation Advisory',
   },
   {
     id: 2,
-    title: 'Ecosystem Building',
+    subTitle: 'Ecosystem Building',
     description: 'Customised digital adoption plans',
     price: 'NGN 100 000',
     image: service2,
+    serviceType: 'Ecosystem Building',
+    name: 'Market Access',
   },
   {
     id: 3,
-    title: 'Ecosystem Building',
+    subTitle: 'Ecosystem Building',
     description: 'Customised digital adoption plans',
     price: 'NGN 100 000',
     image: service3,
+    serviceType: 'Ecosystem Building',
+    name: 'Capacity Building & Training',
   },
   {
     id: 4,
-    title: 'Ecosystem Building',
+    subTitle: 'Ecosystem Building',
     description: 'Customised digital adoption plans',
     price: 'NGN 100 000',
     image: service4,
+    serviceType: 'Ecosystem Building',
+    name: 'Access to Finance',
   },
   {
     id: 5,
-    title: 'Ecosystem Building',
+    subTitle: 'Ecosystem Building',
     description: 'Customised digital adoption plans',
     price: 'NGN 100 000',
     image: service1,
+    serviceType: 'Ecosystem Building',
+    name: 'Hub Membership',
   },
   {
     id: 6,
-    title: 'Ecosystem Building',
+    subTitle: 'Ecosystem Building',
     description: 'Customised digital adoption plans',
     price: 'NGN 100 000',
     image: service2,
+    serviceType: 'Ecosystem Building',
+    name: 'Hub Membership',
   },
   {
     id: 7,
-    title: 'Ecosystem Building',
+    subTitle: 'Ecosystem Building',
     description: 'Customised digital adoption plans',
     price: 'NGN 100 000',
     image: service3,
+    serviceType: 'Ecosystem Building',
+    name: 'Hub Membership',
   },
   {
     id: 8,
-    title: 'Ecosystem Building',
+    subTitle: 'Ecosystem Building',
     description: 'Customised digital adoption plans',
     price: 'NGN 100 000',
     image: service4,
+    serviceType: 'Ecosystem Building',
+    name: 'Hub Membership',
   },
 ];
 
@@ -91,7 +109,7 @@ export default function ServicesComponent() {
 
   const handleApply = () => {
     // Handle apply logic here
-    console.log('Apply for service:', selectedService?.title);
+    console.log('Apply for service:', selectedService?.subTitle);
     router.push('/user-dashboard/applications/apply');
   };
 

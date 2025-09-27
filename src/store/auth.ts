@@ -1,4 +1,4 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
 export type User = {
   _id: string;
@@ -18,6 +18,9 @@ export type User = {
   updatedAt?: string;
   __v?: number;
   onboarded?: boolean;
+  phone?: string;
+  website?: string;
+  address?: string;
 };
 
 type AuthState = {

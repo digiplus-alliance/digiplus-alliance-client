@@ -3,14 +3,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { Calendar, Filter, Search } from 'lucide-react';
 import { Input } from '../../ui/input';
 import { Button } from '../../ui/button';
-import { RecentApplications } from './RecentApplications';
-import { Badge } from '../../ui/badge';
 import { ApplicationsTable } from './ApplicationsTable';
-import Image from 'next/image';
 import PageHeader from '@/components/PageHeader';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import Link from 'next/link';
+import StatsCards from '@/app/admin-dashboard/widgets/stats-card';
+
+const statsData = [
+  { label: 'Applications Submitted', value: 10 },
+  { label: 'Total Applications', value: 10 },
+  { label: 'Total Assessments Completed', value: 10 },
+];
 
 const Applications = () => {
   return (
@@ -25,6 +29,10 @@ const Applications = () => {
             </Button>
           </Link>
         </div>
+      </div>
+
+      <div className="p-4">
+        <StatsCards stats={statsData} />
       </div>
       {/* Applications Table */}
       <div className="col-span-1 mt-6">

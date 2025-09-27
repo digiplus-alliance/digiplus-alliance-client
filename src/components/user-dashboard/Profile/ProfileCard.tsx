@@ -4,8 +4,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ChevronRight, Globe, Mail, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuthStore } from '@/store/auth';
 
 const ProfileCard = () => {
+  const { user } = useAuthStore();
+  console.log(user);
   return (
     <div className=" w-full max-w-[400px] h-full">
       <Card className="">
@@ -14,17 +17,19 @@ const ProfileCard = () => {
             <div className=" flex flex-col items-center text-center space-y-6">
               <div className="relative">
                 <Image
-                  src="/avatar.png"
-                  alt="Opeyemi Bioku"
+                  src={user?.profile_picture || '/about/team-placeholder-four.png'}
+                  alt={`${user?.first_name} ${user?.last_name}` || 'Profile'}
                   className="w-[100px] h-[100px] rounded-full object-cover ring-4 ring-green-100"
                   width={100}
                   height={100}
                 />
               </div>
               <div className=" space-y-3">
-                <h3 className=" text-2xl">Opeyemi Bioku</h3>
-                <p className="text-sm text-[#8F8F8F]">COO, 8th Gear</p>
-                <p className=" bg-[#EBFFFC] text-[#076C61] px-[24px] rounded-lg w-full text-center text-sm ">Online</p>
+                <h3 className=" text-2xl">{user?.first_name + ' ' + user?.last_name}</h3>
+                <p className="text-sm text-[#8F8F8F]">{user?.role}</p>
+                <p className=" bg-[#EBFFFC] text-[#076C61] px-[24px] rounded-lg w-full text-center text-sm ">
+                  {user?.is_active ? 'Active' : 'Inactive'}
+                </p>
               </div>
             </div>
 
@@ -64,15 +69,15 @@ const ProfileCard = () => {
             <div className="space-y-4 text-sm text-center flex flex-col items-center justify-start pt-10 w-full border-t border-[#D9D9D9]">
               <div className="flex items-center gap-2 w-full max-w-[70%]">
                 <Mail className="w-5 h-5" color="#B8B8B8" />
-                <span className="">opeyemibioku@gmail.com</span>
+                <span className="">{user?.email}</span>
               </div>
               <div className="flex items-center gap-2 w-full max-w-[70%]">
                 <Phone className="w-5 h-5" color="#B8B8B8" />
-                <span className="">+23481 6543 9834</span>
+                <span className="">{(user as any)?.phone || 'Not provided'}</span>
               </div>
               <div className="flex items-center gap-2 w-full max-w-[70%]">
                 <Globe className="w-5 h-5" color="#B8B8B8" />
-                <span className="">www.8thgear.com</span>
+                <span className="">{(user as any)?.website || user?.business_name || 'Not provided'}</span>
               </div>
             </div>
             <div className="space-y-4 text-sm text-center flex flex-col items-center justify-start pt-10  pb-0 w-full border-t border-[#D9D9D9]">
