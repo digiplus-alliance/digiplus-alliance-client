@@ -19,6 +19,9 @@ export type User = {
   updatedAt?: string;
   __v?: number;
   onboarded?: boolean;
+  phone?: string;
+  website?: string;
+  address?: string;
 };
 
 type AuthState = {
