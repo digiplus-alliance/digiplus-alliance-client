@@ -6,9 +6,7 @@ import UsersTable from "./widgets/user-table";
 import FilterButton from "@/components/FilterButton";
 import { useRouter } from "next/navigation";
 
-type Props = {};
-
-export default function page({}: Props) {
+export default function page() {
   const router = useRouter();
   const handleFilterChange = (value: string) => {
     console.log("Selected filter:", value);

@@ -9,7 +9,7 @@ import {
   CellContext,
 } from "@tanstack/react-table";
 import Pagination from "@/components/Pagination";
-import { ChevronDown, Trash2 } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,

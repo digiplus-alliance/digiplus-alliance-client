@@ -2,7 +2,6 @@
 
 import FilterButton from "@/components/FilterButton";
 import { Button } from "@/components/ui/button";
-import App from "next/app";
 import ApplicationTable from "./widgets/application-table";
 
 export default function ApplicationsPage() {
