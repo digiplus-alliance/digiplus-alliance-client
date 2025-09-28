@@ -17,7 +17,7 @@ export default function FeaturesSection() {
         subtitle="Ecosystem Building"
         title="Market Access Support"
         description="Tap into a vibrant support network that helps MSMEs connect, collaborate, and thrive because no business should grow alone."
-        image="/services/services_image_one.png"
+        image="/services/services_image_two.png"
         bgColor="#EBFBFF"
         reverse
         showSubtitle={false}
@@ -28,7 +28,7 @@ export default function FeaturesSection() {
         subtitle="Ecosystem Building"
         title="Capacity Building & Training"
         description="Tap into a vibrant support network that helps MSMEs connect, collaborate, and thrive because no business should grow alone."
-        image="/services/services_image_one.png"
+        image="/services/services_image_seven.png"
         bgColor="#CCF1FF"
          showSubtitle={false}
         linkPath="/landing/services/capacity-building-and-training"
@@ -38,7 +38,7 @@ export default function FeaturesSection() {
         subtitle="Digital Skills & Training"
         title="Access to Finance"
         description="From DSE (Digital Skills for Entrepreneurs) to MIRE (Market & Investment Readiness), we offer hands-on programs that teach what really works in today’s market."
-        image="/services/services_image_two.png"
+        image="/services/services_image_three.png"
         bgColor="#FFB0B0"
         linkPath="/landing/services/access-to-finance"
         reverse
@@ -48,7 +48,7 @@ export default function FeaturesSection() {
         subtitle="Digital Infrastructure / Tools"
         title="Digital Infrastructure Support"
         description="From DSE (Digital Skills for Entrepreneurs) to MIRE (Market & Investment Readiness), we offer hands-on programs that teach what really works in today’s market."
-        image="/services/services_image_two.png"
+        image="/services/services_image_four.png"
         linkPath="/landing/services/digital-infrastructure-support"
         bgColor="#97D2E7"
       />
@@ -57,7 +57,7 @@ export default function FeaturesSection() {
         subtitle="Digital Infrastructure / Tools"
         title="Taster Sessions: Digital Tools & Platforms"
         description="From DSE (Digital Skills for Entrepreneurs) to MIRE (Market & Investment Readiness), we offer hands-on programs that teach what really works in today’s market."
-        image="/services/services_image_two.png"
+        image="/services/services_image_five.png"
         bgColor="#CCF1FF"
         linkPath="/landing/services/digital-tools-and-platforms"
         reverse
@@ -67,7 +67,7 @@ export default function FeaturesSection() {
         subtitle="Business Advisory & Ecosystem Support"
         title="Hub Membership"
         description="We show you how to structure your business for funding and connect you to real, accessible financial opportunities."
-        image="/services/services_image_three.png"
+        image="/services/services_hub_membership.png"
         bgColor="#AD1F1F"
         subtitleBg="#0229B2"
         learnMoreColor="#FFFFFF"
@@ -81,7 +81,7 @@ export default function FeaturesSection() {
         subtitle="Research & Insights"
         title="Market & Policy Insight"
         description="Launch your website. Set up your socials. Get custom emails. Go digital with ease and get the support to stay ahead."
-        image="/services/services_image_four.png"
+        image="/services/services_policy.png"
         bgColor="#171616"
         titleColor="#FFFFFF"
         descriptionColor="#D6D4D4"
@@ -94,7 +94,7 @@ export default function FeaturesSection() {
         subtitle="Innovation & Co-creation Labs"
         title="Research Commercialisation"
         description="We go beyond the numbers. Our deep-dive assessments and on-the-ground research help shape smarter policies and programs because impactful solutions start with real-world insight."
-        image="/services/services_image_five.png"
+        image="/services/services_image_six.png"
         bgColor="#3D3A3A"
          titleColor="#FFFFFF"
         descriptionColor="#D6D4D4"

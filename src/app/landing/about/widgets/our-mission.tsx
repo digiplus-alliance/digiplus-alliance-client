@@ -24,7 +24,7 @@ export default function OurMission() {
           <div className="w-full flex flex-row space-x-4">
             <div className="w-1/2">
               <Image
-                src="/about/about-misson-one.png"
+                src="/about/about-mission-one.png"
                 alt="Our mission image"
                 width={1000}
                 height={700}

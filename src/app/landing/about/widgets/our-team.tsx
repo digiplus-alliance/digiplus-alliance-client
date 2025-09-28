@@ -2,31 +2,36 @@ import Image from "next/image";
 
 const team = [
   {
-    name: "Adaeze Okafor",
-    role: "Program Lead",
-    img: "/about/team-placeholder-one.png",
+    name: "Damilola Obidairo",
+    role: "Lead Partner/Orchestrator (8thGear)",
+    img: "/about/damilolaobidairo1.png",
   },
   {
-    name: "Chinedu Iweka Iweka Iweka",
-    role: "Technical Lead",
-    img: "/about/team-placeholder-two.png",
+    name: "Sunkanmi Olarewaju",
+    role: "Partner Talent Supply (Innkeeper)",
+    img: "/about/mr-sunkanmi.jpeg",
   },
   {
-    name: "Funmi Adebayo",
-    role: "Partnerships",
-    img: "/about/team-placeholder-three.png",
+    name: "Prof Obafemi O. Olubanjo",
+    role: "Partner Research & Development (FUTA)",
+    img: "/about/Olubanjo.jpg",
   },
   {
-    name: "Seyi Martins",
-    role: "Operations",
-    img: "/about/team-placeholder-four.png",
+    name: "Dr Bunmi Kole-Dawudo",
+    role: "Partner Ecosystem Development (SMEDAN)",
+    img: "/about/Kole-Dawodu.jpg",
+  },
+  {
+    name: "Mrs Bolanle Tyson",
+    role: "Partner Access to Finance (Sterling Bank)",
+    img: "/about/Bolanle.jpg",
   },
 ];
 
 export default function OurTeam() {
   return (
     <section className="py-12 px-4">
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto max-w-6xl">
         <div className="flex flex-col items-center justify-center mb-8">
           <div className="flex flex-col items-center text-center">
             <h3 className="text-[#171616] font-medium text-2xl md:text-4xl">
@@ -38,7 +43,7 @@ export default function OurTeam() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-1 items-center">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 lg:gap-1 items-center">
           {team.map((member, idx) => (
             <div
               key={member.name + idx}

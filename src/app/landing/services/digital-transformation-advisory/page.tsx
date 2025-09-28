@@ -14,10 +14,10 @@ export default function DigitalTransformationAdvisory() {
         ]}
         buttonText="Request Service"
         buttonLink="/contact"
-        mainImage="/services/advisory_one.png"
+        mainImage="/services/transformation-advisory/digital_hero_one.png"
         sideImages={[
-          "/services/advisory_three.png",
-          "/services/advisory_two.png",
+          "/services/transformation-advisory/digital_hero_three.png",
+          "/services/transformation-advisory/digital_hero_two.png",
         ]}
       />
 

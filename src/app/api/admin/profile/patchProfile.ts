@@ -25,7 +25,7 @@ export type PatchProfileResponse = z.infer<typeof patchProfileResponseSchema>;
 // Custom hook
 export const usePatchProfile = () => {
   return useSend<PatchProfilePayload, PatchProfileResponse>({
-    url: "admin/profile",
+    url: "profile/admin",
     method: "PATCH",
     hasAuth: true,
     schema: patchProfileResponseSchema,

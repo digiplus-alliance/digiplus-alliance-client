@@ -71,7 +71,7 @@ export function Navbar() {
           <Button className="font-normal" onClick={() => router.push("/auth/login")}>
             Sign In
           </Button>
-          <Button variant="outline" className="text-[#3D3A3A] font-normal">
+          <Button variant="outline" className="text-[#3D3A3A] font-normal" onClick={() => router.push("/landing/contact")}>
             Contact Us
           </Button>
         </div>

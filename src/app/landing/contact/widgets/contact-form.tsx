@@ -3,12 +3,14 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useContactForm } from "@/app/api/landing/contact-form";
+import SpinnerIcon from "@/components/icons/spinner";
 
 const formSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
+  first_name: z.string().min(1, "First name is required"),
+  last_name: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
-  reason: z.string().min(5, "Please provide a reason"),
+  message: z.string().min(5, "Please provide a reason"),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -17,13 +19,24 @@ export default function ContactForm() {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
   });
+  const {
+    mutate: submitContactForm,
+    isPending,
+    isError,
+    error,
+  } = useContactForm();
 
   const onSubmit = (data: FormData) => {
-    console.log("Form Submitted:", data);
+    submitContactForm(data, {
+      onSuccess: () => {
+        reset();
+      },
+    });
   };
 
   return (
@@ -35,41 +48,56 @@ export default function ContactForm() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="firstName" className="block text-sm font-medium text-[#706C6C] mb-1">
+            <label
+              htmlFor="firstName"
+              className="block text-sm font-medium text-[#706C6C] mb-1"
+            >
               First Name
             </label>
             <input
               id="firstName"
-              {...register("firstName")}
+              {...register("first_name")}
               placeholder="First Name"
-              aria-invalid={errors.firstName ? "true" : "false"}
-              aria-describedby={errors.firstName ? "firstName-error" : undefined}
+              aria-invalid={errors.first_name ? "true" : "false"}
+              aria-describedby={
+                errors.first_name ? "firstName-error" : undefined
+              }
               className="w-full border rounded-md p-2"
             />
-            {errors.firstName && (
-              <p id="firstName-error" className="text-red-500 text-sm">{errors.firstName.message}</p>
+            {errors.first_name && (
+              <p id="firstName-error" className="text-red-500 text-sm">
+                {errors.first_name.message}
+              </p>
             )}
           </div>
           <div>
-            <label htmlFor="lastName" className="block text-sm font-medium text-[#706C6C] mb-1">
+            <label
+              htmlFor="lastName"
+              className="block text-sm font-medium text-[#706C6C] mb-1"
+            >
               Last Name
             </label>
             <input
               id="lastName"
-              {...register("lastName")}
+              {...register("last_name")}
               placeholder="Last Name"
-              aria-invalid={errors.lastName ? "true" : "false"}
-              aria-describedby={errors.lastName ? "lastName-error" : undefined}
+              aria-invalid={errors.last_name ? "true" : "false"}
+              aria-describedby={errors.last_name ? "lastName-error" : undefined}
               className="w-full border rounded-md p-2"
             />
-            {errors.lastName && (
-              <p id="lastName-error" className="text-red-500 text-sm">{errors.lastName.message}</p>
+            {errors.last_name && (
+              <p id="lastName-error" className="text-red-500 text-sm">
+                {errors.last_name.message}
+              </p>
             )}
           </div>
         </div>
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-[#706C6C] mb-1">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-[#706C6C] mb-1"
+          >
             Email
           </label>
           <input
@@ -81,25 +109,32 @@ export default function ContactForm() {
             className="w-full border rounded-md p-2"
           />
           {errors.email && (
-            <p id="email-error" className="text-red-500 text-sm">{errors.email.message}</p>
+            <p id="email-error" className="text-red-500 text-sm">
+              {errors.email.message}
+            </p>
           )}
         </div>
 
         <div>
-          <label htmlFor="reason" className="block text-sm font-medium text-[#706C6C] mb-1">
-            Reason
+          <label
+            htmlFor="message"
+            className="block text-sm font-medium text-[#706C6C] mb-1"
+          >
+            Message
           </label>
           <textarea
             id="reason"
-            {...register("reason")}
-            placeholder="Reason for applying"
+            {...register("message")}
+            placeholder="Type your message here ..."
             rows={4}
-            aria-invalid={errors.reason ? "true" : "false"}
-            aria-describedby={errors.reason ? "reason-error" : undefined}
+            aria-invalid={errors.message ? "true" : "false"}
+            aria-describedby={errors.message ? "reason-error" : undefined}
             className="w-full border rounded-md p-2"
           />
-          {errors.reason && (
-            <p id="reason-error" className="text-red-500 text-sm">{errors.reason.message}</p>
+          {errors.message && (
+            <p id="reason-error" className="text-red-500 text-sm">
+              {errors.message.message}
+            </p>
           )}
         </div>
 
@@ -107,7 +142,13 @@ export default function ContactForm() {
           type="submit"
           className="w-full bg-[#FF5C5C] text-white font-semibold py-2 rounded-md hover:bg-red-500 transition"
         >
-          Submit
+          {isPending ? (
+            <div className="flex items-center justify-center">
+              <SpinnerIcon />
+            </div>
+          ) : (
+            "Submit"
+          )}
         </button>
       </form>
     </div>
