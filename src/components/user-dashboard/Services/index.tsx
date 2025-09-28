@@ -96,6 +96,14 @@ const services: {
   },
 ];
 
+export enum PricingUnit {
+  PER_HOUR = 'per_hour',
+  PER_PROJECT = 'per_project',
+  ONE_TIME = 'one_time',
+  PER_DAY = 'per_day',
+  PER_MONTH = 'per_month',
+}
+
 interface ServiceCard {
   _id: string;
   name: string;
@@ -108,7 +116,27 @@ interface ServiceCard {
   long_description: string;
   createdAt: string;
   updatedAt: string;
+  formatted_price: string;
+  formatted_discounted_price: string;
+  pricing_unit: string;
 }
+
+const getPricingUnit = (unit: string) => {
+  switch (unit) {
+    case 'per_hour':
+      return 'Per Hour';
+    case 'per_project':
+      return 'Per Project';
+    case 'one_time':
+      return 'One Time';
+    case 'per_day':
+      return 'Per Day';
+    case 'per_month':
+      return 'Per Month';
+    default:
+      return '';
+  }
+};
 
 export default function ServicesComponent() {
   const router = useRouter();
@@ -160,6 +188,7 @@ export default function ServicesComponent() {
           service={selectedService}
           relatedServices={getRelatedServices(selectedService._id)}
           onApply={handleApply}
+          pricing_unit={getPricingUnit(selectedService.pricing_unit)}
         />
       </div>
     );

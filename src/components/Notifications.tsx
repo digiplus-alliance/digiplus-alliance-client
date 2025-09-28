@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { CiBellOn } from "react-icons/ci";
-import { IoClose } from "react-icons/io5";
-import { LuCalendarDays } from "react-icons/lu";
-import { TbSend } from "react-icons/tb";
+import { CiBellOn } from 'react-icons/ci';
+import { IoClose } from 'react-icons/io5';
+import { LuCalendarDays } from 'react-icons/lu';
+import { TbSend } from 'react-icons/tb';
 
-import SpinnerIcon from "@/components/icons/spinner";
-import { useState } from "react";
+import SpinnerIcon from '@/components/icons/spinner';
+import { useEffect, useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +14,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuClose,
-} from "./ui/dropdown-menu";
+} from './ui/dropdown-menu';
+import { useAuthStore } from '@/store/auth';
 
 interface NotificationsProps {
   open?: boolean;
@@ -30,54 +31,21 @@ export default function Notifications({ open, onOpenChange }: NotificationsProps
       date: string;
       time: string;
       section: string;
-      type: "form" | "application";
+      type: 'form' | 'application';
     }[]
-  >([
-    {
-      id: 1,
-      title: "Innkeeper submitted assessment form",
-      description: "Lorem Ipsum",
-      date: "Today",
-      time: "5.00 pm",
-      section: "Today",
-      type: "form",
-    },
-    {
-      id: 2,
-      title: "Mamaplus Submitted an application form",
-      description: "Lorem Ipsum",
-      date: "Today",
-      time: "11.20 am",
-      section: "Today",
-      type: "application",
-    },
-    {
-      id: 3,
-      title: "Title",
-      description: "desc",
-      date: "Mon, 12 June",
-      time: "",
-      section: "Yesterday",
-      type: "form",
-    },
-    {
-      id: 4,
-      title: "Title",
-      description: "desc",
-      date: "Mon, 11 June",
-      time: "",
-      section: "This Week",
-      type: "application",
-    },
-  ]);
+  >([]);
 
   const [isPending] = useState(false);
+  const { openNotification, setOpenNotification } = useAuthStore();
+  const [isOpen, setOpen] = useState(openNotification);
+
+  useEffect(() => {
+    setOpen(openNotification);
+  }, [openNotification]);
 
   return (
-    <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
-      <DropdownMenuTrigger 
-        className="group shrink-0 font-secondary lg:bg-[#EBFBFF] w-fit p-1 size-8 rounded-full md:bg-[#EBFBFF] relative"
-      >
+    <DropdownMenu open={isOpen} onOpenChange={() => setOpen(!isOpen)} modal={false}>
+      <DropdownMenuTrigger className="group shrink-0 font-secondary lg:bg-[#EBFBFF] w-fit p-1 size-8 rounded-full md:bg-[#EBFBFF] relative">
         <CiBellOn className="text-[#1E293B] size-full" />
         {notifications?.length > 0 && (
           <span className="inline-block size-1.5 absolute right-2 top-1 rounded-full bg-[#EB7A21]" />
@@ -87,9 +55,7 @@ export default function Notifications({ open, onOpenChange }: NotificationsProps
       <DropdownMenuContent className="border border-[#D9D9D9] md:absolute md:-right-[16rem] md:-top-16 font-secondary bg-white w-[90vw] max-w-[400px] rounded-none">
         {/* Header */}
         <div className="flex items-center justify-between relative">
-          <h2 className="text-xl text-[#667085] font-normal font-primary py-3 px-4">
-            Notification
-          </h2>
+          <h2 className="text-xl text-[#667085] font-normal font-primary py-3 px-4">Notification</h2>
           <DropdownMenuClose>
             <button className="text-[#6E6D6D] size-4 absolute right-4 top-4 cursor-pointer">
               <IoClose aria-hidden />
@@ -106,10 +72,8 @@ export default function Notifications({ open, onOpenChange }: NotificationsProps
             </div>
           ) : notifications.length ? (
             <div className="divide-y">
-              {["Today", "Yesterday", "This Week"].map((section) => {
-                const sectionItems = notifications.filter(
-                  (n) => n.section === section
-                );
+              {['Today', 'Yesterday', 'This Week'].map((section) => {
+                const sectionItems = notifications.filter((n) => n.section === section);
                 if (!sectionItems.length) return null;
 
                 return (
@@ -120,13 +84,11 @@ export default function Notifications({ open, onOpenChange }: NotificationsProps
                         <DropdownMenuItem
                           key={n.id}
                           className={`flex items-start gap-3 rounded-lg p-3 ${
-                            n.section === "Today" && n.id === 1
-                              ? "bg-[#EBFBFF]"
-                              : ""
+                            n.section === 'Today' && n.id === 1 ? 'bg-[#EBFBFF]' : ''
                           }`}
                         >
                           <span className="mt-1">
-                            {n.type === "form" ? (
+                            {n.type === 'form' ? (
                               <LuCalendarDays className="text-gray-500" />
                             ) : (
                               <TbSend className="text-gray-500" />
@@ -136,22 +98,16 @@ export default function Notifications({ open, onOpenChange }: NotificationsProps
                             <div className="flex items-center justify-between">
                               <h3
                                 className={`text-sm ${
-                                  n.id === 1 && n.section === "Today"
-                                    ? "font-semibold text-black"
-                                    : "font-medium text-gray-700"
+                                  n.id === 1 && n.section === 'Today'
+                                    ? 'font-semibold text-black'
+                                    : 'font-medium text-gray-700'
                                 }`}
                               >
                                 {n.title}
                               </h3>
-                              {n.time && (
-                                <span className="text-xs text-gray-500">
-                                  {n.time}
-                                </span>
-                              )}
+                              {n.time && <span className="text-xs text-gray-500">{n.time}</span>}
                             </div>
-                            <p className="text-xs text-gray-500">
-                              {n.description}
-                            </p>
+                            <p className="text-xs text-gray-500">{n.description}</p>
                           </div>
                         </DropdownMenuItem>
                       ))}
@@ -161,9 +117,7 @@ export default function Notifications({ open, onOpenChange }: NotificationsProps
               })}
             </div>
           ) : (
-            <p className="text-center text-gray-500 text-sm py-6">
-              No notifications yet
-            </p>
+            <p className="text-center text-gray-500 text-sm py-6">No notifications yet</p>
           )}
         </div>
       </DropdownMenuContent>
