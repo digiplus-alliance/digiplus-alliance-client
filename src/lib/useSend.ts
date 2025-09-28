@@ -7,7 +7,7 @@ import * as z from "zod";
 import { apiClient } from "@/lib/apiClient";
 import { generateQueryKey } from "@/lib/generateQueryKey";
 
-type AllowedMethodType = "post" | "put" | "delete" | "get" | "patch";
+type AllowedMethodType = "post" | "put" | "delete" | "get" | "PATCH";
 
 type QueryResponse<T> = {
   success: boolean;
@@ -72,7 +72,9 @@ const useSend = <RequestBodyType, TData = unknown, TContext = unknown>({
   };
 
   return useMutation<QueryResponse<TData>, unknown, RequestBodyType, TContext>({
+    
     mutationFn: async (variables: RequestBodyType): Promise<QueryResponse<TData>> => {
+      console.log("useSend called with:", { url, method, hasAuth, config });
       const response = await apiClient<QueryResponse<TData>>(url, {
         method: (method as unknown) as string,
         body: JSON.stringify(variables),

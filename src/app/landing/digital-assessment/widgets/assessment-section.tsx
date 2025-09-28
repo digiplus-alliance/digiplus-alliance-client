@@ -1,8 +1,12 @@
+'use client'
+
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { IoCheckmarkDoneCircleOutline } from "react-icons/io5";
 
 export default function AssessmentSection() {
+  const router = useRouter()
   return (
     <section className="w-full py-4 md:py-24">
       <div className="mx-auto max-w-6xl px-4">
@@ -10,7 +14,7 @@ export default function AssessmentSection() {
           {/* Image column */}
           <div className="w-full md:w-1/2">
             <Image
-              src="/why-join-digiplus.png"
+              src="/digital-assessment/digi-three.png"
               alt="Why Join Digiplus"
               width={900}
               height={560}
@@ -56,6 +60,7 @@ export default function AssessmentSection() {
               <Button
                 className="w-full sm:w-auto px-6 py-3 my-4 text-xs sm:text-base"
                 size="lg"
+                onClick={() => router.push("/auth/login")}
               >
                 Take the Digital Maturity Assessment Test
               </Button>

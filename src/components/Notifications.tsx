@@ -16,9 +16,22 @@ import {
   DropdownMenuClose,
 } from "./ui/dropdown-menu";
 
-export default function Notifications() {
+interface NotificationsProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export default function Notifications({ open, onOpenChange }: NotificationsProps) {
   const [notifications] = useState<
-    { id: number; title: string; description: string; date: string; time: string; section: string; type: "form" | "application" }[]
+    {
+      id: number;
+      title: string;
+      description: string;
+      date: string;
+      time: string;
+      section: string;
+      type: "form" | "application";
+    }[]
   >([
     {
       id: 1,
@@ -61,8 +74,10 @@ export default function Notifications() {
   const [isPending] = useState(false);
 
   return (
-    <DropdownMenu modal={false}>
-      <DropdownMenuTrigger className="group shrink-0 font-secondary lg:bg-[#EBFBFF] w-fit p-1 size-8 rounded-full md:bg-[#EBFBFF] relative">
+    <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
+      <DropdownMenuTrigger 
+        className="group shrink-0 font-secondary lg:bg-[#EBFBFF] w-fit p-1 size-8 rounded-full md:bg-[#EBFBFF] relative"
+      >
         <CiBellOn className="text-[#1E293B] size-full" />
         {notifications?.length > 0 && (
           <span className="inline-block size-1.5 absolute right-2 top-1 rounded-full bg-[#EB7A21]" />
@@ -75,11 +90,11 @@ export default function Notifications() {
           <h2 className="text-xl text-[#667085] font-normal font-primary py-3 px-4">
             Notification
           </h2>
-            <DropdownMenuClose>
-              <button className="text-[#6E6D6D] size-4 absolute right-4 top-4 cursor-pointer">
-                <IoClose aria-hidden />
-              </button>
-            </DropdownMenuClose>
+          <DropdownMenuClose>
+            <button className="text-[#6E6D6D] size-4 absolute right-4 top-4 cursor-pointer">
+              <IoClose aria-hidden />
+            </button>
+          </DropdownMenuClose>
         </div>
         <DropdownMenuSeparator className="mx-4" />
 
@@ -92,7 +107,9 @@ export default function Notifications() {
           ) : notifications.length ? (
             <div className="divide-y">
               {["Today", "Yesterday", "This Week"].map((section) => {
-                const sectionItems = notifications.filter((n) => n.section === section);
+                const sectionItems = notifications.filter(
+                  (n) => n.section === section
+                );
                 if (!sectionItems.length) return null;
 
                 return (
@@ -127,10 +144,14 @@ export default function Notifications() {
                                 {n.title}
                               </h3>
                               {n.time && (
-                                <span className="text-xs text-gray-500">{n.time}</span>
+                                <span className="text-xs text-gray-500">
+                                  {n.time}
+                                </span>
                               )}
                             </div>
-                            <p className="text-xs text-gray-500">{n.description}</p>
+                            <p className="text-xs text-gray-500">
+                              {n.description}
+                            </p>
                           </div>
                         </DropdownMenuItem>
                       ))}

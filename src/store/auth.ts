@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 export type User = {
   _id: string;
@@ -18,16 +19,42 @@ export type User = {
   updatedAt?: string;
   __v?: number;
   onboarded?: boolean;
+  phone?: string;
+  website?: string;
+  address?: string;
 };
 
 type AuthState = {
   user: User | null;
+  accessToken: string | null;
   setUser: (user: User) => void;
+  setAccessToken: (token: string) => void;
   clearUser: () => void;
+  clearAuth: () => void;
 };
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  setUser: (user) => set({ user }),
-  clearUser: () => set({ user: null }),
-}));
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      accessToken: null,
+      setUser: (user) => set({ user }),
+      setAccessToken: (token) => set({ accessToken: token }),
+      clearUser: () => set({ user: null }),
+      clearAuth: () => {
+        set({ user: null, accessToken: null });
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('auth-storage');
+        }
+      },
+    }),
+    {
+      name: 'auth-storage',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ 
+        user: state.user, 
+        accessToken: state.accessToken 
+      }),
+    }
+  )
+);

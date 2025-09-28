@@ -1,8 +1,12 @@
-export default function UserDashboard() {
+import UserDashboard from '@/components/user-dashboard/dashboard';
+import React from 'react';
+
+const UserDashboardPage = () => {
   return (
-    <div>
-      <h1>User Dashboard</h1>
-      <p>Manage your application settings and users from here.</p>
-    </div>
+    <section className="w-full">
+      <UserDashboard />
+    </section>
   );
-}
+};
+
+export default UserDashboardPage;

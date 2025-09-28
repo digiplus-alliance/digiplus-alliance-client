@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import type { Icon } from "react-feather";
+import Image from 'next/image';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import type { Icon } from 'react-feather';
 
 import {
   Sidebar,
@@ -15,14 +15,15 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/sidebar';
+import { cn } from '@/lib/utils';
 
 interface SidebarItem {
   title: string;
   url: string;
   icon: Icon;
   iconLogo?: string;
+  onClick?: () => void;
 }
 
 interface SidebarLayoutProps extends React.ComponentProps<typeof Sidebar> {
@@ -38,8 +39,8 @@ interface SidebarLayoutProps extends React.ComponentProps<typeof Sidebar> {
 export default function SidebarLayout({
   navItems,
   personalizationItems,
-  logoHref = "/",
-  basePath = "",
+  logoHref = '/',
+  basePath = '',
   footer,
   showProfileMenu = false,
   profileMenu,
@@ -49,39 +50,29 @@ export default function SidebarLayout({
   const { setOpenMobile } = useSidebar();
 
   return (
-    <Sidebar {...props}>
-      <SidebarHeader className="p-4">
-        <Link href={logoHref} className="w-28 lg:w-32">
-          <Image
-            src="/mobile-logo.png"
-            alt="App Logo"
-            width={200}
-            height={200}
-          />
+    <Sidebar {...props} className="bg-white border-none">
+      <SidebarHeader className="p-4 bg-white">
+        <Link href={logoHref} className="w-28 lg:w-40">
+          <Image src="/mobile-logo.png" alt="App Logo" width={200} height={200} />
         </Link>
       </SidebarHeader>
 
-      <SidebarContent className="grow flex flex-col justify-between h-full px-2">
+      <SidebarContent className="grow flex flex-col justify-between h-full px-2 bg-white">
         <SidebarGroup className="py-2">
           <SidebarGroupContent>
             <SidebarMenu>
               <div>
-                <h3 className="px-2 text-[#706C6C] font-bold text-sm mb-4">
-                  Applications
-                </h3>
+                <h3 className="px-2 text-[#706C6C] font-bold text-sm mb-4">Applications</h3>
                 {navItems.map((item) => {
                   const url = `${basePath}/${item.url}`;
                   return (
                     <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        asChild
-                        onClick={() => setOpenMobile(false)}
-                      >
+                      <SidebarMenuButton asChild onClick={() => setOpenMobile(false)}>
                         <Link
                           href={url}
                           className={cn(
                             "p-2 h-auto !rounded-4xl flex items-center gap-1 hover:bg-[#F1F8F8]",
-                            pathname.startsWith(url) && "bg-[#F1F8F8]"
+                            pathname.startsWith(url) && "bg-[#EBFBFF]"
                           )}
                         >
                           {item.iconLogo && (
@@ -93,9 +84,7 @@ export default function SidebarLayout({
                               className="object-contain"
                             />
                           )}
-                          <span className="text-sm font-secondary text-[#706C6C]">
-                            {item.title}
-                          </span>
+                          <span className="text-sm font-secondary text-[#706C6C]">{item.title}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -103,38 +92,67 @@ export default function SidebarLayout({
                 })}
               </div>
               <div>
-                <h3 className="p-2 text-[#706C6C] font-bold text-sm mb-2">
-                  Personalization
-                </h3>
+                <h3 className="p-2 text-[#706C6C] font-bold text-sm mb-2">Personalization</h3>
                 {personalizationItems.map((item) => {
                   const url = `${basePath}/${item.url}`;
                   return (
                     <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        asChild
-                        onClick={() => setOpenMobile(false)}
-                      >
-                        <Link
-                          href={url}
-                          className={cn(
-                            "p-2 h-auto !rounded-4xl flex items-center gap-1 hover:bg-[#F1F8F8]",
-                            pathname.startsWith(url) && "bg-[#F1F8F8]"
-                          )}
+                      {item.onClick ? (
+                        <SidebarMenuButton
+                          onClick={() => {
+                            if (item.onClick) {
+                              item.onClick();
+                            }
+                            setOpenMobile(false);
+                          }}
                         >
-                          {item.iconLogo && (
-                            <Image
-                              src={item.iconLogo}
-                              alt="Coming Soon"
-                              width={20}
-                              height={20}
-                              className="object-contain"
-                            />
-                          )}
-                          <span className="text-sm font-secondary text-[#706C6C]">
-                            {item.title}
-                          </span>
-                        </Link>
-                      </SidebarMenuButton>
+                          <div
+                            className={cn(
+                              "h-auto !rounded-4xl flex items-center gap-1 hover:bg-[#F1F8F8] cursor-pointer w-full",
+                              pathname.startsWith(url) && "bg-[#F1F8F8]"
+                            )}
+                          >
+                            {item.iconLogo && (
+                              <Image
+                                src={item.iconLogo}
+                                alt="Coming Soon"
+                                width={20}
+                                height={20}
+                                className="object-contain"
+                              />
+                            )}
+                            <span className="text-sm font-secondary text-[#706C6C]">
+                              {item.title}
+                            </span>
+                          </div>
+                        </SidebarMenuButton>
+                      ) : (
+                        <SidebarMenuButton
+                          asChild
+                          onClick={() => setOpenMobile(false)}
+                        >
+                          <Link
+                            href={url}
+                            className={cn(
+                              "p-2 h-auto !rounded-4xl flex items-center gap-1 hover:bg-[#F1F8F8]",
+                              pathname.startsWith(url) && "bg-[#F1F8F8]"
+                            )}
+                          >
+                            {item.iconLogo && (
+                              <Image
+                                src={item.iconLogo}
+                                alt="Coming Soon"
+                                width={20}
+                                height={20}
+                                className="object-contain"
+                              />
+                            )}
+                            <span className="text-sm font-secondary text-[#706C6C]">
+                              {item.title}
+                            </span>
+                          </Link>
+                        </SidebarMenuButton>
+                      )}
                     </SidebarMenuItem>
                   );
                 })}
@@ -144,7 +162,7 @@ export default function SidebarLayout({
         </SidebarGroup>
 
         <SidebarGroup className="mt-auto">
-          <SidebarGroupContent className="space-y-8">
+          <SidebarGroupContent className="space-y-6">
             {showProfileMenu && profileMenu}
             {footer}
           </SidebarGroupContent>

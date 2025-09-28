@@ -11,10 +11,10 @@ import { PasswordInput } from "@/components/ui/password-input";
 import SpinnerIcon from "@/components/icons/spinner";
 import Image from "next/image";
 import Link from "next/link";
-import { FaFacebook } from "react-icons/fa";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore, User } from "@/store/auth";
 import { toast } from "sonner";
+import { getDefaultDashboard } from "@/lib/permissions";
 
 const schema = z.object({
   email: z.string().email("Invalid email address"),
@@ -24,6 +24,10 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function LoginPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirect');
+
   const {
     register,
     handleSubmit,
@@ -31,10 +35,9 @@ export default function LoginPage() {
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
   });
-  const router = useRouter();
 
   const mutation = useMutation<
-    { message?: string; user?: unknown },
+    { message?: string; user?: unknown; accessToken?: string },
     Error,
     FormValues
   >({
@@ -51,13 +54,26 @@ export default function LoginPage() {
         throw new Error(json?.message || "Login failed");
       }
 
-      return json as { message?: string; user?: unknown };
+      return json as { message?: string; user?: unknown; accessToken?: string };
     },
     onSuccess(data) {
       toast.success("Login successful! Redirecting to dashboard...");
-      useAuthStore.getState().setUser(data.user as User);
+      const authStore = useAuthStore.getState();
+      authStore.setUser(data.user as User);
+      if (data.accessToken) {
+        authStore.setAccessToken(data.accessToken);
+      }
+
+      console.log("User data stored in Zustand:", data.user);
+      console.log("Access token stored in Zustand:", data.accessToken);
+      
+      // Determine redirect destination
+      const user = data.user as User;
+      const defaultDashboard = getDefaultDashboard(user.role);
+      const destination = redirectTo || defaultDashboard;
+      
       // Short delay to show the success message before redirect
-      setTimeout(() => router.push("/admin-dashboard"), 500);
+      setTimeout(() => router.push(destination), 500);
     },
     onError(error) {
       toast.error(error.message || "Failed to login. Please try again.");
@@ -96,7 +112,7 @@ export default function LoginPage() {
           </p>
         </div>
         {/* Social login */}
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-center">
+        {/* <div className="flex flex-col md:flex-row gap-4 items-center justify-center">
           <Button
             variant="ghost"
             className="text-[#171616] text-base md:w-auto w-full py-4 font-normal border border-[#D6D4D4] flex items-center gap-3"
@@ -108,7 +124,7 @@ export default function LoginPage() {
             variant="ghost"
             className="text-[#171616] text-base  md:w-auto w-full  py-4 font-normal border border-[#D6D4D4] flex items-center gap-3"
           >
-            {/* <FcGoogle className="w-5 h-5" /> */}
+            <FcGoogle className="w-5 h-5" />
             <Image
               src="/google-logo.svg"
               alt="Google Logo"
@@ -119,7 +135,7 @@ export default function LoginPage() {
           </Button>
         </div>
 
-        <div className="my-2 text-center text-base text-[#706C6C]">or</div>
+        <div className="my-2 text-center text-base text-[#706C6C]">or</div> */}
       </div>
       <div className="w-full max-w-lg md:rounded-lg md:bg-white md:shadow">
         {/* Form */}
@@ -157,11 +173,14 @@ export default function LoginPage() {
               {...register("password")}
               error={errors.password?.message}
             />
-            <Link href="/auth/forgot-password">
-              <p className="py-2 text-end text-[#D63A3A] text-sm">
+            <div className="w-full text-right">
+              <Link
+                href="/auth/forgot-password"
+                className="inline-block py-2 text-[#D63A3A] text-sm hover:underline"
+              >
                 Forgot password?
-              </p>
-            </Link>
+              </Link>
+            </div>
           </div>
 
           <p className="text-xs text-center text-[#5E5B5B]">

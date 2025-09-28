@@ -28,7 +28,7 @@ export default function DigitalAssessmentPage() {
             {/* Image column */}
             <div className="w-full md:w-1/2">
               <Image
-                src="/placeholder-one.png"
+                src="/digital-assessment/digi-one.png"
                 alt="Placeholder"
                 width={900}
                 height={560}
@@ -67,7 +67,7 @@ export default function DigitalAssessmentPage() {
             {/* Image column */}
             <div className="w-full md:w-1/2 py-4 md:py-0">
               <Image
-                src="/placeholder-one.png"
+                src="/digital-assessment/digi-two.png"
                 alt="Placeholder"
                 width={900}
                 height={560}
