@@ -1,8 +1,8 @@
-import { ChevronDown, LogOut } from "react-feather";
+import { ChevronDown, LogOut } from 'react-feather';
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,42 +10,47 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
-import { useLogout } from "@/lib/logout";
+} from './ui/dropdown-menu';
+import { useLogout } from '@/lib/logout';
+import { useAuthStore } from '@/store/auth';
+import { useGetBusinessProfile } from '@/app/api/profile';
 
 export default function ProfileMenu({ className }: { className?: string }) {
   const { mutate: logoutMutate } = useLogout();
+  const { user } = useAuthStore();
+  const { data: businessProfile } = useGetBusinessProfile();
+
   const handleLogout = () => {
     logoutMutate();
   };
 
-  const userName = "Opeyemi Bioku";
-  const role = "admin";
+  const userName = user?.first_name + ' ' + user?.last_name || businessProfile?.business_name;
+  const role = user?.role;
 
-  const avatarUrl = "",
-    name = "EN";
+  const avatarUrl = '',
+    name = 'EN';
 
   const getInitials = (name?: string) => {
-    if (!name) return "";
+    if (!name) return '';
     return name.slice(0, 1);
   };
 
   const getRole = (role?: string) => {
     switch (role) {
-      case "admin":
-        return "Admin";
-      case "business_owner":
-        return "Business Owner";
+      case 'admin':
+        return 'Admin';
+      case 'business_owner':
+        return 'Business Owner';
       default:
-        return "User";
+        return 'User';
     }
   };
 
-  const initials = getInitials(userName);
+  const initials = getInitials(user?.first_name + ' ' + user?.last_name || businessProfile?.business_name);
   return (
-    <div className={cn("flex relative items-center", className)}>
+    <div className={cn('flex relative items-center', className)}>
       <Avatar className="flex">
-        <AvatarImage src={avatarUrl} alt={name} />
+        <AvatarImage src={user?.profile_picture || businessProfile?.logo_url || avatarUrl} alt={name} />
         <AvatarFallback className="text-[#176E8E] bg-[#EBFBFF] text-base font-normal font-inter">
           {initials}
         </AvatarFallback>
@@ -53,11 +58,9 @@ export default function ProfileMenu({ className }: { className?: string }) {
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger className="group shrink-0 font-secondary ">
           <>
-            <span className='px-2 py-2 flex text-xs items-center gap-4 justify-between"'>
+            <span className="px-2 py-2 flex text-xs items-center gap-4 justify-between">
               <span className="flex flex-col text-start">
-                <span className="text-sm text-[#171616] font-inter">
-                  {userName}
-                </span>
+                <span className="text-sm text-[#171616] font-inter">{userName}</span>
               </span>
               <ChevronDown className="text-black size-4 shrink-0 group-data-[state=open]:rotate-180 transition-transform ease-in" />
             </span>
@@ -66,7 +69,7 @@ export default function ProfileMenu({ className }: { className?: string }) {
         <DropdownMenuContent className="border border-[#D9D9D9] rounded-2xl p-6 font-secondary bg-white w-64">
           <div className="flex flex-col gap-2 items-center pb-3">
             <Avatar className="hidden lg:flex">
-              <AvatarImage src={avatarUrl} alt={name} />
+              <AvatarImage src={user?.profile_picture || businessProfile?.logo_url || avatarUrl} alt={name} />
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col items-center">

@@ -9,22 +9,22 @@ interface Testimonial {
 
 const testimonials: Testimonial[] = [
   {
-    name: "Name of the person",
-    role: "What he does",
-    text: "Customised digital adoption plans that align with business goals, plans that align plans.",
-    image: "/testimonial-avatar.png",
+  name: "Aisha Bello",
+  role: "Founder, KokoCrafts (SME)",
+  text: "The digital assessment showed exactly where we were lagging. With Digiplus’ advisory and tools, we streamlined our sales and started reaching customers online within weeks.",
+  image: "/about/team-placeholder-one.png",
   },
   {
-    name: "Name of the person",
-    role: "What he does",
-    text: "Customised digital adoption plans that align with business goals, plans that align plans.",
-    image: "/testimonial-avatar.png",
+  name: "Chinedu Okafor",
+  role: "Operations Lead, AgriLink",
+  text: "Capacity-building workshops were practical and relevant. Our team now uses simple digital tools to track inventory and fulfil orders more reliably.",
+  image: "/about/team-placeholder-two.png",
   },
   {
-    name: "Name of the person",
-    role: "What he does",
-    text: "Customised digital adoption plans that align with business goals, plans that align plans.",
-    image: "/testimonial-avatar.png",
+  name: "Fatima Sule",
+  role: "Program Manager, Community Hub",
+  text: "Digiplus connected our entrepreneurs to market access opportunities and mentorship. The one-on-one support made all the difference for early-stage founders.",
+  image: "/about/team-placeholder-three.png",
   },
 ];
 

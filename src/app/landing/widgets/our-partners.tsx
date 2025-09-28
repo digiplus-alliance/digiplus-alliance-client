@@ -62,7 +62,7 @@ export default function OurPartners() {
             </div>
             <div className="w-18 h-18">
               <Image
-                src="/partners-logo/sme.svg"
+                src="/partners-logo/sme.png"
                 alt="SME logo"
                 layout="responsive"
                 width={100}
@@ -132,7 +132,7 @@ export default function OurPartners() {
           <div className="flex items-center gap-3 sm:flex-nowrap mt-2 sm:mt-0">
             <div className="w-60 h-20">
               <Image
-                src="/partners-logo/giz.svg"
+                src="/partners-logo/group.svg"
                 alt="GIZ logo"
                 layout="responsive"
                 width={960}

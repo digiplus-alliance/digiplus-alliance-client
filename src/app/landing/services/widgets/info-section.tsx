@@ -1,5 +1,8 @@
+'use client'
+
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import React from "react";
 import { IoCheckmarkDoneCircleOutline } from "react-icons/io5";
 
@@ -49,6 +52,7 @@ const InfoSection: React.FC<SectionProps> = ({
 }) => {
   const textWidth = layout === "balanced" ? "md:w-1/2" : "md:w-3/5";
   const imageWidth = layout === "balanced" ? "md:w-1/2" : "md:w-2/5";
+  const router = useRouter()
   return (
     <section
       className={`w-full py-10 px-4 md:px-8 lg:pl-28 lg:pr-10 md:py-18 ${background}`}
@@ -131,7 +135,7 @@ const InfoSection: React.FC<SectionProps> = ({
           <Button
             className="w-full sm:w-auto px-6 py-3 text-xs sm:text-base"
             size="lg"
-            onClick={button.onClick}
+            onClick={() => router.push("/auth/login")}
           >
             {button.label}
           </Button>

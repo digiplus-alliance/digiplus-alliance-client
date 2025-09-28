@@ -4,14 +4,16 @@ import { useAuthStore } from "@/store/auth";
 import { toast } from "sonner";
 
 export function signOutCompletelyClientSide() {
-  useAuthStore.setState({ user: null });
+  useAuthStore.setState({ user: null, accessToken: null });
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('auth-storage');
+  }
 }
 
 export function useLogout() {
   const queryClient = useQueryClient();
-  const clearUser = useAuthStore((s) => s.clearUser);
+  const clearAuth = useAuthStore((s) => s.clearAuth);
   const router = useRouter();
-  signOutCompletelyClientSide();
 
   return useMutation<void, Error, void>({
     mutationFn: async () => {
@@ -24,7 +26,7 @@ export function useLogout() {
     },
     onSuccess() {
       // Clear client state and cached queries
-      clearUser();
+      clearAuth();
       queryClient.clear();
       toast.success("Logged out");
       router.push("/auth/login");
@@ -33,7 +35,7 @@ export function useLogout() {
       console.error("Logout failed:", err);
       toast.error("Logout failed");
       // still clear client state to avoid stuck sessions
-      clearUser();
+      clearAuth();
       queryClient.clear();
       router.push("/auth/login");
     },

@@ -5,7 +5,7 @@ export default function ServicesHero() {
     <section className="relative w-full h-full max-h-[40rem] lg:h-[76vh] flex items-center">
       {/* Background image */}
       <Image
-        src="/digital-assessment/digital-assessment-hero.png"
+        src="/services/services-hero.png"
         alt="DigiPlus Services Hero"
         fill
         className="object-cover"
