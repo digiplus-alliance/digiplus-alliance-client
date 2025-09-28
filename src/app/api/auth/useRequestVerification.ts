@@ -16,7 +16,7 @@ export function useRequestVerification() {
   return useSend<VerificationRequest, VerificationResponse>({
     url: "auth/request-verification",
     method: "post",
-    hasAuth: false,
+    hasAuth: true,
     schema: VerificationResponseSchema,
   });
 }

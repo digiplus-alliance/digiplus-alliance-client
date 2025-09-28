@@ -4,7 +4,7 @@ import * as z from "zod";
 import useSend from "@/lib/useSend";
 
 export const VerificationRequestSchema = z.object({
-  token: z.string().min(6),
+  email: z.string().email().min(6),
 });
 
 export type VerificationRequest = z.infer<typeof VerificationRequestSchema>;
@@ -16,9 +16,9 @@ export const VerificationResponseSchema = z.object({
 
 export type VerificationResponse = z.infer<typeof VerificationResponseSchema>;
 
-export function useVerification() {
+export function useForgotPassword() {
   return useSend<VerificationRequest, VerificationResponse>({
-    url: "auth/verify-email",
+    url: "auth/forgot-password",
     method: "post",
     hasAuth: false,
     schema: VerificationResponseSchema,
