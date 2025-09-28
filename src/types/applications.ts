@@ -14,7 +14,7 @@ export const ApplicationSubmissionSchema = z.object({
   start_date: z.string().nullable(),
   end_date: z.string().nullable(),
   timetable_url: z.string().nullable(),
-  image: z.string().optional(),
+  service_image: z.string().optional(),
 });
 
 // Application Submissions Response Schema

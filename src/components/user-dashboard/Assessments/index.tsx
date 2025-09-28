@@ -283,15 +283,15 @@ export default function Assessment() {
   if (currentQuestion.type === 'multiple_choice') {
     return (
       <div>
-        <AssessmentHeader />
+        {/* <AssessmentHeader /> */}
         <div className="min-h-screen bg-muted/30 p-6">
           <div className="max-w-4xl mx-auto">
-            <ProgressBar />
+            {/* <ProgressBar /> */}
             <MultipleChoiceQuestion
-              module={currentModule?.title || ''}
+              module={assessment.title || currentModule?.title || ''}
               title={currentQuestion.question}
-              description={currentQuestion.description}
-              instruction={currentQuestion.instruction}
+              description={currentQuestion.description || assessment.description}
+              instruction={currentQuestion.instruction || assessment.instruction}
               options={transformOptions(currentQuestion.options || [])}
               currentStep={currentQuestion.step}
               totalSteps={totalSteps}
@@ -310,8 +310,8 @@ export default function Assessment() {
       <CheckboxQuestion
         module={currentModule?.title || ''}
         title={currentQuestion.question}
-        description={currentQuestion.description}
-        instruction={currentQuestion.instruction}
+        description={currentQuestion.description || assessment.description}
+        instruction={currentQuestion.instruction || assessment.instruction}
         options={transformOptions(currentQuestion.options || [])}
         minSelections={currentQuestion.min_selections}
         maxSelections={currentQuestion.max_selections}
@@ -330,7 +330,7 @@ export default function Assessment() {
         module={currentModule?.title || ''}
         title={currentQuestion.question}
         description={currentQuestion.description}
-        instruction={currentQuestion.instruction}
+        instruction={currentQuestion.instruction || assessment.instruction}
         placeholder={currentQuestion.placeholder}
         type={currentQuestion.type}
         maxLength={currentQuestion.max_length}

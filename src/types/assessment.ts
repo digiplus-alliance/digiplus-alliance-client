@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // Assessment Option Schema
 export const AssessmentOptionSchema = z.object({
-  _id: z.string(),
+  id: z.string(),
   text: z.string(),
   value: z.number().optional(),
   points: z.number().optional(),
@@ -11,7 +11,7 @@ export const AssessmentOptionSchema = z.object({
 
 // Grid Column Schema
 export const GridColumnSchema = z.object({
-  _id: z.string(),
+  id: z.string(),
   text: z.string(),
   value: z.number().optional(),
   points: z.number().optional(),
@@ -20,7 +20,7 @@ export const GridColumnSchema = z.object({
 
 // Grid Row Schema
 export const GridRowSchema = z.object({
-  _id: z.string(),
+  id: z.string(),
   text: z.string(),
   weight: z.number().optional(),
 });
@@ -106,9 +106,16 @@ export const AssessmentSchema = z.object({
 // Service Recommendation Schema
 export const ServiceRecommendationSchema = z.object({
   _id: z.string(),
-  name: z.string(),
+  assessment_id: z.string(),
+  service_id: z.string(),
+  service_name: z.string(),
   description: z.string(),
-  // Add other service recommendation fields as needed
+  min_points: z.number(),
+  max_points: z.number(),
+  levels: z.array(z.string()),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  __v: z.number(),
 });
 
 // Available Assessments Response Schema

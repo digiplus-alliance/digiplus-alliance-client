@@ -84,7 +84,7 @@ export function RecentApplications() {
           recentApplications.map((app) => (
             <div key={app._id} className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 border-b">
               <Image
-                src={app.image || ''}
+                src={app.service_image || ''}
                 alt={app.name}
                 className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover flex-shrink-0"
                 width={48}

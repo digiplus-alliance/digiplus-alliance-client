@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { useState } from 'react';
 
 interface MultipleChoiceOption {
   id: string;
@@ -38,9 +39,13 @@ export function MultipleChoiceQuestion({
 }: MultipleChoiceQuestionProps) {
   const handleSubmit = () => {
     if (selectedOption) {
-      onNext(selectedOption);
+      onNext(optionSelected);
     }
   };
+
+  const [optionSelected, setOptionSelected] = useState('');
+
+  const isValid = !!selectedOption;
 
   return (
     <div className="min-h-screen flex items-start justify-center p-6">
@@ -54,10 +59,19 @@ export function MultipleChoiceQuestion({
 
         <CardContent className="space-y-8">
           <div className="space-y-6">
-            <RadioGroup value={selectedOption} onValueChange={(value: any) => onNext(value)} className="space-y-4">
+            <RadioGroup
+              value={selectedOption}
+              onValueChange={(value: any) => setOptionSelected(value)}
+              className="space-y-4"
+            >
               {options.map((option) => (
                 <div key={option.id} className="flex items-start space-x-3">
-                  <RadioGroupItem value={option.id} id={option.id} className="mt-1" />
+                  <RadioGroupItem
+                    value={option.id}
+                    id={option.id}
+                    className="mt-1"
+                    onClick={() => setOptionSelected(option.id)}
+                  />
                   <Label htmlFor={option.id} className=" text-[#3D3A3A] leading-relaxed cursor-pointer">
                     {option.text}
                   </Label>
@@ -72,7 +86,7 @@ export function MultipleChoiceQuestion({
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={!selectedOption}
+              // disabled={!selectedOption}
               className="flex-1 bg-destructive hover:bg-destructive/90 text-primary"
             >
               Save and continue
