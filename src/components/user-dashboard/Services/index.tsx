@@ -7,10 +7,11 @@ import { StaticImageData } from 'next/image';
 import ServiceCard from './ServiceCard';
 import ServiceDetail from './ServiceDetail';
 import PageHeader from '@/components/PageHeader';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useGetServices } from '@/app/api/services/useGetServices';
 
 const services: {
   id: number;
@@ -95,11 +96,34 @@ const services: {
   },
 ];
 
+interface ServiceCard {
+  _id: string;
+  name: string;
+  service_type: string;
+  image: string;
+  images: string[];
+  price: number;
+  discounted_price: number;
+  short_description: string;
+  long_description: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function ServicesComponent() {
   const router = useRouter();
-  const [selectedService, setSelectedService] = useState<(typeof services)[0] | null>(null);
+  const [selectedService, setSelectedService] = useState<ServiceCard | null>(null);
+  const { data, isLoading } = useGetServices();
 
-  const handleServiceClick = (service: (typeof services)[0]) => {
+  const [servicesAvailable, setServicesAvailable] = useState<ServiceCard[]>([]);
+
+  useEffect(() => {
+    if (data) {
+      setServicesAvailable(data as any);
+    }
+  }, [isLoading, data]);
+
+  const handleServiceClick = (service: ServiceCard) => {
     setSelectedService(service);
   };
 
@@ -109,13 +133,13 @@ export default function ServicesComponent() {
 
   const handleApply = () => {
     // Handle apply logic here
-    console.log('Apply for service:', selectedService?.subTitle);
+    console.log('Apply for service:', selectedService?.name);
     router.push('/user-dashboard/applications/apply');
   };
 
   // Get related services (exclude the selected one)
-  const getRelatedServices = (currentServiceId: number) => {
-    return services.filter((service) => service.id !== currentServiceId);
+  const getRelatedServices = (currentServiceId: string) => {
+    return servicesAvailable.filter((service) => service._id !== currentServiceId);
   };
 
   if (selectedService) {
@@ -134,21 +158,29 @@ export default function ServicesComponent() {
 
         <ServiceDetail
           service={selectedService}
-          relatedServices={getRelatedServices(selectedService.id)}
+          relatedServices={getRelatedServices(selectedService._id)}
           onApply={handleApply}
         />
       </div>
     );
   }
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh] sm:min-h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 sm:h-24 sm:w-24 lg:h-32 lg:w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <PageHeader title="Services" />
 
-      {/* Services Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {services.map((service) => (
-          <ServiceCard key={service.id} {...service} onClick={() => handleServiceClick(service)} />
+      {/* Services Grid - Responsive */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+        {servicesAvailable.map((service) => (
+          <ServiceCard key={service._id} {...service} onClick={() => handleServiceClick(service)} />
         ))}
       </div>
     </div>

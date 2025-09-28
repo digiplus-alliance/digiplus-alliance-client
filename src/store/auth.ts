@@ -1,5 +1,5 @@
-import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 export type User = {
   _id: string;
@@ -9,6 +9,7 @@ export type User = {
   first_name?: string;
   last_name?: string;
   profile_picture?: string | null;
+  logo_url?: string | null;
   is_verified: boolean;
   locked_until?: string | null;
   is_in_recovery: boolean;
@@ -19,9 +20,17 @@ export type User = {
   updatedAt?: string;
   __v?: number;
   onboarded?: boolean;
-  phone?: string;
+  // Legacy fields (keeping for backward compatibility)
+  phone_number?: string;
   website?: string;
   address?: string;
+  // New business profile fields
+  industry?: string;
+  company_website?: string;
+  company_address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
 };
 
 type AuthState = {
@@ -51,9 +60,9 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'auth-storage',
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ 
-        user: state.user, 
-        accessToken: state.accessToken 
+      partialize: (state) => ({
+        user: state.user,
+        accessToken: state.accessToken,
       }),
     }
   )

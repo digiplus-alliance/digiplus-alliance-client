@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -10,6 +10,10 @@ import { useRouter } from 'next/navigation';
 import { Textarea } from '@/components/ui/textarea';
 import PageHeader from '@/components/PageHeader';
 import ApplicationSuccessModal from './ApplicationSuccessModal';
+import { useGetServiceTypes } from '@/app/api/services/useGetServiceTypes';
+import { useCreateApplication } from '@/app/api/user/useCreateApplication';
+import { toast } from 'sonner';
+import { useGetServices } from '@/app/api/services/useGetServices';
 
 const ApplicationForm = () => {
   const router = useRouter();
@@ -22,6 +26,16 @@ const ApplicationForm = () => {
     reason_for_applying: '',
   });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const { data, isLoading } = useGetServices();
+  const { mutate: createApplication, isPending } = useCreateApplication();
+
+  const [serviceTypes, setServiceTypes] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (data) {
+      setServiceTypes(data.map((service) => service.name));
+    }
+  }, [isLoading, data]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({
@@ -32,11 +46,36 @@ const ApplicationForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log('Form submitted:', formData);
+    const payload = {
+      responses: {
+        company_name: formData.company_name,
+        first_name: formData.fullName.split(' ')[0],
+        last_name: formData.fullName.split(' ')[1],
+        email: formData.email,
+        phone_number: formData.phone_number,
+        reason_for_applying: formData.reason_for_applying,
+      },
+      service: formData.service,
+    };
 
-    // Show success modal
-    setShowSuccessModal(true);
+    createApplication(payload, {
+      onSuccess: () => {
+        setShowSuccessModal(true);
+        toast.success('Application submitted successfully');
+        setFormData({
+          service: '',
+          company_name: '',
+          fullName: '',
+          email: '',
+          phone_number: '',
+          reason_for_applying: '',
+        });
+      },
+      onError: (error) => {
+        console.error('Application submission failed:', error);
+        toast.error('Application submission failed');
+      },
+    });
   };
 
   const handleBack = () => {
@@ -55,11 +94,13 @@ const ApplicationForm = () => {
         {/* Left Side - Information */}
         <div className="space-y-6">
           <div className="space-y-3">
-            <h1 className="text-xl font-medium text-[#5E5B5B]">One form. All the support you need.</h1>
+            <h1 className="text-base md:text-lg  lg:text-xl  font-medium text-[#5E5B5B]">
+              One form. All the support you need.
+            </h1>
 
-            <h2 className="text-xl  text-[#706C6C]">Ready to grow your business?</h2>
+            <h2 className="text-base md:text-lg  lg:text-xl   text-[#706C6C]">Ready to grow your business?</h2>
 
-            <p className="text-[#706C6C] leading-relaxed text-xl">
+            <p className="text-[#706C6C] leading-relaxed text-base md:text-lg  lg:text-xl ">
               Whether it&apos;s training, advisory, or digital tools you&apos;re just a few steps away from getting
               started.
             </p>
@@ -84,10 +125,11 @@ const ApplicationForm = () => {
                         <SelectValue placeholder="Select" className=" py-3" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="ecosystem-building">Ecosystem Building</SelectItem>
-                        <SelectItem value="digital-adoption">Digital Adoption</SelectItem>
-                        <SelectItem value="business-advisory">Business Advisory</SelectItem>
-                        <SelectItem value="training-program">Training Program</SelectItem>
+                        {serviceTypes.map((serviceType) => (
+                          <SelectItem key={serviceType} value={serviceType}>
+                            {serviceType}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>

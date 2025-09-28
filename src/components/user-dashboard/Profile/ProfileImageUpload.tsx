@@ -4,6 +4,7 @@ import React, { useRef, useState } from 'react';
 import Image from 'next/image';
 import { Camera } from 'lucide-react';
 import { useAuthStore } from '@/store/auth';
+import { useGetBusinessProfile } from '@/app/api/profile';
 
 interface ProfileImageUploadProps {
   onImageChange?: (file: File) => void;
@@ -14,6 +15,7 @@ const ProfileImageUpload = ({ onImageChange, className = '' }: ProfileImageUploa
   const { user } = useAuthStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const { data } = useGetBusinessProfile();
 
   const handleImageClick = () => {
     fileInputRef.current?.click();
@@ -49,6 +51,8 @@ const ProfileImageUpload = ({ onImageChange, className = '' }: ProfileImageUploa
   const getImageSrc = () => {
     if (previewUrl) return previewUrl;
     if (user?.profile_picture) return user.profile_picture;
+    if (user?.logo_url) return user.logo_url;
+    if (data?.logo_url) return data.logo_url;
     return '/about/team-placeholder-four.png';
   };
 
