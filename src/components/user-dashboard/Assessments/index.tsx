@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { WelcomeScreen } from './WelcomeScreen';
 import { ModuleTitleScreen } from './ModuleTitleScreen';
 import { MultipleChoiceQuestion } from './MultipleChoiceQuestion';
@@ -8,6 +8,11 @@ import { TextQuestion } from './TextQuestion';
 import { DropdownQuestion } from './DropdownQuestion';
 import { GridQuestion } from './GridQuestion';
 import { AssessmentResults } from './AssessmentResults';
+import { useGetAvailableAssessments, useGetAssessmentById } from '@/app/api/assessments';
+import { useAuthStore } from '@/store/auth';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 
 interface AssessmentOption {
   id: string;

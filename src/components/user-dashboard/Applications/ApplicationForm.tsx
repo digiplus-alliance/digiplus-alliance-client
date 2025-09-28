@@ -11,6 +11,9 @@ import { Textarea } from '@/components/ui/textarea';
 import PageHeader from '@/components/PageHeader';
 import ApplicationSuccessModal from './ApplicationSuccessModal';
 import { useGetServiceTypes } from '@/app/api/services/useGetServiceTypes';
+import { useCreateApplication } from '@/app/api/user/useCreateApplication';
+import { toast } from 'sonner';
+import { useGetServices } from '@/app/api/services/useGetServices';
 
 const ApplicationForm = () => {
   const router = useRouter();
@@ -23,13 +26,14 @@ const ApplicationForm = () => {
     reason_for_applying: '',
   });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const { data, isLoading } = useGetServiceTypes();
+  const { data, isLoading } = useGetServices();
+  const { mutate: createApplication, isPending } = useCreateApplication();
 
   const [serviceTypes, setServiceTypes] = useState<string[]>([]);
 
   useEffect(() => {
     if (data) {
-      setServiceTypes(data.service_types);
+      setServiceTypes(data.map((service) => service.name));
     }
   }, [isLoading, data]);
 
@@ -54,8 +58,24 @@ const ApplicationForm = () => {
       service: formData.service,
     };
 
-    // Show success modal
-    setShowSuccessModal(true);
+    createApplication(payload, {
+      onSuccess: () => {
+        setShowSuccessModal(true);
+        toast.success('Application submitted successfully');
+        setFormData({
+          service: '',
+          company_name: '',
+          fullName: '',
+          email: '',
+          phone_number: '',
+          reason_for_applying: '',
+        });
+      },
+      onError: (error) => {
+        console.error('Application submission failed:', error);
+        toast.error('Application submission failed');
+      },
+    });
   };
 
   const handleBack = () => {
