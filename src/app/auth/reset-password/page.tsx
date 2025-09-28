@@ -65,10 +65,8 @@ export default function ResetPasswordPage() {
     console.log("Reset password payload:", payload);
 
     resetPassword(payload, {
-      onSuccess: (response) => {
-        console.log("Password reset successful:", response);
+      onSuccess: () => {
         reset();
-        alert("Password reset successfully!");
         router.push("/auth/login");
       },
       onError: (error) => {
