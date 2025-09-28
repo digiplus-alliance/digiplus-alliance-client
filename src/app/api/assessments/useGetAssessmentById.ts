@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import * as z from "zod";
-import useFetch from "@/lib/useFetch";
-import { 
+import * as z from 'zod';
+import useFetch from '@/lib/useFetch';
+import {
   AssessmentDetailsResponseSchema,
   type AssessmentDetailsResponse,
   AssessmentSchema,
   AssessmentModuleSchema,
   AssessmentQuestionSchema,
-  ServiceRecommendationSchema
-} from "@/types/assessment";
+  ServiceRecommendationSchema,
+} from '@/types/assessment';
 
 // Schema for the API response data structure
 const AssessmentByIdDataSchema = z.object({
@@ -23,7 +23,7 @@ export type AssessmentByIdData = z.infer<typeof AssessmentByIdDataSchema>;
 
 export function useGetAssessmentById(id: string, enabled: boolean = true) {
   return useFetch<AssessmentByIdData>({
-    url: `assessments/${id}`,
+    url: `api/assessments/${id}`,
     hasAuth: true,
     schema: AssessmentByIdDataSchema,
     enabled: enabled && !!id,

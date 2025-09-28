@@ -1,8 +1,8 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { CheckCircle } from "lucide-react";
-import { useState } from "react";
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { CheckCircle } from 'lucide-react';
+import { useState } from 'react';
 
 interface AssessmentResultsProps {
   score: number;
@@ -12,16 +12,10 @@ interface AssessmentResultsProps {
   onRestart?: () => void;
 }
 
-export function AssessmentResults({
-  score,
-  maxScore,
-  level,
-  onSuggestions,
-  onRestart,
-}: AssessmentResultsProps) {
+export function AssessmentResults({ score, maxScore, level, onSuggestions, onRestart }: AssessmentResultsProps) {
   const [dontShowAgain, setDontShowAgain] = useState(false);
   const percentage = Math.round((score / maxScore) * 100);
-  
+
   // Calculate stroke-dasharray for the circular progress
   const radius = 120;
   const circumference = 2 * Math.PI * radius;
@@ -32,33 +26,17 @@ export function AssessmentResults({
     <div className="min-h-screen bg-muted/30 flex items-center justify-center p-6">
       <Card className="w-full max-w-3xl">
         <CardHeader className="text-center space-y-6 pb-8">
-          <h1 className="text-4xl font-bold text-primary">
-            Open Digital Maturity Assessment
-          </h1>
-          <h2 className="text-2xl text-primary font-medium">
-            (SMEs & MSMEs)
-          </h2>
+          <h1 className="text-4xl font-bold text-primary">Open Digital Maturity Assessment</h1>
+          <h2 className="text-2xl text-primary font-medium">(SMEs & MSMEs)</h2>
         </CardHeader>
-        
+
         <CardContent className="space-y-8">
           {/* Circular Progress Chart */}
           <div className="flex flex-col items-center space-y-6">
             <div className="relative">
-              <svg
-                width="280"
-                height="280"
-                viewBox="0 0 280 280"
-                className="transform -rotate-90"
-              >
+              <svg width="280" height="280" viewBox="0 0 280 280" className="transform -rotate-90">
                 {/* Background circle */}
-                <circle
-                  cx="140"
-                  cy="140"
-                  r={radius}
-                  stroke="hsl(var(--muted))"
-                  strokeWidth="20"
-                  fill="none"
-                />
+                <circle cx="140" cy="140" r={radius} stroke="hsl(var(--muted))" strokeWidth="20" fill="none" />
                 {/* Progress circle */}
                 <circle
                   cx="140"
@@ -73,7 +51,7 @@ export function AssessmentResults({
                   className="transition-all duration-1000 ease-out"
                 />
               </svg>
-              
+
               {/* Score display */}
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <p className="text-sm text-muted-foreground">Your Score</p>
@@ -82,10 +60,10 @@ export function AssessmentResults({
                 </p>
               </div>
             </div>
-            
+
             <h3 className="text-2xl font-bold text-destructive">{level}</h3>
           </div>
-          
+
           {/* Congratulations Card */}
           <Card className="bg-muted/50">
             <CardContent className="p-6">
@@ -98,10 +76,10 @@ export function AssessmentResults({
                     Congratulations on completing the assessment
                   </h4>
                   <p className="text-muted-foreground">
-                    Based on your score, we would suggest you take the following 
-                    services so that you can get better at doing business.
+                    Based on your score, we would suggest you take the following services so that you can get better at
+                    doing business.
                   </p>
-                  
+
                   <div className="flex items-center justify-between pt-4">
                     <div className="flex items-center space-x-2">
                       <Checkbox
@@ -109,14 +87,11 @@ export function AssessmentResults({
                         checked={dontShowAgain}
                         onCheckedChange={(checked) => setDontShowAgain(checked as boolean)}
                       />
-                      <label
-                        htmlFor="dont-show"
-                        className="text-sm text-muted-foreground cursor-pointer"
-                      >
-                        Don't show again
+                      <label htmlFor="dont-show" className="text-sm text-muted-foreground cursor-pointer">
+                        Don&apos;t show again
                       </label>
                     </div>
-                    
+
                     <Button
                       onClick={onSuggestions}
                       className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
@@ -128,13 +103,10 @@ export function AssessmentResults({
               </div>
             </CardContent>
           </Card>
-          
+
           {onRestart && (
             <div className="flex justify-center pt-4">
-              <Button
-                variant="outline"
-                onClick={onRestart}
-              >
+              <Button variant="outline" onClick={onRestart}>
                 Take Assessment Again
               </Button>
             </div>

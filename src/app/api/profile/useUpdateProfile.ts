@@ -6,10 +6,12 @@ import useSend from '@/lib/useSend';
 export const UpdateProfileRequestSchema = z.object({
   first_name: z.string().min(1, 'First name is required').max(100),
   last_name: z.string().min(1, 'Last name is required').max(100),
-  business_name: z.string().min(1, 'Company name is required').max(100),
+  org_logo: z.any().optional(), // File upload
+  business_name: z.string().min(1, 'Business name is required').max(100),
+  industry: z.string().min(1, 'Industry is required').max(100),
   email: z.string().email('Invalid email address'),
-  phone: z.string().optional(),
-  website: z
+  phone_number: z.string().optional(),
+  company_website: z
     .string()
     .optional()
     .refine(
@@ -26,8 +28,10 @@ export const UpdateProfileRequestSchema = z.object({
         message: 'Invalid website URL',
       }
     ),
-  address: z.string().optional(),
-  role: z.string().optional(),
+  company_address: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  country: z.string().optional(),
 });
 
 export type UpdateProfileRequest = z.infer<typeof UpdateProfileRequestSchema>;

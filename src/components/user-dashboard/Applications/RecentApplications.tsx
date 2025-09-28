@@ -2,36 +2,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
+import { useGetApplicationSubmissions } from '@/app/api/user';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
-const recentApplications = [
-  {
-    id: 1,
-    name: 'Service Name',
-    price: '100,000 NGN',
-    date: 'April 20, 2022 at 04:00 PM',
-    quantity: 1,
-    status: 'Submitted',
-    image: '/services/services_image_four.png',
-  },
-  {
-    id: 2,
-    name: 'Service Name',
-    price: '100,000 NGN',
-    date: 'April 20, 2022 at 04:00 PM',
-    quantity: 1,
-    status: 'Processing',
-    image: '/services/services_image_three.png',
-  },
-  {
-    id: 3,
-    name: 'Service Name',
-    price: '100,000 NGN',
-    date: 'April 20, 2022 at 04:00 PM',
-    quantity: 1,
-    status: 'Completed',
-    image: '/services/services_image_three.png',
-  },
-];
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date
+    .toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    })
+    .replace(',', ' •');
+};
 
 const getStatusBadge = (status: string) => {
   switch (status) {
@@ -59,6 +46,26 @@ const getStatusBadge = (status: string) => {
 };
 
 export function RecentApplications() {
+  const { data: applications, isLoading, error } = useGetApplicationSubmissions();
+
+  const [recentApplications, setRecentApplications] = useState(applications?.slice(0, 6));
+
+  useEffect(() => {
+    setRecentApplications(applications);
+  }, [applications]);
+
+  const router = useRouter();
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-center items-center py-8">
+          <div className="text-sm text-gray-500">Loading recent applications...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Card>
       <CardHeader className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 p-4 sm:p-6">
@@ -66,33 +73,42 @@ export function RecentApplications() {
         <Button
           variant="default"
           size="sm"
+          onClick={() => router.push('/user-dashboard/applications')}
           className="w-full sm:w-auto border-[#227C9D] rounded-md text-[#8F8F8F] bg-transparent border hover:bg-transparent hover:text-[#227C9D] text-sm"
         >
           See all →
         </Button>
       </CardHeader>
       <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6">
-        {recentApplications.map((app) => (
-          <div key={app.id} className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 border-b">
-            <Image
-              src={app.image}
-              alt={app.name}
-              className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover flex-shrink-0"
-              width={48}
-              height={48}
-            />
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1 sm:justify-between">
-                <h4 className="font-medium text-sm sm:text-base truncate">{app.name}</h4>
-                <div className="flex-shrink-0">{getStatusBadge(app.status)}</div>
+        {recentApplications ? (
+          recentApplications.map((app) => (
+            <div key={app._id} className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 border-b">
+              <Image
+                src={app.image || ''}
+                alt={app.name}
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg object-cover flex-shrink-0"
+                width={48}
+                height={48}
+              />
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1 sm:justify-between">
+                  <h4 className="font-medium text-sm sm:text-base truncate">{app.name}</h4>
+                  <div className="flex-shrink-0">{getStatusBadge(app.status)}</div>
+                </div>
+                <p className="text-xs text-muted-foreground mb-1">
+                  <span className="text-[#D63A3A]">{app._id.slice(0, 11)}</span> • {formatDate(app.submission_time)}
+                </p>
+                {/* <p className="text-xs sm:text-sm text-muted-foreground font-medium text-right">Qty: {app.quantity}</p> */}
               </div>
-              <p className="text-xs text-muted-foreground mb-1">
-                <span className="text-[#D63A3A]">#D63A3A</span> • {app.date}
-              </p>
-              <p className="text-xs sm:text-sm text-muted-foreground font-medium text-right">Qty: {app.quantity}</p>
+            </div>
+          ))
+        ) : (
+          <div className="space-y-4">
+            <div className="flex justify-center items-center py-8">
+              <div className="text-sm text-gray-500">No recent applications</div>
             </div>
           </div>
-        ))}
+        )}
       </CardContent>
     </Card>
   );

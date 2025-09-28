@@ -8,16 +8,23 @@ import PageHeader from '../PageHeader';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/auth';
 import { useGetApplicationStatusCounts } from '@/app/api/user/useGetApplicationStatusCounts';
+import { useRouter } from 'next/navigation';
 
 export default function UserDashboard() {
   const { user } = useAuthStore();
+  const router = useRouter();
   return (
     <div className="space-y-4 sm:space-y-6 font-secondary">
       {/* Header */}
       <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 flex-wrap gap-y-3">
         <PageHeader title={`Welcome ${user?.first_name}`} description="What would you like to do today?" />
         <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4 sm:space-y-0">
-          <Button className="w-full sm:w-auto text-sm sm:text-base">Take Assessments</Button>
+          <Button
+            className="w-full sm:w-auto text-sm sm:text-base"
+            onClick={() => router.push('/user-dashboard/assessments')}
+          >
+            Take Assessments
+          </Button>
           <Link href="/user-dashboard/applications/apply" className="w-full sm:w-auto">
             <Button
               variant="ghost"

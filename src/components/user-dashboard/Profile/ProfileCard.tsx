@@ -5,10 +5,15 @@ import { Badge } from '@/components/ui/badge';
 import { ChevronRight, Globe, Mail, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/store/auth';
+import { useGetBusinessProfile } from '@/app/api/profile/useGetBusinessProfile';
+import { useRouter } from 'next/navigation';
 
 const ProfileCard = () => {
   const { user } = useAuthStore();
-  console.log(user);
+  const { data: businessProfile, isLoading: isLoadingProfile } = useGetBusinessProfile();
+
+  const router = useRouter();
+
   return (
     <div className="w-full max-w-[400px] sm:max-w-[450px] lg:max-w-[500px] max-md:max-w-full h-full">
       <Card className="shadow-lg">
@@ -17,7 +22,12 @@ const ProfileCard = () => {
             <div className="flex flex-col items-center text-center space-y-4 sm:space-y-6">
               <div className="relative">
                 <Image
-                  src={user?.profile_picture || '/about/team-placeholder-four.png'}
+                  src={
+                    user?.logo_url ||
+                    user?.profile_picture ||
+                    businessProfile?.logo_url ||
+                    '/about/team-placeholder-four.png'
+                  }
                   alt={`${user?.first_name} ${user?.last_name}` || 'Profile'}
                   className="w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] lg:w-[120px] lg:h-[120px] rounded-full object-cover ring-4 ring-green-100"
                   width={120}
@@ -71,16 +81,40 @@ const ProfileCard = () => {
             <div className="space-y-3 sm:space-y-4 text-xs sm:text-sm text-center flex flex-col items-center justify-start pt-6 sm:pt-8 lg:pt-10 w-full border-t border-[#D9D9D9]">
               <div className="flex items-center gap-2 w-full max-w-[85%] sm:max-w-[70%]">
                 <Mail className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" color="#B8B8B8" />
-                <span className="truncate">{user?.email}</span>
+                <span className="truncate">{businessProfile?.email || user?.email}</span>
               </div>
               <div className="flex items-center gap-2 w-full max-w-[85%] sm:max-w-[70%]">
                 <Phone className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" color="#B8B8B8" />
-                <span className="truncate">{(user as any)?.phone || 'Not provided'}</span>
+                <span className="truncate">
+                  {businessProfile?.phone_number || user?.phone_number || 'Not provided'}
+                </span>
               </div>
               <div className="flex items-center gap-2 w-full max-w-[85%] sm:max-w-[70%]">
                 <Globe className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" color="#B8B8B8" />
-                <span className="truncate">{(user as any)?.website || user?.business_name || 'Not provided'}</span>
+                <span className="truncate">
+                  {businessProfile?.company_website || user?.company_website || user?.business_name || 'Not provided'}
+                </span>
               </div>
+              {/* {businessProfile && (
+                <>
+                  {businessProfile.industry && (
+                    <div className="flex items-center gap-2 w-full max-w-[85%] sm:max-w-[70%]">
+                      <span className="text-muted-foreground text-xs">Industry:</span>
+                      <span className="truncate">{businessProfile.industry}</span>
+                    </div>
+                  )}
+                  {(businessProfile.city || businessProfile.state || businessProfile.country) && (
+                    <div className="flex items-center gap-2 w-full max-w-[85%] sm:max-w-[70%]">
+                      <span className="text-muted-foreground text-xs">Location:</span>
+                      <span className="truncate">
+                        {[businessProfile.city, businessProfile.state, businessProfile.country]
+                          .filter(Boolean)
+                          .join(', ')}
+                      </span>
+                    </div>
+                  )}
+                </>
+              )} */}
             </div>
             <div className="space-y-3 sm:space-y-4 text-xs sm:text-sm text-center flex flex-col items-center justify-start pt-6 sm:pt-8 lg:pt-10 pb-0 w-full border-t border-[#D9D9D9]">
               <div className="flex items-center justify-between gap-2 w-full max-w-[85%] sm:max-w-[70%]">
@@ -97,9 +131,20 @@ const ProfileCard = () => {
               <div className="flex items-center justify-between gap-2 text-sm w-full max-w-[70%]">
                 <div className=" flex flex-col items-start gap-0.5 w-full max-w-[98%]">
                   <p className="text-muted-foreground">Policies</p>
-                  <button className=" ">Read all Terms and conditions</button>
+                  <button
+                    className=" "
+                    onClick={() => {
+                      router.push('/privacy');
+                    }}
+                  >
+                    Read all Terms and conditions
+                  </button>
                 </div>
-                <button>
+                <button
+                  onClick={() => {
+                    router.push('/privacy');
+                  }}
+                >
                   <ChevronRight color="#B8B8B8" />
                 </button>
               </div>

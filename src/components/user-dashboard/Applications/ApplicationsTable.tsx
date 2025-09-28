@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useGetApplicationSubmissions } from '@/app/api/user/useGetApplicationSubmissions';
 import { ApplicationSubmission } from '@/types/applications';
+import { ApplicationFilters } from './index';
+import { useMemo } from 'react';
 
 // Helper function to format currency
 const formatCurrency = (amount: number) => {
@@ -77,8 +79,62 @@ const getStatusBadge = (status: string) => {
   }
 };
 
-export function ApplicationsTable() {
+interface ApplicationsTableProps {
+  filters?: ApplicationFilters;
+}
+
+export function ApplicationsTable({ filters = {} }: ApplicationsTableProps) {
   const { data: applications, isLoading, error } = useGetApplicationSubmissions();
+
+  // Filter applications based on the provided filters
+  const filteredApplications = useMemo(() => {
+    if (!applications) return [];
+
+    return applications.filter((app) => {
+      // Search filter
+      if (filters.search) {
+        const searchTerm = filters.search.toLowerCase();
+        const matchesSearch =
+          app.service.toLowerCase().includes(searchTerm) ||
+          app.service_type.toLowerCase().includes(searchTerm) ||
+          app.name.toLowerCase().includes(searchTerm) ||
+          app.email.toLowerCase().includes(searchTerm) ||
+          app._id.toLowerCase().includes(searchTerm);
+
+        if (!matchesSearch) return false;
+      }
+
+      // Service filter
+      if (filters.service && app.service !== filters.service) {
+        return false;
+      }
+
+      // Status filter
+      if (filters.status && app.status !== filters.status) {
+        return false;
+      }
+
+      // Date range filter
+      if (filters.dateFrom || filters.dateTo) {
+        const submissionDate = new Date(app.submission_time);
+
+        if (filters.dateFrom && submissionDate < filters.dateFrom) {
+          return false;
+        }
+
+        if (filters.dateTo) {
+          // Set end of day for dateTo to include the entire day
+          const endOfDay = new Date(filters.dateTo);
+          endOfDay.setHours(23, 59, 59, 999);
+          if (submissionDate > endOfDay) {
+            return false;
+          }
+        }
+      }
+
+      return true;
+    });
+  }, [applications, filters]);
 
   if (isLoading) {
     return (
@@ -110,6 +166,16 @@ export function ApplicationsTable() {
     );
   }
 
+  if (filteredApplications.length === 0) {
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-center items-center py-8">
+          <div className="text-sm text-gray-500">No applications match your filters.</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Desktop Table View */}
@@ -128,7 +194,7 @@ export function ApplicationsTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {applications.map((app: ApplicationSubmission) => (
+            {filteredApplications.map((app: ApplicationSubmission) => (
               <TableRow key={app._id} className="hover:bg-[#EBFBFF] border-white">
                 <TableCell className="font-medium text-[#06516C] text-xs xl:text-sm">{app._id}</TableCell>
                 <TableCell>
@@ -138,8 +204,9 @@ export function ApplicationsTable() {
                   </div>
                 </TableCell>
                 <TableCell className="text-xs xl:text-sm">{formatDate(app.submission_time)}</TableCell>
-                <TableCell className="text-xs xl:text-sm capitalize">{app.payment_status}</TableCell>
                 <TableCell className="text-xs xl:text-sm">{formatCurrency(app.payment_amount)}</TableCell>
+
+                <TableCell className="text-xs xl:text-sm capitalize">{app.payment_status}</TableCell>
                 <TableCell className="text-xs xl:text-sm">
                   {app.timetable_url ? (
                     <a
@@ -164,7 +231,7 @@ export function ApplicationsTable() {
 
       {/* Mobile Card View */}
       <div className="lg:hidden space-y-3">
-        {applications.map((app: ApplicationSubmission) => (
+        {filteredApplications.map((app: ApplicationSubmission) => (
           <div key={app._id} className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm">
             <div className="flex justify-between items-start mb-3">
               <div>
@@ -212,7 +279,10 @@ export function ApplicationsTable() {
       {/* Pagination */}
       <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div className="text-xs sm:text-sm text-[#706C6C] bg-white px-2.5 py-1 pr-6 rounded-lg">
-          {applications.length} Application{applications.length !== 1 ? 's' : ''}
+          {filteredApplications.length} Application{filteredApplications.length !== 1 ? 's' : ''}
+          {applications && filteredApplications.length !== applications.length && (
+            <span className="text-muted-foreground">of {applications.length}</span>
+          )}
         </div>
         <div className="flex items-center justify-center gap-2">
           <Button variant="ghost" size="icon" className="border border-white h-8 w-8 sm:h-10 sm:w-10" disabled>

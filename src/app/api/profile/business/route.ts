@@ -4,20 +4,33 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export async function PATCH(req: NextRequest) {
   try {
-    const payload = await req.json();
+    const contentType = req.headers.get('content-type') || '';
     const cookieHeader = req.headers.get('cookie') || '';
 
-    console.log('Payload:', payload);
+    let body: FormData | string;
+    let headers: Record<string, string> = {
+      Cookie: cookieHeader,
+      Authorization: 'Bearer ' + req.cookies.get('accessToken')?.value,
+    };
+
+    // Handle both JSON and FormData
+    if (contentType.includes('multipart/form-data')) {
+      // For multipart/form-data, pass the body as-is and let fetch handle the content-type
+      body = await req.formData();
+    } else {
+      // For JSON data
+      const payload = await req.json();
+      body = JSON.stringify(payload);
+      headers['Content-Type'] = 'application/json';
+    }
+
+    console.log('Content-Type:', contentType);
     console.log('Cookie Header:', cookieHeader);
 
     const response = await fetch(`${apiUrl}profile/business`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Cookie: cookieHeader,
-        Authorization: 'Bearer ' + req.cookies.get('accessToken')?.value,
-      },
-      body: JSON.stringify(payload),
+      headers,
+      body,
     });
 
     const responseData = await response.json().catch(() => ({}));

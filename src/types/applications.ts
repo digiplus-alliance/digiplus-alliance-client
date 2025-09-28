@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 // Application Submission Schema
 export const ApplicationSubmissionSchema = z.object({
@@ -8,23 +8,13 @@ export const ApplicationSubmissionSchema = z.object({
   service: z.string(),
   service_type: z.string(),
   payment_amount: z.number(),
-  status: z.enum([
-    "Submitted",
-    "Being Processed", 
-    "Approved",
-    "Rejected",
-    "Completed"
-  ]),
-  payment_status: z.enum([
-    "Not Paid",
-    "Paid",
-    "Pending",
-    "Failed"
-  ]),
+  status: z.enum(['Submitted', 'Being Processed', 'Approved', 'Rejected', 'Completed']),
+  payment_status: z.enum(['Not Paid', 'Paid', 'Pending', 'Failed']),
   submission_time: z.string(),
   start_date: z.string().nullable(),
   end_date: z.string().nullable(),
   timetable_url: z.string().nullable(),
+  image: z.string().optional(),
 });
 
 // Application Submissions Response Schema
