@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useMemo, Fragment } from 'react';
 import { WelcomeScreen } from './WelcomeScreen';
 import { ModuleTitleScreen } from './ModuleTitleScreen';
 import { MultipleChoiceQuestion } from './MultipleChoiceQuestion';
@@ -13,13 +13,18 @@ import { useAuthStore } from '@/store/auth';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import { groupQuestionsByModuleAndStep, IGroupedModule } from '@/utils/assessmentUtils';
 
 // Import types from the assessment types file
-import type { Assessment } from '@/types/assessment';
+import type { Assessment, AssessmentQuestion } from '@/types/assessment';
 
 export default function Assessment() {
   const [currentAssessmentIndex, setCurrentAssessmentIndex] = useState(0);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  // New state for module and step navigation
+  const [currentModuleIndex, setCurrentModuleIndex] = useState(0);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [showAssessment, setShowAssessment] = useState(false);
+
   const [responses, setResponses] = useState<Record<string, any>>({});
   const [completedAssessments, setCompletedAssessments] = useState<Set<string>>(new Set());
   const [allAssessmentsCompleted, setAllAssessmentsCompleted] = useState(false);
@@ -40,6 +45,12 @@ export default function Assessment() {
   } = useGetAssessmentById(currentAssessmentId || '', !!currentAssessmentId);
 
   const submitAssessment = useSubmitAssessment();
+
+  // Group questions by module and step
+  const groupedModules: IGroupedModule[] = useMemo(
+    () => (assessmentData ? groupQuestionsByModuleAndStep(assessmentData) : []),
+    [assessmentData]
+  );
 
   // Show loading state for available assessments
   if (loadingAssessments) {
@@ -91,8 +102,9 @@ export default function Assessment() {
         level="Beginner"
         onSuggestions={() => {}}
         onRestart={() => {
+          // Reset state for restarting all assessments
           setCurrentAssessmentIndex(0);
-          setCurrentQuestionIndex(0);
+          // setCurrentQuestionIndex(0);
           setResponses({});
           setCompletedAssessments(new Set());
           setAllAssessmentsCompleted(false);
@@ -101,8 +113,8 @@ export default function Assessment() {
     );
   }
 
-  // Show loading state for current assessment
-  if (isLoading) {
+  // Show loading state for current assessment or if grouping is in progress
+  if (isLoading || (assessmentData && groupedModules.length === 0)) {
     return (
       <div className="min-h-screen bg-muted/30 flex items-center justify-center p-6">
         <Card className="w-full max-w-4xl">
@@ -129,7 +141,7 @@ export default function Assessment() {
     );
   }
 
-  if (!assessmentData) {
+  if (!assessmentData || groupedModules.length === 0) {
     return (
       <div className="min-h-screen bg-muted/30 flex items-center justify-center p-6">
         <Card className="w-full max-w-4xl">
@@ -142,27 +154,47 @@ export default function Assessment() {
     );
   }
 
-  const { assessment, modules, questions } = assessmentData;
-  const currentQuestion = questions[currentQuestionIndex];
-  const totalSteps = questions.length;
-  const isLastQuestion = currentQuestionIndex === questions.length - 1;
+  const { assessment } = assessmentData;
+
+  // Get current module, step, and questions
+  const currentModule = groupedModules[currentModuleIndex];
+  const currentStepData = currentModule.steps[currentStepIndex];
+  const currentQuestions = currentStepData.questions;
+  const totalStepsInModule = currentModule.steps.length;
+
+  const isLastStepInModule = currentStepIndex === totalStepsInModule - 1;
+  const isLastModule = currentModuleIndex === groupedModules.length - 1;
+  const isLastStepOverall = isLastStepInModule && isLastModule;
 
   // Transform API data to match component interfaces
   const transformOptions = (options: any[]) => options.map((opt) => ({ ...opt, id: opt._id }));
-
   const transformGridColumns = (columns: any[]) => columns.map((col) => ({ ...col, id: col._id }));
-
   const transformGridRows = (rows: any[]) => rows.map((row) => ({ ...row, id: row._id }));
 
-  const handleNext = async (response: any) => {
-    const updatedResponses = {
-      ...responses,
-      [currentQuestion._id]: response,
-    };
-
+  // A helper to handle single or multiple question responses for a step
+  const handleNext = async (stepResponses: Record<string, any>) => {
+    const updatedResponses = { ...responses, ...stepResponses };
     setResponses(updatedResponses);
 
-    if (isLastQuestion) {
+    if (isLastStepInModule) {
+      if (isLastModule) {
+        // This is the last step of the last module of the current assessment
+        await submitAndProceed(updatedResponses);
+      } else {
+        // Move to the first step of the next module
+        setCurrentModuleIndex(currentModuleIndex + 1);
+        setCurrentStepIndex(0);
+      }
+    } else {
+      // Go to the next step in the current module
+      setCurrentStepIndex(currentStepIndex + 1);
+    }
+  };
+
+  const submitAndProceed = async (finalResponses: Record<string, any>) => {
+    // This function is called only at the end of an assessment.
+    // It submits the responses and decides whether to show results or move to the next assessment.
+    if (isLastStepOverall) {
       // Submit the current assessment
       try {
         if (!user?._id) {
@@ -171,8 +203,8 @@ export default function Assessment() {
 
         await submitAssessment.mutateAsync({
           assessment_id: currentAssessmentId!,
-          user_id: user._id,
-          responses: updatedResponses,
+          user_id: user._id, // Make sure user is defined
+          responses: finalResponses,
         });
 
         // Mark current assessment as completed
@@ -187,8 +219,8 @@ export default function Assessment() {
         } else {
           // Move to next assessment
           setCurrentAssessmentIndex((prev) => prev + 1);
-          setCurrentQuestionIndex(0);
-          setResponses({});
+          setCurrentModuleIndex(0); // Reset for new assessment
+          setCurrentStepIndex(0);
         }
       } catch (error) {
         console.error('Failed to submit assessment:', error);
@@ -197,38 +229,43 @@ export default function Assessment() {
           setAllAssessmentsCompleted(true);
         } else {
           setCurrentAssessmentIndex((prev) => prev + 1);
-          setCurrentQuestionIndex(0);
-          setResponses({});
+          setCurrentModuleIndex(0); // Reset for new assessment
+          setCurrentStepIndex(0);
         }
       }
-    } else {
-      setCurrentQuestionIndex((prev) => prev + 1);
+      // Reset responses for the next assessment
+      setResponses({});
     }
   };
 
   const handleBack = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex((prev) => prev - 1);
+    if (currentStepIndex > 0) {
+      // Go to the previous step in the current module
+      setCurrentStepIndex(currentStepIndex - 1);
+    } else if (currentModuleIndex > 0) {
+      // Go to the last step of the previous module
+      const prevModule = groupedModules[currentModuleIndex - 1];
+      setCurrentModuleIndex(currentModuleIndex - 1);
+      setCurrentStepIndex(prevModule.steps.length - 1);
     }
   };
 
-  const currentModule = modules.find((m) => m._id === currentQuestion.module_id);
-
   // Progress calculation across all assessments
   const totalAssessments = availableAssessments?.length || 1;
-  const overallProgress = ((currentAssessmentIndex + (currentQuestionIndex + 1) / totalSteps) / totalAssessments) * 100;
+  const progressInCurrentAssessment =
+    (currentModuleIndex + (currentStepIndex + 1) / totalStepsInModule) / groupedModules.length;
+  const overallProgress = ((currentAssessmentIndex + progressInCurrentAssessment) / totalAssessments) * 100;
 
   // Progress bar component
   const ProgressBar = () => (
-    <div className="w-full bg-gray-200 rounded-full h-2 mb-6">
+    <div className="w-full  rounded-full h-2 mb-6 pb-8">
       <div
         className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
         style={{ width: `${overallProgress}%` }}
       />
-      <div className="flex justify-between text-sm text-gray-600 mt-2">
-        <span>
-          Assessment {currentAssessmentIndex + 1} of {totalAssessments} - Question {currentQuestionIndex + 1} of{' '}
-          {totalSteps}
+      <div className="flex justify-between text-sm text-gray-600 mt-3 ">
+        <span className="truncate pr-2">
+          Assessment {currentAssessmentIndex + 1} of {totalAssessments} - Module: {currentModule.moduleName}
         </span>
         <span>{Math.round(overallProgress)}% Complete</span>
       </div>
@@ -245,143 +282,192 @@ export default function Assessment() {
     </div>
   );
 
-  if (currentQuestion.type === 'welcome_screen') {
-    return (
-      <div>
-        <div className="max-w-4xl mx-auto px-6">
-          <ProgressBar />
-        </div>
+  // This component will now render all questions for the current step
+  const renderCurrentStep = () => {
+    // A single question component might need to be rendered on its own page (e.g., welcome screen)
+    // Or multiple questions might be rendered together in a card.
+    const firstQuestion = currentQuestions[0];
+
+    // Handle single-page question types like welcome and module titles
+    if (firstQuestion.type === 'welcome_screen') {
+      return (
         <WelcomeScreen
-          title={currentQuestion.welcome_title || assessment.title}
-          message={currentQuestion.welcome_message || assessment.description || ''}
-          buttonText={currentQuestion.button_text || 'Begin Assessment'}
-          onStart={() => handleNext(null)}
+          title={firstQuestion.welcome_title || assessment.title}
+          message={firstQuestion.welcome_message || assessment.description || ''}
+          buttonText={firstQuestion.button_text || 'Begin Assessment'}
+          onStart={() => handleNext({ [firstQuestion._id]: null })}
         />
-      </div>
-    );
-  }
+      );
+    }
 
-  if (currentQuestion.type === 'module_title') {
-    return (
-      <div>
-        <AssessmentHeader />
-        <div className="max-w-4xl mx-auto px-6">
-          <ProgressBar />
-        </div>
+    if (firstQuestion.type === 'module_title') {
+      return (
         <ModuleTitleScreen
-          module={currentModule?.title || ''}
-          title={currentQuestion.module_title || ''}
-          description={currentQuestion.module_description || ''}
-          onBack={currentQuestionIndex > 0 ? handleBack : undefined}
-          onContinue={() => handleNext(null)}
-          showBackButton={currentQuestionIndex > 0}
+          module={currentModule.moduleName}
+          title={firstQuestion.module_title || ''}
+          description={firstQuestion.module_description || ''}
+          onBack={currentModuleIndex > 0 || currentStepIndex > 0 ? handleBack : undefined}
+          onContinue={() => handleNext({ [firstQuestion._id]: null })}
+          showBackButton={currentModuleIndex > 0 || currentStepIndex > 0}
         />
-      </div>
-    );
-  }
+      );
+    }
 
-  if (currentQuestion.type === 'multiple_choice') {
+    // For all other question types, group them in a card
+    // Note: This assumes your individual question components can be composed this way.
+    // You might need to adjust them to remove their own "Next/Back" buttons and layout,
+    // and instead rely on a shared set of controls.
+    // For this example, I'll keep them as they are, but ideally, you'd refactor them.
     return (
-      <div>
-        {/* <AssessmentHeader /> */}
-        <div className="min-h-screen bg-muted/30 p-6">
-          <div className="max-w-4xl mx-auto">
-            {/* <ProgressBar /> */}
-            <MultipleChoiceQuestion
-              module={assessment.title || currentModule?.title || ''}
-              title={currentQuestion.question}
-              description={currentQuestion.description || assessment.description}
-              instruction={currentQuestion.instruction || assessment.instruction}
-              options={transformOptions(currentQuestion.options || [])}
-              currentStep={currentQuestion.step}
-              totalSteps={totalSteps}
-              onBack={handleBack}
-              onNext={handleNext}
-              selectedOption={responses[currentQuestion.step] || ''}
+      <Card>
+        <CardContent className="p-6 md:p-8">
+          {showAssessment && (
+            <>
+              <p className="text-[#227C9D] text-sm font-medium text-center">module {currentModuleIndex + 1}</p>
+              <h1 className="text-2xl font-bold text-[#227C9D] text-center mb-4">{currentModule.moduleName}</h1>
+            </>
+          )}
+          {!showAssessment ? (
+            <WelcomeScreen
+              title={assessment.title}
+              message={assessment.description || ''}
+              buttonText={'Begin Assessment'}
+              onStart={() => setShowAssessment(true)}
             />
+          ) : (
+            currentQuestions.map((currentQuestion: AssessmentQuestion, index) => (
+              <div key={currentQuestion._id} className="mb-6 last:mb-0">
+                {renderQuestion(currentQuestion, index)}
+              </div>
+            ))
+          )}
+
+          {/* Shared Navigation for the step */}
+          <div className="mt-8 flex justify-between">
+            <Button
+              variant="outline"
+              onClick={handleBack}
+              disabled={currentModuleIndex === 0 && currentStepIndex === 0}
+              className=" bg-transparent cursor-pointer py-4 border-[#227C9D]"
+            >
+              Back
+            </Button>
+            <Button
+              onClick={() => {
+                const stepResponses = currentQuestions.reduce((acc: any, q: any) => {
+                  acc[q._id] = responses[q._id] || null; // Use existing response or null
+                  return acc;
+                }, {} as Record<string, any>);
+                handleNext(stepResponses);
+              }}
+              className=" cursor-pointer py-4"
+            >
+              {isLastStepOverall ? 'Finish Assessment' : 'Next'}
+            </Button>
           </div>
-        </div>
+          <div className="text-center text-sm text-muted-foreground mt-4">
+            Step {currentStepIndex + 1} of {totalStepsInModule}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const renderQuestion = (currentQuestion: AssessmentQuestion, index: number) => {
+    switch (currentQuestion.type) {
+      case 'multiple_choice':
+        return (
+          <MultipleChoiceQuestion
+            module={currentModule.moduleName}
+            title={currentQuestion.question}
+            description={currentQuestion.description}
+            instruction={currentQuestion.instruction}
+            options={transformOptions(currentQuestion.options || [])}
+            // currentStep={currentStepIndex + 1}
+            value={responses[currentQuestion._id] || ''}
+            onChange={(res) => setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }))}
+            index={index}
+          />
+        );
+      case 'checkbox':
+        return (
+          <CheckboxQuestion
+            module={currentModule.moduleName}
+            title={currentQuestion.question}
+            description={currentQuestion.description}
+            instruction={currentQuestion.instruction}
+            options={transformOptions(currentQuestion.options || [])}
+            minSelections={currentQuestion.min_selections}
+            maxSelections={currentQuestion.max_selections}
+            // currentStep={currentStepIndex + 1}
+            value={responses[currentQuestion._id] || []}
+            onChange={(res) => setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }))}
+            index={index}
+          />
+        );
+      case 'short_text':
+      case 'long_text':
+        return (
+          <TextQuestion
+            module={currentModule.moduleName}
+            title={currentQuestion.question}
+            description={currentQuestion.description}
+            instruction={currentQuestion.instruction}
+            placeholder={currentQuestion.placeholder}
+            type={currentQuestion.type}
+            maxLength={currentQuestion.max_length}
+            minLength={currentQuestion.min_length}
+            rows={currentQuestion.rows}
+            isRequired={currentQuestion.is_required}
+            // currentStep={currentStepIndex + 1}
+            value={responses[currentQuestion._id] || ''}
+            onChange={(res) => setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }))}
+            index={index}
+          />
+        );
+      case 'dropdown':
+        return (
+          <DropdownQuestion
+            module={currentModule.moduleName}
+            title={currentQuestion.question}
+            description={currentQuestion.description}
+            placeholder={currentQuestion.placeholder}
+            options={transformOptions(currentQuestion.options || [])}
+            isRequired={currentQuestion.is_required}
+            // currentStep={currentStepIndex + 1}
+            value={responses[currentQuestion._id] || ''}
+            onChange={(res) => setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }))}
+            index={index}
+          />
+        );
+      case 'multiple_choice_grid':
+        return (
+          <GridQuestion
+            module={currentModule.moduleName}
+            title={currentQuestion.question}
+            description={currentQuestion.description}
+            instruction={currentQuestion.instruction}
+            columns={transformGridColumns(currentQuestion.grid_columns || [])}
+            rows={transformGridRows(currentQuestion.grid_rows || [])}
+            isRequired={currentQuestion.is_required}
+            // currentStep={currentStepIndex + 1}
+            value={responses[currentQuestion._id] || {}}
+            onChange={(res) => setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }))}
+            index={index}
+          />
+        );
+      default:
+        return <div key={currentQuestion._id}>Unsupported question type: {currentQuestion.type}</div>;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-muted/30 p-6">
+      <div className="max-w-4xl mx-auto">
+        {/* <AssessmentHeader /> */}
+        <ProgressBar />
+        {renderCurrentStep()}
       </div>
-    );
-  }
-
-  if (currentQuestion.type === 'checkbox') {
-    return (
-      <CheckboxQuestion
-        module={currentModule?.title || ''}
-        title={currentQuestion.question}
-        description={currentQuestion.description || assessment.description}
-        instruction={currentQuestion.instruction || assessment.instruction}
-        options={transformOptions(currentQuestion.options || [])}
-        minSelections={currentQuestion.min_selections}
-        maxSelections={currentQuestion.max_selections}
-        currentStep={currentQuestion.step}
-        totalSteps={totalSteps}
-        onBack={handleBack}
-        onNext={handleNext}
-        selectedOptions={responses[currentQuestion.step] || []}
-      />
-    );
-  }
-
-  if (currentQuestion.type === 'short_text' || currentQuestion.type === 'long_text') {
-    return (
-      <TextQuestion
-        module={currentModule?.title || ''}
-        title={currentQuestion.question}
-        description={currentQuestion.description}
-        instruction={currentQuestion.instruction || assessment.instruction}
-        placeholder={currentQuestion.placeholder}
-        type={currentQuestion.type}
-        maxLength={currentQuestion.max_length}
-        minLength={currentQuestion.min_length}
-        rows={currentQuestion.rows}
-        isRequired={currentQuestion.is_required}
-        currentStep={currentQuestion.step}
-        totalSteps={totalSteps}
-        onBack={handleBack}
-        onNext={handleNext}
-        value={responses[currentQuestion.step] || ''}
-      />
-    );
-  }
-
-  if (currentQuestion.type === 'dropdown') {
-    return (
-      <DropdownQuestion
-        module={currentModule?.title || ''}
-        title={currentQuestion.question}
-        description={currentQuestion.description}
-        placeholder={currentQuestion.placeholder}
-        options={transformOptions(currentQuestion.options || [])}
-        isRequired={currentQuestion.is_required}
-        currentStep={currentQuestion.step}
-        totalSteps={totalSteps}
-        onBack={handleBack}
-        onNext={handleNext}
-        selectedValue={responses[currentQuestion.step] || ''}
-      />
-    );
-  }
-
-  if (currentQuestion.type === 'multiple_choice_grid') {
-    return (
-      <GridQuestion
-        module={currentModule?.title || ''}
-        title={currentQuestion.question}
-        description={currentQuestion.description}
-        instruction={currentQuestion.instruction}
-        columns={transformGridColumns(currentQuestion.grid_columns || [])}
-        rows={transformGridRows(currentQuestion.grid_rows || [])}
-        isRequired={currentQuestion.is_required}
-        currentStep={currentQuestion.step}
-        totalSteps={totalSteps}
-        onBack={handleBack}
-        onNext={handleNext}
-        responses={responses[currentQuestion.step] || {}}
-      />
-    );
-  }
-
-  return null;
+    </div>
+  );
 }
