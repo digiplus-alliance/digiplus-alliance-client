@@ -14,6 +14,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { groupQuestionsByModuleAndStep, IGroupedModule } from '@/utils/assessmentUtils';
+import { type AssessmentSubmissionResponse } from '@/types/assessment';
 
 // Import types from the assessment types file
 import type { Assessment, AssessmentQuestion } from '@/types/assessment';
@@ -51,6 +52,7 @@ export default function Assessment() {
   } = useGetAssessmentById(currentAssessmentId || '', !!currentAssessmentId);
 
   const submitAssessment = useSubmitAssessment();
+  const [assessmentResult, setAssessmentResult] = useState<AssessmentSubmissionResponse | null>(null);
 
   // Group questions by module and step
   const groupedModules: IGroupedModule[] = useMemo(
@@ -103,9 +105,11 @@ export default function Assessment() {
   if (allAssessmentsCompleted) {
     return (
       <AssessmentResults
-        score={20}
-        maxScore={45}
-        level="Beginner"
+        score={assessmentResult?.data?.user_score || 0}
+        maxScore={Math.max(
+          ...(assessmentResult?.data?.recommended_services?.map((service) => service.max_points) || [])
+        )}
+        level={assessmentResult?.data?.user_level || 'Beginner'}
         onSuggestions={() => {
           router.push('/user-dashboard/services');
         }}
@@ -117,6 +121,7 @@ export default function Assessment() {
           setCompletedAssessments(new Set());
           setAllAssessmentsCompleted(false);
         }}
+        assessment_title={assessmentResult?.data?.assessment_title || ''}
       />
     );
   }
@@ -211,11 +216,14 @@ export default function Assessment() {
 
         setIsSubmitting(true);
 
-        await submitAssessment.mutateAsync({
+        const response = await submitAssessment.mutateAsync({
           assessment_id: currentAssessmentId!,
           user_id: user._id, // Make sure user is defined
           responses: finalResponses,
         });
+
+        console.log(response.score);
+        setAssessmentResult(response);
 
         // Mark current assessment as completed
         const newCompletedAssessments = new Set(completedAssessments);

@@ -10,9 +10,17 @@ interface AssessmentResultsProps {
   level: string;
   onSuggestions: () => void;
   onRestart?: () => void;
+  assessment_title: string;
 }
 
-export function AssessmentResults({ score, maxScore, level, onSuggestions, onRestart }: AssessmentResultsProps) {
+export function AssessmentResults({
+  score,
+  maxScore,
+  level,
+  onSuggestions,
+  onRestart,
+  assessment_title,
+}: AssessmentResultsProps) {
   const [dontShowAgain, setDontShowAgain] = useState(false);
   const percentage = Math.round((score / maxScore) * 100);
 
@@ -26,8 +34,7 @@ export function AssessmentResults({ score, maxScore, level, onSuggestions, onRes
     <div className=" bg-muted/30 flex items-center justify-center p-6">
       <Card className="w-full max-w-3xl bg-transparent border-none shadow-none drop-shadow-none">
         <CardHeader className="text-center space-y-6 pb-8">
-          <h1 className="text-5xl tracking-wide text-[#227C9D]">Open Digital Maturity Assessment</h1>
-          <h2 className="text-5xl tracking-wide text-[#227C9D]">(SMEs & MSMEs)</h2>
+          <h1 className="text-5xl tracking-wide text-[#227C9D]">{assessment_title}</h1>
         </CardHeader>
 
         <CardContent className="space-y-4">
