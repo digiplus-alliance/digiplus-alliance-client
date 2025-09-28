@@ -267,7 +267,7 @@ export default function Assessment() {
   // Progress calculation across all assessments
   const totalAssessments = availableAssessments?.length || 1;
   const progressInCurrentAssessment =
-    (currentModuleIndex + (currentStepIndex + 1) / totalStepsInModule) / groupedModules.length;
+    (currentModuleIndex + currentStepIndex / totalStepsInModule) / groupedModules.length;
   const overallProgress = ((currentAssessmentIndex + progressInCurrentAssessment) / totalAssessments) * 100;
 
   // Progress bar component
@@ -358,33 +358,44 @@ export default function Assessment() {
             ))
           )}
 
-          {/* Shared Navigation for the step */}
-          <div className="mt-8 flex justify-between">
-            <Button
-              variant="outline"
-              onClick={handleBack}
-              disabled={currentModuleIndex === 0 && currentStepIndex === 0}
-              className=" bg-transparent cursor-pointer py-4 border-[#227C9D]"
-            >
-              Back
-            </Button>
-            <Button
-              onClick={() => {
-                const stepResponses = currentQuestions.reduce((acc: any, q: any) => {
-                  acc[q._id] = responses[q._id] || null; // Use existing response or null
-                  return acc;
-                }, {} as Record<string, any>);
-                handleNext(stepResponses);
-              }}
-              disabled={isSubmitting}
-              className=" cursor-pointer py-4"
-            >
-              {isLastStepOverall ? (isSubmitting ? 'Submitting Assessment...' : 'Finish Assessment') : 'Next'}
-            </Button>
-          </div>
-          <div className="text-center text-sm text-muted-foreground mt-4">
-            Step {currentStepIndex + 1} of {totalStepsInModule}
-          </div>
+          {showAssessment && (
+            <>
+              {/* Shared Navigation for the step */}
+              <div className="mt-8 flex justify-between">
+                <Button
+                  variant="outline"
+                  onClick={handleBack}
+                  disabled={currentModuleIndex === 0 && currentStepIndex === 0}
+                  className=" bg-transparent cursor-pointer py-4 border-[#227C9D]"
+                >
+                  Back
+                </Button>
+                <Button
+                  onClick={() => {
+                    const stepResponses = currentQuestions.reduce((acc: any, q: any) => {
+                      acc[q._id] = responses[q._id] || null; // Use existing response or null
+                      return acc;
+                    }, {} as Record<string, any>);
+
+                    const checkIfAnyIsNull = Object.values(stepResponses).some((value) => value === null);
+
+                    if (checkIfAnyIsNull) {
+                      toast.error('Please answer all questions before proceeding.');
+                      return;
+                    }
+                    handleNext(stepResponses);
+                  }}
+                  disabled={isSubmitting}
+                  className=" cursor-pointer py-4"
+                >
+                  {isLastStepOverall ? (isSubmitting ? 'Submitting Assessment...' : 'Finish Assessment') : 'Next'}
+                </Button>
+              </div>
+              <div className="text-center text-sm text-muted-foreground mt-4">
+                Step {currentStepIndex + 1} of {totalStepsInModule}
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
     );

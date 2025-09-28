@@ -189,6 +189,7 @@ export default function ServicesComponent() {
           relatedServices={getRelatedServices(selectedService._id)}
           onApply={handleApply}
           pricing_unit={getPricingUnit(selectedService.pricing_unit)}
+          handleClick={handleServiceClick}
         />
       </div>
     );
