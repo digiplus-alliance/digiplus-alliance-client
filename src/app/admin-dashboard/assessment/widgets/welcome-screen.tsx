@@ -117,7 +117,7 @@ export default function WelcomePageQuestion({
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="bg-red-500 hover:bg-red-600 text-white font-medium rounded-md px-6 py-2"
+            className="font-medium rounded-md px-6 py-2"
           >
             {isSubmitting ? (
               <div className="flex items-center space-x-2">

@@ -11,7 +11,6 @@ import { PasswordInput } from "@/components/ui/password-input";
 import SpinnerIcon from "@/components/icons/spinner";
 import Image from "next/image";
 import Link from "next/link";
-import { FaFacebook } from "react-icons/fa";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore, User } from "@/store/auth";
 import { toast } from "sonner";
@@ -113,7 +112,7 @@ export default function LoginPage() {
           </p>
         </div>
         {/* Social login */}
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-center">
+        {/* <div className="flex flex-col md:flex-row gap-4 items-center justify-center">
           <Button
             variant="ghost"
             className="text-[#171616] text-base md:w-auto w-full py-4 font-normal border border-[#D6D4D4] flex items-center gap-3"
@@ -125,7 +124,7 @@ export default function LoginPage() {
             variant="ghost"
             className="text-[#171616] text-base  md:w-auto w-full  py-4 font-normal border border-[#D6D4D4] flex items-center gap-3"
           >
-            {/* <FcGoogle className="w-5 h-5" /> */}
+            <FcGoogle className="w-5 h-5" />
             <Image
               src="/google-logo.svg"
               alt="Google Logo"
@@ -136,7 +135,7 @@ export default function LoginPage() {
           </Button>
         </div>
 
-        <div className="my-2 text-center text-base text-[#706C6C]">or</div>
+        <div className="my-2 text-center text-base text-[#706C6C]">or</div> */}
       </div>
       <div className="w-full max-w-lg md:rounded-lg md:bg-white md:shadow">
         {/* Form */}
@@ -174,11 +173,14 @@ export default function LoginPage() {
               {...register("password")}
               error={errors.password?.message}
             />
-            <Link href="/auth/forgot-password">
-              <p className="py-2 text-end text-[#D63A3A] text-sm">
+            <div className="w-full text-right">
+              <Link
+                href="/auth/forgot-password"
+                className="inline-block py-2 text-[#D63A3A] text-sm hover:underline"
+              >
                 Forgot password?
-              </p>
-            </Link>
+              </Link>
+            </div>
           </div>
 
           <p className="text-xs text-center text-[#5E5B5B]">

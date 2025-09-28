@@ -80,7 +80,7 @@ export default function RegisterPage() {
           </p>
         </div>
         {/* Social login */}
-        <div className="hidden md:flex gap-4 items-center justify-center">
+        {/* <div className="hidden md:flex gap-4 items-center justify-center">
           <Button
             variant="ghost"
             className="text-[#171616] text-base px-8 py-4 font-normal border border-[#D6D4D4] flex items-center gap-3"
@@ -92,7 +92,7 @@ export default function RegisterPage() {
             variant="ghost"
             className="text-[#171616] text-base px-8 py-4 font-normal border border-[#D6D4D4] flex items-center gap-3"
           >
-            {/* <FcGoogle className="w-5 h-5" /> */}
+            <FcGoogle className="w-5 h-5" />
             <Image
               src="/google-logo.svg"
               alt="Google Logo"
@@ -105,7 +105,7 @@ export default function RegisterPage() {
 
         <div className="hidden md:flex md:justify-center my-2 text-center text-base text-[#706C6C]">
           or
-        </div>
+        </div> */}
       </div>
       <div className="w-full max-w-lg md:rounded-lg md:bg-white md:shadow">
         {/* Form */}

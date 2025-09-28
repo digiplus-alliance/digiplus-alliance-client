@@ -1,7 +1,11 @@
+'use client'
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+
 
 export default function DigitalAssessmentHero() {
+  const router = useRouter()
   return (
     <section className="relative w-full h-full max-h-[40rem] lg:h-[76vh] flex items-center">
       {/* Background image */}
@@ -27,6 +31,7 @@ export default function DigitalAssessmentHero() {
           <Button
             className="w-full sm:w-auto px-6 py-3 my-4 text-xs sm:text-base"
             size="lg"
+            onClick={() => router.push("/auth/login")}
           >
             Take the Digital Maturity Assessment Test
           </Button>

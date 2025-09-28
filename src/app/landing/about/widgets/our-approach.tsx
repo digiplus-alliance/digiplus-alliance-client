@@ -8,7 +8,7 @@ export default function OurApproach() {
           {/* Image column */}
           <div className="w-full md:w-1/2">
             <Image
-              src="/placeholder-one.png"
+              src="/about/about-approach.png"
               alt="Placeholder"
               width={900}
               height={560}

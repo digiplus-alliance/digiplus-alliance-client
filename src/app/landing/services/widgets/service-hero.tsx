@@ -1,5 +1,8 @@
+'use client'
+
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 interface ServiceHeroProps {
   bannerText: string;
@@ -21,6 +24,7 @@ export default function ServiceHero({
   sideImages = [],
   subtitle = "",
 }: ServiceHeroProps) {
+  const router = useRouter()
   return (
     <section className="py-6 px-4 relative overflow-hidden">
       <div>
@@ -61,7 +65,7 @@ export default function ServiceHero({
           </div>
 
           {/* CTA Button */}
-          <Button className="px-8 py-2 mt-6">{buttonText}</Button>
+          <Button className="px-8 py-2 mt-6" onClick={() => router.push("/auth/login")}>{buttonText}</Button>
         </div>
       </div>
 

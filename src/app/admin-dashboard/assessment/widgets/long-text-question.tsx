@@ -1,0 +1,256 @@
+"use client";
+
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+type LongTextData = {
+  question_no: number;
+  question: string;
+  descriptions: string;
+  answer_placeholder: string;
+  min_characters?: number;
+  max_characters?: number;
+  rows?: number;
+  required_score: number;
+  module: string;
+  required_option: boolean;
+  type: "long_text";
+};
+
+interface LongTextProps {
+  questionNo?: number;
+  onSave?: (data: LongTextData) => void;
+}
+
+const moduleOptions = [
+  "Digital Literacy",
+  "Business Strategy", 
+  "Financial Management",
+  "Marketing & Sales",
+  "Technology Integration",
+  "Leadership & Management",
+];
+
+export default function LongTextQuestion({ 
+  questionNo = 1, 
+  onSave 
+}: LongTextProps) {
+  const [question, setQuestion] = useState("");
+  const [description, setDescription] = useState("");
+  const [answerPlaceholder, setAnswerPlaceholder] = useState("");
+  const [minCharacters, setMinCharacters] = useState<number>(50);
+  const [maxCharacters, setMaxCharacters] = useState<number>(1000);
+  const [rows, setRows] = useState<number>(5);
+  const [requiredScore, setRequiredScore] = useState<number>(0);
+  const [selectedModule, setSelectedModule] = useState("");
+  const [requiredOption, setRequiredOption] = useState(false);
+
+  const handleSave = () => {
+    const data: LongTextData = {
+      question_no: questionNo,
+      question,
+      descriptions: description,
+      answer_placeholder: answerPlaceholder,
+      min_characters: minCharacters,
+      max_characters: maxCharacters,
+      rows: rows,
+      required_score: requiredScore,
+      module: selectedModule,
+      required_option: requiredOption,
+      type: "long_text"
+    };
+
+    if (onSave) {
+      onSave(data);
+    } else {
+      console.log("Long Text Data:", data);
+    }
+  };
+
+  const isFormValid = () => {
+    return (
+      question.trim() !== "" &&
+      answerPlaceholder.trim() !== "" &&
+      minCharacters > 0 &&
+      maxCharacters > minCharacters &&
+      rows > 0 &&
+      requiredScore >= 0 &&
+      selectedModule !== ""
+    );
+  };
+
+  return (
+    <div className="flex gap-6 my-10">
+      {/* Left Panel */}
+      <div className="flex-1 p-6 border-[#D6D4D4] rounded-lg border">
+        <div className="w-full flex flex-row text-left justify-start items-center">
+          <div className="text-2xl pb-6 text-gray-500">
+            {questionNo}.
+          </div>
+          <textarea
+            rows={2}
+            placeholder="Ask your question here"
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            className="w-full text-[#7A7A7A] text-left border-none shadow-none resize-none focus:ring-0 focus:outline-none px-4 flex items-center"
+          />
+        </div>
+        
+        <div className="w-full text-center space-y-2">
+          <textarea
+            rows={2}
+            placeholder="Description is optional"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="w-full text-[#7A7A7A] text-left border-none shadow-none resize-none focus:ring-0 focus:outline-none"
+          />
+        </div>
+
+        <div className="mt-4 space-y-4">
+          {/* Answer Textarea Field Preview */}
+          <div className="bg-[#EBFBFF] p-4 rounded-md border border-[#0E5F7D]">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Answer Field Preview:
+            </label>
+            <textarea
+              placeholder={answerPlaceholder || "User will type their detailed answer here..."}
+              disabled
+              rows={rows}
+              className="w-full bg-white border border-gray-300 p-3 rounded-md resize-none focus:ring-0 focus:outline-none"
+              maxLength={maxCharacters}
+            />
+            <div className="text-xs text-gray-500 mt-2 flex justify-between">
+              <span>Min characters: {minCharacters}</span>
+              <span>Max characters: {maxCharacters}</span>
+            </div>
+          </div>
+
+          {/* Configuration Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Answer Placeholder Configuration */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Answer Placeholder Text:
+              </label>
+              <Input
+                placeholder="e.g., Provide detailed explanation..."
+                value={answerPlaceholder}
+                onChange={(e) => setAnswerPlaceholder(e.target.value)}
+                className="w-full"
+              />
+            </div>
+
+            {/* Textarea Rows Configuration */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Textarea Height (rows):
+              </label>
+              <Input
+                type="number"
+                min="3"
+                max="15"
+                placeholder="5"
+                value={rows || ""}
+                onChange={(e) => setRows(parseInt(e.target.value) || 5)}
+                className="w-24"
+              />
+            </div>
+
+            {/* Min Characters Configuration */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Minimum Characters:
+              </label>
+              <Input
+                type="number"
+                min="1"
+                max="5000"
+                placeholder="50"
+                value={minCharacters || ""}
+                onChange={(e) => setMinCharacters(parseInt(e.target.value) || 50)}
+                className="w-24"
+              />
+            </div>
+
+            {/* Max Characters Configuration */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Maximum Characters:
+              </label>
+              <Input
+                type="number"
+                min="10"
+                max="10000"
+                placeholder="1000"
+                value={maxCharacters || ""}
+                onChange={(e) => setMaxCharacters(parseInt(e.target.value) || 1000)}
+                className="w-24"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Panel */}
+      <div className="w-72 border-[#D6D4D4] rounded-lg p-6 border flex flex-col justify-between">
+        <div className="space-y-4 text-gray-600 text-sm">
+          <div className="flex justify-between items-center">
+            <span>Required Score</span>
+            <Input
+              type="number"
+              min="0"
+              max="99"
+              value={requiredScore || ""}
+              onChange={(e) => setRequiredScore(parseInt(e.target.value) || 0)}
+              className="w-16 h-8 text-right"
+              placeholder="0"
+            />
+          </div>
+          
+          <div className="flex justify-between items-center">
+            <span>Module</span>
+            <Select value={selectedModule} onValueChange={setSelectedModule}>
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="Select" />
+              </SelectTrigger>
+              <SelectContent>
+                {moduleOptions.map((module) => (
+                  <SelectItem key={module} value={module}>
+                    {module}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <span>Required Option</span>
+            <Checkbox 
+              checked={requiredOption}
+              onCheckedChange={(checked) => setRequiredOption(checked as boolean)}
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-3 mt-6">
+          <Button 
+            onClick={handleSave}
+            disabled={!isFormValid()}
+            className="flex-1 disabled:bg-gray-300 disabled:cursor-not-allowed"
+          >
+            Save
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
