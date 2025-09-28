@@ -21,7 +21,7 @@ export default function UserDashboard() {
         <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4 sm:space-y-0">
           <Button
             className="w-full sm:w-auto text-sm sm:text-base"
-            onClick={() => router.push('/user-dashboard/assessments')}
+            onClick={() => router.push('/user-dashboard/assessment')}
           >
             Take Assessments
           </Button>
