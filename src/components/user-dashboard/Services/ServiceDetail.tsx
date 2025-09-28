@@ -17,6 +17,8 @@ interface ServiceDetailProps {
     long_description: string;
     createdAt: string;
     updatedAt: string;
+    formatted_price: string;
+    formatted_discounted_price: string;
   };
   relatedServices: {
     _id: string;
@@ -30,11 +32,14 @@ interface ServiceDetailProps {
     long_description: string;
     createdAt: string;
     updatedAt: string;
+    formatted_price: string;
+    formatted_discounted_price: string;
   }[];
+  pricing_unit: string;
   onApply?: () => void;
 }
 
-const ServiceDetail: FC<ServiceDetailProps> = ({ service, relatedServices, onApply }) => {
+const ServiceDetail: FC<ServiceDetailProps> = ({ service, relatedServices, onApply, pricing_unit }) => {
   const defaultFullDescription = `Vivamus adipiscing nisl ut dolor dignissim semper. Nulla luctus malesuada tincidunt. Class aptent taciti sociosqu ad litora torquent! Vivamus adipiscing nisl ut dolor dignissim semper.
 Vivamus adipiscing nisl ut dolor dignissim semper. Nulla luctus malesuada tincidunt. Class aptent taciti sociosqu ad litora torquent! Vivamus adipiscing nisl ut dolor dignissim semper.
 Vivamus adipiscing nisl ut dolor dignissim semper. Nulla luctus malesuada tincidunt. Class aptent taciti sociosqu ad litora torquent! Vivamus adipiscing nisl ut dolor dignissim semper.
@@ -58,8 +63,9 @@ Vivamus adipiscing nisl ut dolor dignissim semper. Nulla luctus malesuada tincid
 
           <p className="text-[#706C6C] text-sm sm:text-base leading-relaxed">{service.short_description}</p>
 
-          <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#D63A3A] mb-4 sm:mb-6">
-            NGN {service.price?.toLocaleString()}
+          <div className="text-2xl sm:text-3xl lg:text-4xl flex items-center font-bold text-[#D63A3A] mb-4 sm:mb-6">
+            NGN {service.price.toLocaleString()}
+            <p className="text-[#706C6C] text-base "> {pricing_unit ? `/${pricing_unit}` : ''}</p>
           </div>
 
           <button

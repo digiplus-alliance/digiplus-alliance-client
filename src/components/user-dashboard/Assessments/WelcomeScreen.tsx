@@ -29,7 +29,7 @@ export function WelcomeScreen({ title, message, buttonText, onStart }: WelcomeSc
             <div>
               <Button
                 onClick={onStart}
-                className="bg-destructive hover:bg-destructive/90 text-destructive-foreground px-6 sm:px-8 py-2.5 sm:py-3 text-base sm:text-lg w-full sm:w-auto"
+                className="bg-destructive hover:bg-destructive/90 text-destructive-foreground px-6 sm:px-8 py-3 sm:py-6 cursor-pointer text-base sm:text-lg w-full sm:w-auto"
               >
                 {buttonText}
               </Button>

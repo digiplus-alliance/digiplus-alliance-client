@@ -36,8 +36,10 @@ const ServiceCard: FC<ServiceCardProps> = (props) => {
         />
       </div>
       <CardContent className="p-3 sm:p-4 pt-0 space-y-3 sm:space-y-4">
-        <h3 className="font-semibold text-base sm:text-lg text-[#5E5B5B] mb-1 sm:mb-2 line-clamp-2">{name}</h3>
-        <p className="text-[#171616] text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3">{show}</p>
+        <div className="space-y-3 sm:space-y-4 min-h-[130px] max-h-[130px] max-sm:max-h-[100px] max-sm:min-h-[70px]">
+          <h3 className="font-semibold text-base sm:text-lg text-[#5E5B5B] mb-1 sm:mb-2 line-clamp-2">{name}</h3>
+          <p className="text-[#171616] text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3">{show}</p>
+        </div>
         <div className="text-base sm:text-lg text-end font-bold text-foreground">NGN {price?.toLocaleString()}</div>
       </CardContent>
     </Card>

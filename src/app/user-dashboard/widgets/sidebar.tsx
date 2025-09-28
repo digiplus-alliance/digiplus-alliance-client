@@ -73,7 +73,7 @@ const UserSidebar = ({ children }: { children: React.ReactNode }) => {
         navItems={items}
         personalizationItems={personalizationItems}
         basePath="/user-dashboard"
-        logoHref="/user-dashboard/home"
+        logoHref="/user-dashboard"
         showProfileMenu
         className="bg-white"
       />

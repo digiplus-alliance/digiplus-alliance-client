@@ -17,6 +17,7 @@ import { groupQuestionsByModuleAndStep, IGroupedModule } from '@/utils/assessmen
 
 // Import types from the assessment types file
 import type { Assessment, AssessmentQuestion } from '@/types/assessment';
+import { cn } from '@/lib/utils';
 
 export default function Assessment() {
   const [currentAssessmentIndex, setCurrentAssessmentIndex] = useState(0);
@@ -167,9 +168,9 @@ export default function Assessment() {
   const isLastStepOverall = isLastStepInModule && isLastModule;
 
   // Transform API data to match component interfaces
-  const transformOptions = (options: any[]) => options.map((opt) => ({ ...opt, id: opt._id }));
-  const transformGridColumns = (columns: any[]) => columns.map((col) => ({ ...col, id: col._id }));
-  const transformGridRows = (rows: any[]) => rows.map((row) => ({ ...row, id: row._id }));
+  const transformOptions = (options: any[]) => options.map((opt) => ({ ...opt, id: opt._id, _id: opt.id }));
+  const transformGridColumns = (columns: any[]) => columns.map((col) => ({ ...col, id: col.id }));
+  const transformGridRows = (rows: any[]) => rows.map((row) => ({ ...row, id: row.id }));
 
   // A helper to handle single or multiple question responses for a step
   const handleNext = async (stepResponses: Record<string, any>) => {
@@ -319,8 +320,10 @@ export default function Assessment() {
     // and instead rely on a shared set of controls.
     // For this example, I'll keep them as they are, but ideally, you'd refactor them.
     return (
-      <Card>
-        <CardContent className="p-6 md:p-8">
+      <Card className={cn('', !showAssessment && 'bg-transparent border-none shadow-none drop-shadow-none ')}>
+        <CardContent
+          className={cn('p-6 md:p-8', !showAssessment && 'bg-transparent border-none shadow-none drop-shadow-none ')}
+        >
           {showAssessment && (
             <>
               <p className="text-[#227C9D] text-sm font-medium text-center">module {currentModuleIndex + 1}</p>
@@ -385,7 +388,10 @@ export default function Assessment() {
             options={transformOptions(currentQuestion.options || [])}
             // currentStep={currentStepIndex + 1}
             value={responses[currentQuestion._id] || ''}
-            onChange={(res) => setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }))}
+            onChange={(res) => {
+              setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }));
+              console.log(res);
+            }}
             index={index}
           />
         );
@@ -465,7 +471,7 @@ export default function Assessment() {
     <div className="min-h-screen bg-muted/30 p-6">
       <div className="max-w-4xl mx-auto">
         {/* <AssessmentHeader /> */}
-        <ProgressBar />
+        {showAssessment && <ProgressBar />}
         {renderCurrentStep()}
       </div>
     </div>

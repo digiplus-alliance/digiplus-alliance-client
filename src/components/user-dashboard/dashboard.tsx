@@ -56,7 +56,7 @@ export default function UserDashboard() {
         <div className="space-y-4 sm:space-y-6 order-2 xl:order-1">
           {/* Recent Applications */}
           <RecentApplications />
-          <AssessmentChart />
+          {/* <AssessmentChart /> */}
         </div>
         <div className="order-1 xl:order-2">
           <ProfileCard />

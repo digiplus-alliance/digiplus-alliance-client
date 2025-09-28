@@ -134,7 +134,7 @@ const ProfileCard = () => {
                   <button
                     className=" "
                     onClick={() => {
-                      router.push('/privacy');
+                      router.push('https://www.8thgearpartners.com/terms-and-conditions');
                     }}
                   >
                     Read all Terms and conditions
@@ -142,7 +142,7 @@ const ProfileCard = () => {
                 </div>
                 <button
                   onClick={() => {
-                    router.push('/privacy');
+                    router.push('https://www.8thgearpartners.com/terms-and-conditions');
                   }}
                 >
                   <ChevronRight color="#B8B8B8" />
