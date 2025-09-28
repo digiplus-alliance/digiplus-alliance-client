@@ -9,6 +9,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useForgotPassword } from "@/app/api/auth/useForgotPassword";
+import SpinnerIcon from "@/components/icons/spinner";
 
 const initiateSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -66,10 +68,57 @@ const InitiateChangePassword: React.FC<{
     resolver: zodResolver(initiateSchema),
   });
 
+  const { mutate: sendEmail, isPending } = useForgotPassword();
+  const [successModal, setSuccessModal] = useState(false);
+  const router = useRouter();
   const onSubmit = (data: InitiateFormValues) => {
-    // Send verification email here
-    onInitiate(data.email);
+    sendEmail(
+      { email: data.email },
+      {
+        onSuccess: (res) => {
+          setSuccessModal(true);
+        },
+      }
+    );
   };
+
+  if (successModal) {
+    return (
+      <div className="bg-[#EBEBEB] flex flex-col min-h-screen items-center justify-center p-4 overflow-auto">
+        {/* Header */}
+        <div className="mb-4 text-center">
+          <div>
+            <Link href="/">
+              <Image
+                src="/colored-logo.png"
+                alt="Digiplus Logo"
+                width={120}
+                height={30}
+                className="mx-auto mb-4"
+              />
+            </Link>
+            <h1 className="text-lg md:text-2xl font-bold">Email Sent!</h1>
+            <p className="mt-1 text-xs md:text-lg text-[#5E5B5B] max-w-lg py-4 md:py-0">
+              A verification code has been sent to your email. Please check your
+              inbox and follow the instructions to reset your password.
+            </p>
+          </div>
+        </div>
+        <div className="w-full max-w-lg md:rounded-lg md:bg-white md:shadow">
+          <div className="p-8">
+            <Button
+              onClick={() => {
+                router.push("/auth/login");
+              }}
+              className="w-full"
+            >
+              Back to Login
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#EBEBEB] flex flex-col min-h-screen items-center justify-center p-4 overflow-auto">
@@ -118,7 +167,7 @@ const InitiateChangePassword: React.FC<{
           </div>
 
           <Button type="submit" className="w-full mt-8">
-            Send verification code
+            {isPending ? <SpinnerIcon /> : "Send verification code"}
           </Button>
         </form>
       </div>
@@ -180,7 +229,9 @@ const VerifyCode: React.FC<{ email: string; onBack?: () => void }> = ({
           </Link>
           <h1 className="text-lg md:text-2xl font-bold">Verify your email</h1>
           <p className="mt-1 text-xs md:text-lg text-[#706C6C] max-w-lg py-2 md:py-0">
-            That’s fine, we have sent a verification code to the email you registered with <span className="font-medium">{maskEmail(email)}</span>
+            That’s fine, we have sent a verification code to the email you
+            registered with{" "}
+            <span className="font-medium">{maskEmail(email)}</span>
           </p>
         </div>
       </div>
