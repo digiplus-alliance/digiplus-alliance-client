@@ -23,14 +23,14 @@ export function AssessmentResults({ score, maxScore, level, onSuggestions, onRes
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
   return (
-    <div className="min-h-screen bg-muted/30 flex items-center justify-center p-6">
-      <Card className="w-full max-w-3xl">
+    <div className=" bg-muted/30 flex items-center justify-center p-6">
+      <Card className="w-full max-w-3xl bg-transparent border-none shadow-none drop-shadow-none">
         <CardHeader className="text-center space-y-6 pb-8">
-          <h1 className="text-4xl font-bold text-primary">Open Digital Maturity Assessment</h1>
-          <h2 className="text-2xl text-primary font-medium">(SMEs & MSMEs)</h2>
+          <h1 className="text-5xl tracking-wide text-[#227C9D]">Open Digital Maturity Assessment</h1>
+          <h2 className="text-5xl tracking-wide text-[#227C9D]">(SMEs & MSMEs)</h2>
         </CardHeader>
 
-        <CardContent className="space-y-8">
+        <CardContent className="space-y-4">
           {/* Circular Progress Chart */}
           <div className="flex flex-col items-center space-y-6">
             <div className="relative">
@@ -42,7 +42,7 @@ export function AssessmentResults({ score, maxScore, level, onSuggestions, onRes
                   cx="140"
                   cy="140"
                   r={radius}
-                  stroke="hsl(var(--primary))"
+                  stroke="#227C9D"
                   strokeWidth="20"
                   fill="none"
                   strokeDasharray={strokeDasharray}
@@ -61,11 +61,11 @@ export function AssessmentResults({ score, maxScore, level, onSuggestions, onRes
               </div>
             </div>
 
-            <h3 className="text-2xl font-bold text-destructive">{level}</h3>
+            <h3 className="text-2xl font-medium mb-3 text-[#D63A3A]">{level}</h3>
           </div>
 
           {/* Congratulations Card */}
-          <Card className="bg-muted/50">
+          <Card className="bg-white">
             <CardContent className="p-6">
               <div className="flex items-start space-x-4">
                 <div className="flex-shrink-0 w-12 h-12 bg-destructive/10 rounded-full flex items-center justify-center">
@@ -75,7 +75,7 @@ export function AssessmentResults({ score, maxScore, level, onSuggestions, onRes
                   <h4 className="text-lg font-semibold text-foreground">
                     Congratulations on completing the assessment
                   </h4>
-                  <p className="text-muted-foreground">
+                  <p className="text-[#7A7A7A]">
                     Based on your score, we would suggest you take the following services so that you can get better at
                     doing business.
                   </p>
@@ -87,14 +87,14 @@ export function AssessmentResults({ score, maxScore, level, onSuggestions, onRes
                         checked={dontShowAgain}
                         onCheckedChange={(checked) => setDontShowAgain(checked as boolean)}
                       />
-                      <label htmlFor="dont-show" className="text-sm text-muted-foreground cursor-pointer">
+                      <label htmlFor="dont-show" className="text-sm text-[#3D3A3A] cursor-pointer">
                         Don&apos;t show again
                       </label>
                     </div>
 
                     <Button
                       onClick={onSuggestions}
-                      className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                      className="bg-destructive hover:bg-destructive/90 text-destructive-foreground py-5 cursor-pointer"
                     >
                       See suggestions
                     </Button>
@@ -103,14 +103,6 @@ export function AssessmentResults({ score, maxScore, level, onSuggestions, onRes
               </div>
             </CardContent>
           </Card>
-
-          {onRestart && (
-            <div className="flex justify-center pt-4">
-              <Button variant="outline" onClick={onRestart}>
-                Take Assessment Again
-              </Button>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>

@@ -18,6 +18,8 @@ import { groupQuestionsByModuleAndStep, IGroupedModule } from '@/utils/assessmen
 // Import types from the assessment types file
 import type { Assessment, AssessmentQuestion } from '@/types/assessment';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 export default function Assessment() {
   const [currentAssessmentIndex, setCurrentAssessmentIndex] = useState(0);
@@ -30,6 +32,9 @@ export default function Assessment() {
   const [completedAssessments, setCompletedAssessments] = useState<Set<string>>(new Set());
   const [allAssessmentsCompleted, setAllAssessmentsCompleted] = useState(false);
   const { user } = useAuthStore();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const router = useRouter();
 
   const {
     data: availableAssessments,
@@ -101,7 +106,9 @@ export default function Assessment() {
         score={20}
         maxScore={45}
         level="Beginner"
-        onSuggestions={() => {}}
+        onSuggestions={() => {
+          router.push('/user-dashboard/services');
+        }}
         onRestart={() => {
           // Reset state for restarting all assessments
           setCurrentAssessmentIndex(0);
@@ -202,6 +209,8 @@ export default function Assessment() {
           throw new Error('User not authenticated');
         }
 
+        setIsSubmitting(true);
+
         await submitAssessment.mutateAsync({
           assessment_id: currentAssessmentId!,
           user_id: user._id, // Make sure user is defined
@@ -224,7 +233,8 @@ export default function Assessment() {
           setCurrentStepIndex(0);
         }
       } catch (error) {
-        console.error('Failed to submit assessment:', error);
+        toast.error('Failed to submit assessment');
+
         // Still move to next assessment even if submission fails
         if (currentAssessmentIndex === (availableAssessments?.length || 0) - 1) {
           setAllAssessmentsCompleted(true);
@@ -233,7 +243,10 @@ export default function Assessment() {
           setCurrentModuleIndex(0); // Reset for new assessment
           setCurrentStepIndex(0);
         }
+      } finally {
+        setIsSubmitting(false);
       }
+    } else {
       // Reset responses for the next assessment
       setResponses({});
     }
@@ -363,9 +376,10 @@ export default function Assessment() {
                 }, {} as Record<string, any>);
                 handleNext(stepResponses);
               }}
+              disabled={isSubmitting}
               className=" cursor-pointer py-4"
             >
-              {isLastStepOverall ? 'Finish Assessment' : 'Next'}
+              {isLastStepOverall ? (isSubmitting ? 'Submitting Assessment...' : 'Finish Assessment') : 'Next'}
             </Button>
           </div>
           <div className="text-center text-sm text-muted-foreground mt-4">

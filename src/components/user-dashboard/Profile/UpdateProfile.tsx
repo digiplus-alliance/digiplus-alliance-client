@@ -116,7 +116,7 @@ const UpdateProfileCompo = ({ onClose }: UpdateProfileModalProps) => {
       formData.append('last_name', data.last_name);
       formData.append('business_name', data.business_name);
       formData.append('industry', data.industry);
-      formData.append('email', data.email);
+      // formData.append('email', data.email);
 
       if (data.phone_number) formData.append('phone_number', data.phone_number);
       if (data.company_website) formData.append('company_website', data.company_website);
@@ -138,7 +138,6 @@ const UpdateProfileCompo = ({ onClose }: UpdateProfileModalProps) => {
       const responseData = await response.json();
 
       if (response.ok) {
-        setUser(responseData.user as any);
         toast.success('Profile updated successfully');
         onClose();
       } else {
