@@ -10,10 +10,12 @@ export const ServiceSchema = z.object({
   service_type: z.string(),
   image: z.string(),
   price: z.number(),
-  subtitle: z.string(),
-  description: z.string(),
   createdAt: z.string(),
   updatedAt: z.string(),
+  images: z.array(z.string()).optional(),
+  short_description: z.string().optional(),
+  long_description: z.string().optional(),
+  discounted_price: z.number().optional(),
 });
 
 export const ServicesResponseSchema = z.array(ServiceSchema);

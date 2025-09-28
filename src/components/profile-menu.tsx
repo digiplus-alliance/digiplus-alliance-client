@@ -12,15 +12,20 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { useLogout } from '@/lib/logout';
+import { useAuthStore } from '@/store/auth';
+import { useGetBusinessProfile } from '@/app/api/profile';
 
 export default function ProfileMenu({ className }: { className?: string }) {
   const { mutate: logoutMutate } = useLogout();
+  const { user } = useAuthStore();
+  const { data: businessProfile } = useGetBusinessProfile();
+
   const handleLogout = () => {
     logoutMutate();
   };
 
-  const userName = 'Opeyemi Bioku';
-  const role = 'admin';
+  const userName = user?.first_name + ' ' + user?.last_name || businessProfile?.business_name;
+  const role = user?.role;
 
   const avatarUrl = '',
     name = 'EN';
@@ -41,11 +46,11 @@ export default function ProfileMenu({ className }: { className?: string }) {
     }
   };
 
-  const initials = getInitials(userName);
+  const initials = getInitials(user?.first_name + ' ' + user?.last_name || businessProfile?.business_name);
   return (
     <div className={cn('flex relative items-center', className)}>
       <Avatar className="flex">
-        <AvatarImage src={avatarUrl} alt={name} />
+        <AvatarImage src={user?.profile_picture || businessProfile?.logo_url || avatarUrl} alt={name} />
         <AvatarFallback className="text-[#176E8E] bg-[#EBFBFF] text-base font-normal font-inter">
           {initials}
         </AvatarFallback>
@@ -64,7 +69,7 @@ export default function ProfileMenu({ className }: { className?: string }) {
         <DropdownMenuContent className="border border-[#D9D9D9] rounded-2xl p-6 font-secondary bg-white w-64">
           <div className="flex flex-col gap-2 items-center pb-3">
             <Avatar className="hidden lg:flex">
-              <AvatarImage src={avatarUrl} alt={name} />
+              <AvatarImage src={user?.profile_picture || businessProfile?.logo_url || avatarUrl} alt={name} />
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col items-center">

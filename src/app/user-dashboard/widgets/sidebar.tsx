@@ -61,10 +61,11 @@ const personalizationItems = [
 const UserSidebar = ({ children }: { children: React.ReactNode }) => {
   return (
     <SidebarProvider defaultOpen className="relative _max-w-[1392px] mx-auto">
-      <SidebarInset className="fixed top-0 left-0 w-full h-16 bg-white border-b z-10 md:hidden">
-        <div className="flex items-center justify-between px-4 h-full">
-          <Image src="/mobile-logo.png" alt="App Logo" width={80} height={80} />
-          <SidebarTrigger className=" top-4 left-4 z-20" />
+      {/* Mobile Header */}
+      <SidebarInset className="fixed top-0 left-0 w-full h-14 sm:h-16 bg-white border-b z-10 md:hidden">
+        <div className="flex items-center justify-between px-3 sm:px-4 h-full">
+          <Image src="/mobile-logo.png" alt="App Logo" width={70} height={70} className="sm:w-20 sm:h-20" />
+          <SidebarTrigger className="top-3 sm:top-4 left-3 sm:left-4 z-20 p-1.5 sm:p-2" />
         </div>
       </SidebarInset>
 
@@ -76,7 +77,7 @@ const UserSidebar = ({ children }: { children: React.ReactNode }) => {
         showProfileMenu
         className="bg-white"
       />
-      <SidebarInset className="overflow-hidden min-w-0 bg-white md:space-y-10 grow flex flex-col">
+      <SidebarInset className="overflow-hidden min-w-0 bg-white md:space-y-6 lg:space-y-8 xl:space-y-10 grow flex flex-col pt-14 sm:pt-16 md:pt-0">
         {children}
       </SidebarInset>
     </SidebarProvider>

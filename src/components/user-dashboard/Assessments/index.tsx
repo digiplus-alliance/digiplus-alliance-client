@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useMemo, Fragment } from 'react';
 import { WelcomeScreen } from './WelcomeScreen';
 import { ModuleTitleScreen } from './ModuleTitleScreen';
 import { MultipleChoiceQuestion } from './MultipleChoiceQuestion';
@@ -8,360 +8,93 @@ import { TextQuestion } from './TextQuestion';
 import { DropdownQuestion } from './DropdownQuestion';
 import { GridQuestion } from './GridQuestion';
 import { AssessmentResults } from './AssessmentResults';
+import { useGetAvailableAssessments, useGetAssessmentById, useSubmitAssessment } from '@/app/api/assessments';
+import { useAuthStore } from '@/store/auth';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
+import { groupQuestionsByModuleAndStep, IGroupedModule } from '@/utils/assessmentUtils';
 
-interface AssessmentOption {
-  id: string;
-  text: string;
-  value?: number;
-  points?: number;
-  points_description?: string;
-}
-
-interface GridColumn {
-  id: string;
-  text: string;
-  value?: number;
-  points?: number;
-  points_description?: string;
-}
-
-interface GridRow {
-  id: string;
-  text: string;
-  weight?: number;
-}
-
-interface AssessmentQuestion {
-  type:
-    | 'welcome_screen'
-    | 'module_title'
-    | 'multiple_choice'
-    | 'checkbox'
-    | 'short_text'
-    | 'long_text'
-    | 'dropdown'
-    | 'multiple_choice_grid';
-  question: string;
-  welcome_title?: string;
-  welcome_message?: string;
-  button_text?: string;
-  module_title?: string;
-  module_description?: string;
-  description?: string;
-  instruction?: string;
-  placeholder?: string;
-  options?: AssessmentOption[];
-  grid_columns?: GridColumn[];
-  grid_rows?: GridRow[];
-  max_length?: number;
-  min_length?: number;
-  rows?: number;
-  min_selections?: number;
-  max_selections?: number;
-  is_required?: boolean;
-  step: number;
-  module_ref: string;
-  max_points?: number;
-  scoring_categories?: string[];
-}
-
-interface AssessmentModule {
-  temp_id: string;
-  title: string;
-  description?: string;
-  order: number;
-  max_points?: number;
-}
-
-interface Assessment {
-  title: string;
-  description?: string;
-  instruction?: string;
-  modules: AssessmentModule[];
-  questions: AssessmentQuestion[];
-  is_active?: boolean;
-}
-
-// Mock assessment data matching the provided format
-const mockAssessment: Assessment = {
-  title: 'Digital Maturity Assessment',
-  description: 'Comprehensive evaluation with personalized service suggestions',
-  instruction: 'Answer all questions to receive personalized service recommendations',
-  modules: [
-    {
-      temp_id: 'intro-module',
-      title: 'Introduction',
-      description: 'Welcome and overview',
-      order: 1,
-    },
-    {
-      temp_id: 'skills-module',
-      title: 'Digital Skills Assessment',
-      description: 'Evaluate current capabilities',
-      order: 2,
-      max_points: 25,
-    },
-    {
-      temp_id: 'tools-module',
-      title: 'Current Tools Usage',
-      description: 'Assess existing digital infrastructure',
-      order: 3,
-      max_points: 30,
-    },
-    {
-      temp_id: 'business-module',
-      title: 'Business Information',
-      description: 'Company details and context',
-      order: 4,
-    },
-  ],
-  questions: [
-    {
-      type: 'welcome_screen',
-      question: 'Assessment Welcome',
-      welcome_title: 'Digital Maturity Assessment',
-      welcome_message:
-        'Welcome! This assessment will help us understand your current digital capabilities and provide personalized recommendations. It takes about 10-15 minutes to complete.',
-      button_text: 'Begin Assessment',
-      step: 1,
-      module_ref: 'intro-module',
-    },
-    {
-      type: 'module_title',
-      question: 'Module Introduction',
-      module_title: 'Digital Skills Assessment',
-      module_description: 'In this section, we will evaluate your familiarity with digital tools and technologies.',
-      step: 2,
-      module_ref: 'skills-module',
-    },
-    {
-      type: 'multiple_choice',
-      question: 'What best describes your current level of digital tool usage?',
-      description: 'Select the option that most accurately reflects your situation',
-      instruction: 'Choose only one option',
-      options: [
-        {
-          id: 'opt-1',
-          text: 'Minimal - Basic email and web browsing',
-          points: 2,
-        },
-        {
-          id: 'opt-2',
-          text: 'Basic - Office applications and simple online tools',
-          points: 4,
-        },
-        {
-          id: 'opt-3',
-          text: 'Intermediate - Multiple digital tools for business',
-          points: 6,
-        },
-        {
-          id: 'opt-4',
-          text: 'Advanced - Integrated digital solutions',
-          points: 8,
-        },
-        {
-          id: 'opt-5',
-          text: 'Expert - Leading digital transformation',
-          points: 10,
-        },
-      ],
-      is_required: true,
-      step: 3,
-      module_ref: 'skills-module',
-    },
-    {
-      type: 'checkbox',
-      question: 'Which digital tools do you currently use in your business?',
-      description: 'Select all tools that you actively use',
-      instruction: 'You can select multiple options',
-      options: [
-        {
-          id: 'opt-1',
-          text: 'Email marketing tools (Mailchimp, Constant Contact)',
-          points: 2,
-        },
-        {
-          id: 'opt-2',
-          text: 'Social media management (Hootsuite, Buffer)',
-          points: 2,
-        },
-        {
-          id: 'opt-3',
-          text: 'Customer relationship management (CRM)',
-          points: 3,
-        },
-        {
-          id: 'opt-4',
-          text: 'E-commerce platforms (Shopify, WooCommerce)',
-          points: 3,
-        },
-        {
-          id: 'opt-5',
-          text: 'Accounting software (QuickBooks, Xero)',
-          points: 2,
-        },
-        {
-          id: 'opt-6',
-          text: 'Project management tools (Trello, Asana)',
-          points: 2,
-        },
-      ],
-      min_selections: 1,
-      max_selections: 6,
-      is_required: true,
-      step: 4,
-      module_ref: 'tools-module',
-    },
-    {
-      type: 'short_text',
-      question: 'What is the name of your business?',
-      description: 'Please enter your business or organization name',
-      placeholder: 'e.g., ABC Marketing Solutions',
-      max_length: 100,
-      min_length: 2,
-      is_required: true,
-      step: 5,
-      module_ref: 'business-module',
-    },
-    {
-      type: 'dropdown',
-      question: 'What industry does your business primarily operate in?',
-      description: 'Select the industry that best matches your business',
-      placeholder: 'Select your industry',
-      options: [
-        {
-          id: 'opt-1',
-          text: 'Technology & Software',
-          value: 1,
-        },
-        {
-          id: 'opt-2',
-          text: 'Healthcare & Medical',
-          value: 2,
-        },
-        {
-          id: 'opt-3',
-          text: 'Education & Training',
-          value: 3,
-        },
-        {
-          id: 'opt-4',
-          text: 'Finance & Banking',
-          value: 4,
-        },
-        {
-          id: 'opt-5',
-          text: 'Manufacturing',
-          value: 5,
-        },
-        {
-          id: 'opt-6',
-          text: 'Retail & E-commerce',
-          value: 6,
-        },
-        {
-          id: 'opt-7',
-          text: 'Professional Services',
-          value: 7,
-        },
-        {
-          id: 'opt-8',
-          text: 'Other',
-          value: 8,
-        },
-      ],
-      is_required: true,
-      step: 6,
-      module_ref: 'business-module',
-    },
-    {
-      type: 'multiple_choice_grid',
-      question: 'For each business area below, how would you rate your current digital maturity?',
-      description: 'Rate each area based on your current digital adoption and effectiveness',
-      instruction: 'Select one option for each row',
-      grid_columns: [
-        {
-          id: 'col-1',
-          text: 'Not Digitized',
-          points: 1,
-        },
-        {
-          id: 'col-2',
-          text: 'Basic Digital Tools',
-          points: 2,
-        },
-        {
-          id: 'col-3',
-          text: 'Integrated Systems',
-          points: 3,
-        },
-        {
-          id: 'col-4',
-          text: 'Advanced Analytics',
-          points: 4,
-        },
-        {
-          id: 'col-5',
-          text: 'AI-Powered Optimization',
-          points: 5,
-        },
-      ],
-      grid_rows: [
-        {
-          id: 'row-1',
-          text: 'Customer relationship management',
-        },
-        {
-          id: 'row-2',
-          text: 'Sales and marketing processes',
-        },
-        {
-          id: 'row-3',
-          text: 'Financial management and reporting',
-        },
-        {
-          id: 'row-4',
-          text: 'Inventory and supply chain management',
-        },
-      ],
-      is_required: true,
-      step: 7,
-      module_ref: 'tools-module',
-    },
-  ],
-  is_active: true,
-};
+// Import types from the assessment types file
+import type { Assessment, AssessmentQuestion } from '@/types/assessment';
 
 export default function Assessment() {
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [currentAssessmentIndex, setCurrentAssessmentIndex] = useState(0);
+  // New state for module and step navigation
+  const [currentModuleIndex, setCurrentModuleIndex] = useState(0);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [showAssessment, setShowAssessment] = useState(false);
+
   const [responses, setResponses] = useState<Record<string, any>>({});
-  const [assessment] = useState<Assessment>(mockAssessment);
+  const [completedAssessments, setCompletedAssessments] = useState<Set<string>>(new Set());
+  const [allAssessmentsCompleted, setAllAssessmentsCompleted] = useState(false);
+  const { user } = useAuthStore();
 
-  const currentQuestion = assessment.questions[currentQuestionIndex];
-  const totalSteps = assessment.questions.length;
-  const isLastQuestion = currentQuestionIndex === assessment.questions.length - 1;
+  const {
+    data: availableAssessments,
+    isLoading: loadingAssessments,
+    error: assessmentsError,
+  } = useGetAvailableAssessments();
 
-  const handleNext = (response: any) => {
-    setResponses((prev) => ({
-      ...prev,
-      [currentQuestion.step]: response,
-    }));
+  const currentAssessmentId = availableAssessments?.[currentAssessmentIndex]?._id || null;
 
-    if (isLastQuestion) {
-      setCurrentQuestionIndex(totalSteps); // Show results
-    } else {
-      setCurrentQuestionIndex((prev) => prev + 1);
-    }
-  };
+  const {
+    data: assessmentData,
+    isLoading,
+    error,
+  } = useGetAssessmentById(currentAssessmentId || '', !!currentAssessmentId);
 
-  const handleBack = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex((prev) => prev - 1);
-    }
-  };
+  const submitAssessment = useSubmitAssessment();
 
-  if (currentQuestionIndex >= totalSteps) {
+  // Group questions by module and step
+  const groupedModules: IGroupedModule[] = useMemo(
+    () => (assessmentData ? groupQuestionsByModuleAndStep(assessmentData) : []),
+    [assessmentData]
+  );
+
+  // Show loading state for available assessments
+  if (loadingAssessments) {
+    return (
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center p-6">
+        <Card className="w-full max-w-4xl">
+          <CardContent className="p-12 text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p>Loading available assessments...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show error state for available assessments
+  if (assessmentsError) {
+    return (
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center p-6">
+        <Card className="w-full max-w-4xl">
+          <CardContent className="p-12 text-center">
+            <p className="text-red-600 mb-4">Error loading assessments: {String(assessmentsError)}</p>
+            <Button onClick={() => window.location.reload()}>Retry</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show message if no assessments available
+  if (!availableAssessments || availableAssessments.length === 0) {
+    return (
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center p-6">
+        <Card className="w-full max-w-4xl">
+          <CardContent className="p-12 text-center">
+            <p>No assessments available at this time.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show all assessments completed screen
+  if (allAssessmentsCompleted) {
     return (
       <AssessmentResults
         score={20}
@@ -369,133 +102,372 @@ export default function Assessment() {
         level="Beginner"
         onSuggestions={() => {}}
         onRestart={() => {
-          setCurrentQuestionIndex(0);
+          // Reset state for restarting all assessments
+          setCurrentAssessmentIndex(0);
+          // setCurrentQuestionIndex(0);
           setResponses({});
+          setCompletedAssessments(new Set());
+          setAllAssessmentsCompleted(false);
         }}
       />
     );
   }
 
-  const currentModule = assessment.modules.find((m) => m.temp_id === currentQuestion.module_ref);
-
-  if (currentQuestion.type === 'welcome_screen') {
+  // Show loading state for current assessment or if grouping is in progress
+  if (isLoading || (assessmentData && groupedModules.length === 0)) {
     return (
-      <WelcomeScreen
-        title={currentQuestion.welcome_title || assessment.title}
-        message={currentQuestion.welcome_message || ''}
-        buttonText={currentQuestion.button_text || 'Begin Assessment'}
-        onStart={() => handleNext(null)}
-      />
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center p-6">
+        <Card className="w-full max-w-4xl">
+          <CardContent className="p-12 text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p>Loading assessment...</p>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
-  if (currentQuestion.type === 'module_title') {
+  // Show error state
+  if (error) {
     return (
-      <ModuleTitleScreen
-        module={currentModule?.title || ''}
-        title={currentQuestion.module_title || ''}
-        description={currentQuestion.module_description || ''}
-        onBack={currentQuestionIndex > 0 ? handleBack : undefined}
-        onContinue={() => handleNext(null)}
-        showBackButton={currentQuestionIndex > 0}
-      />
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center p-6">
+        <Card className="w-full max-w-4xl">
+          <CardContent className="p-12 text-center">
+            <p className="text-red-600 mb-4">Error loading assessment: {String(error)}</p>
+            <Button onClick={() => window.location.reload()}>Retry</Button>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
-  if (currentQuestion.type === 'multiple_choice') {
+  if (!assessmentData || groupedModules.length === 0) {
     return (
-      <MultipleChoiceQuestion
-        module={currentModule?.title || ''}
-        title={currentQuestion.question}
-        description={currentQuestion.description}
-        instruction={currentQuestion.instruction}
-        options={currentQuestion.options || []}
-        currentStep={currentQuestion.step}
-        totalSteps={totalSteps}
-        onBack={handleBack}
-        onNext={handleNext}
-        selectedOption={responses[currentQuestion.step] || ''}
-      />
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center p-6">
+        <Card className="w-full max-w-4xl">
+          <CardContent className="p-12 text-center">
+            <p>Assessment not found.</p>
+            <Button onClick={() => window.location.reload()}>Retry</Button>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
-  if (currentQuestion.type === 'checkbox') {
-    return (
-      <CheckboxQuestion
-        module={currentModule?.title || ''}
-        title={currentQuestion.question}
-        description={currentQuestion.description}
-        instruction={currentQuestion.instruction}
-        options={currentQuestion.options || []}
-        minSelections={currentQuestion.min_selections}
-        maxSelections={currentQuestion.max_selections}
-        currentStep={currentQuestion.step}
-        totalSteps={totalSteps}
-        onBack={handleBack}
-        onNext={handleNext}
-        selectedOptions={responses[currentQuestion.step] || []}
-      />
-    );
-  }
+  const { assessment } = assessmentData;
 
-  if (currentQuestion.type === 'short_text' || currentQuestion.type === 'long_text') {
-    return (
-      <TextQuestion
-        module={currentModule?.title || ''}
-        title={currentQuestion.question}
-        description={currentQuestion.description}
-        instruction={currentQuestion.instruction}
-        placeholder={currentQuestion.placeholder}
-        type={currentQuestion.type}
-        maxLength={currentQuestion.max_length}
-        minLength={currentQuestion.min_length}
-        rows={currentQuestion.rows}
-        isRequired={currentQuestion.is_required}
-        currentStep={currentQuestion.step}
-        totalSteps={totalSteps}
-        onBack={handleBack}
-        onNext={handleNext}
-        value={responses[currentQuestion.step] || ''}
-      />
-    );
-  }
+  // Get current module, step, and questions
+  const currentModule = groupedModules[currentModuleIndex];
+  const currentStepData = currentModule.steps[currentStepIndex];
+  const currentQuestions = currentStepData.questions;
+  const totalStepsInModule = currentModule.steps.length;
 
-  if (currentQuestion.type === 'dropdown') {
-    return (
-      <DropdownQuestion
-        module={currentModule?.title || ''}
-        title={currentQuestion.question}
-        description={currentQuestion.description}
-        placeholder={currentQuestion.placeholder}
-        options={currentQuestion.options || []}
-        isRequired={currentQuestion.is_required}
-        currentStep={currentQuestion.step}
-        totalSteps={totalSteps}
-        onBack={handleBack}
-        onNext={handleNext}
-        selectedValue={responses[currentQuestion.step] || ''}
-      />
-    );
-  }
+  const isLastStepInModule = currentStepIndex === totalStepsInModule - 1;
+  const isLastModule = currentModuleIndex === groupedModules.length - 1;
+  const isLastStepOverall = isLastStepInModule && isLastModule;
 
-  if (currentQuestion.type === 'multiple_choice_grid') {
-    return (
-      <GridQuestion
-        module={currentModule?.title || ''}
-        title={currentQuestion.question}
-        description={currentQuestion.description}
-        instruction={currentQuestion.instruction}
-        columns={currentQuestion.grid_columns || []}
-        rows={currentQuestion.grid_rows || []}
-        isRequired={currentQuestion.is_required}
-        currentStep={currentQuestion.step}
-        totalSteps={totalSteps}
-        onBack={handleBack}
-        onNext={handleNext}
-        responses={responses[currentQuestion.step] || {}}
-      />
-    );
-  }
+  // Transform API data to match component interfaces
+  const transformOptions = (options: any[]) => options.map((opt) => ({ ...opt, id: opt._id }));
+  const transformGridColumns = (columns: any[]) => columns.map((col) => ({ ...col, id: col._id }));
+  const transformGridRows = (rows: any[]) => rows.map((row) => ({ ...row, id: row._id }));
 
-  return null;
+  // A helper to handle single or multiple question responses for a step
+  const handleNext = async (stepResponses: Record<string, any>) => {
+    const updatedResponses = { ...responses, ...stepResponses };
+    setResponses(updatedResponses);
+
+    if (isLastStepInModule) {
+      if (isLastModule) {
+        // This is the last step of the last module of the current assessment
+        await submitAndProceed(updatedResponses);
+      } else {
+        // Move to the first step of the next module
+        setCurrentModuleIndex(currentModuleIndex + 1);
+        setCurrentStepIndex(0);
+      }
+    } else {
+      // Go to the next step in the current module
+      setCurrentStepIndex(currentStepIndex + 1);
+    }
+  };
+
+  const submitAndProceed = async (finalResponses: Record<string, any>) => {
+    // This function is called only at the end of an assessment.
+    // It submits the responses and decides whether to show results or move to the next assessment.
+    if (isLastStepOverall) {
+      // Submit the current assessment
+      try {
+        if (!user?._id) {
+          throw new Error('User not authenticated');
+        }
+
+        await submitAssessment.mutateAsync({
+          assessment_id: currentAssessmentId!,
+          user_id: user._id, // Make sure user is defined
+          responses: finalResponses,
+        });
+
+        // Mark current assessment as completed
+        const newCompletedAssessments = new Set(completedAssessments);
+        newCompletedAssessments.add(currentAssessmentId!);
+        setCompletedAssessments(newCompletedAssessments);
+
+        // Check if this was the last assessment
+        if (currentAssessmentIndex === (availableAssessments?.length || 0) - 1) {
+          // All assessments completed
+          setAllAssessmentsCompleted(true);
+        } else {
+          // Move to next assessment
+          setCurrentAssessmentIndex((prev) => prev + 1);
+          setCurrentModuleIndex(0); // Reset for new assessment
+          setCurrentStepIndex(0);
+        }
+      } catch (error) {
+        console.error('Failed to submit assessment:', error);
+        // Still move to next assessment even if submission fails
+        if (currentAssessmentIndex === (availableAssessments?.length || 0) - 1) {
+          setAllAssessmentsCompleted(true);
+        } else {
+          setCurrentAssessmentIndex((prev) => prev + 1);
+          setCurrentModuleIndex(0); // Reset for new assessment
+          setCurrentStepIndex(0);
+        }
+      }
+      // Reset responses for the next assessment
+      setResponses({});
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStepIndex > 0) {
+      // Go to the previous step in the current module
+      setCurrentStepIndex(currentStepIndex - 1);
+    } else if (currentModuleIndex > 0) {
+      // Go to the last step of the previous module
+      const prevModule = groupedModules[currentModuleIndex - 1];
+      setCurrentModuleIndex(currentModuleIndex - 1);
+      setCurrentStepIndex(prevModule.steps.length - 1);
+    }
+  };
+
+  // Progress calculation across all assessments
+  const totalAssessments = availableAssessments?.length || 1;
+  const progressInCurrentAssessment =
+    (currentModuleIndex + (currentStepIndex + 1) / totalStepsInModule) / groupedModules.length;
+  const overallProgress = ((currentAssessmentIndex + progressInCurrentAssessment) / totalAssessments) * 100;
+
+  // Progress bar component
+  const ProgressBar = () => (
+    <div className="w-full  rounded-full h-2 mb-6 pb-8">
+      <div
+        className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
+        style={{ width: `${overallProgress}%` }}
+      />
+      <div className="flex justify-between text-sm text-gray-600 mt-3 ">
+        <span className="truncate pr-2">
+          Assessment {currentAssessmentIndex + 1} of {totalAssessments} - Module: {currentModule.moduleName}
+        </span>
+        <span>{Math.round(overallProgress)}% Complete</span>
+      </div>
+    </div>
+  );
+
+  // Assessment header component
+  const AssessmentHeader = () => (
+    <div className="bg-white border-b border-gray-200 p-4 mb-6">
+      <div className="max-w-4xl mx-auto">
+        <h2 className="text-xl font-semibold text-gray-800">{assessment.title}</h2>
+        {assessment.description && <p className="text-sm text-gray-600 mt-1">{assessment.description}</p>}
+      </div>
+    </div>
+  );
+
+  // This component will now render all questions for the current step
+  const renderCurrentStep = () => {
+    // A single question component might need to be rendered on its own page (e.g., welcome screen)
+    // Or multiple questions might be rendered together in a card.
+    const firstQuestion = currentQuestions[0];
+
+    // Handle single-page question types like welcome and module titles
+    if (firstQuestion.type === 'welcome_screen') {
+      return (
+        <WelcomeScreen
+          title={firstQuestion.welcome_title || assessment.title}
+          message={firstQuestion.welcome_message || assessment.description || ''}
+          buttonText={firstQuestion.button_text || 'Begin Assessment'}
+          onStart={() => handleNext({ [firstQuestion._id]: null })}
+        />
+      );
+    }
+
+    if (firstQuestion.type === 'module_title') {
+      return (
+        <ModuleTitleScreen
+          module={currentModule.moduleName}
+          title={firstQuestion.module_title || ''}
+          description={firstQuestion.module_description || ''}
+          onBack={currentModuleIndex > 0 || currentStepIndex > 0 ? handleBack : undefined}
+          onContinue={() => handleNext({ [firstQuestion._id]: null })}
+          showBackButton={currentModuleIndex > 0 || currentStepIndex > 0}
+        />
+      );
+    }
+
+    // For all other question types, group them in a card
+    // Note: This assumes your individual question components can be composed this way.
+    // You might need to adjust them to remove their own "Next/Back" buttons and layout,
+    // and instead rely on a shared set of controls.
+    // For this example, I'll keep them as they are, but ideally, you'd refactor them.
+    return (
+      <Card>
+        <CardContent className="p-6 md:p-8">
+          {showAssessment && (
+            <>
+              <p className="text-[#227C9D] text-sm font-medium text-center">module {currentModuleIndex + 1}</p>
+              <h1 className="text-2xl font-bold text-[#227C9D] text-center mb-4">{currentModule.moduleName}</h1>
+            </>
+          )}
+          {!showAssessment ? (
+            <WelcomeScreen
+              title={assessment.title}
+              message={assessment.description || ''}
+              buttonText={'Begin Assessment'}
+              onStart={() => setShowAssessment(true)}
+            />
+          ) : (
+            currentQuestions.map((currentQuestion: AssessmentQuestion, index) => (
+              <div key={currentQuestion._id} className="mb-6 last:mb-0">
+                {renderQuestion(currentQuestion, index)}
+              </div>
+            ))
+          )}
+
+          {/* Shared Navigation for the step */}
+          <div className="mt-8 flex justify-between">
+            <Button
+              variant="outline"
+              onClick={handleBack}
+              disabled={currentModuleIndex === 0 && currentStepIndex === 0}
+              className=" bg-transparent cursor-pointer py-4 border-[#227C9D]"
+            >
+              Back
+            </Button>
+            <Button
+              onClick={() => {
+                const stepResponses = currentQuestions.reduce((acc: any, q: any) => {
+                  acc[q._id] = responses[q._id] || null; // Use existing response or null
+                  return acc;
+                }, {} as Record<string, any>);
+                handleNext(stepResponses);
+              }}
+              className=" cursor-pointer py-4"
+            >
+              {isLastStepOverall ? 'Finish Assessment' : 'Next'}
+            </Button>
+          </div>
+          <div className="text-center text-sm text-muted-foreground mt-4">
+            Step {currentStepIndex + 1} of {totalStepsInModule}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const renderQuestion = (currentQuestion: AssessmentQuestion, index: number) => {
+    switch (currentQuestion.type) {
+      case 'multiple_choice':
+        return (
+          <MultipleChoiceQuestion
+            module={currentModule.moduleName}
+            title={currentQuestion.question}
+            description={currentQuestion.description}
+            instruction={currentQuestion.instruction}
+            options={transformOptions(currentQuestion.options || [])}
+            // currentStep={currentStepIndex + 1}
+            value={responses[currentQuestion._id] || ''}
+            onChange={(res) => setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }))}
+            index={index}
+          />
+        );
+      case 'checkbox':
+        return (
+          <CheckboxQuestion
+            module={currentModule.moduleName}
+            title={currentQuestion.question}
+            description={currentQuestion.description}
+            instruction={currentQuestion.instruction}
+            options={transformOptions(currentQuestion.options || [])}
+            minSelections={currentQuestion.min_selections}
+            maxSelections={currentQuestion.max_selections}
+            // currentStep={currentStepIndex + 1}
+            value={responses[currentQuestion._id] || []}
+            onChange={(res) => setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }))}
+            index={index}
+          />
+        );
+      case 'short_text':
+      case 'long_text':
+        return (
+          <TextQuestion
+            module={currentModule.moduleName}
+            title={currentQuestion.question}
+            description={currentQuestion.description}
+            instruction={currentQuestion.instruction}
+            placeholder={currentQuestion.placeholder}
+            type={currentQuestion.type}
+            maxLength={currentQuestion.max_length}
+            minLength={currentQuestion.min_length}
+            rows={currentQuestion.rows}
+            isRequired={currentQuestion.is_required}
+            // currentStep={currentStepIndex + 1}
+            value={responses[currentQuestion._id] || ''}
+            onChange={(res) => setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }))}
+            index={index}
+          />
+        );
+      case 'dropdown':
+        return (
+          <DropdownQuestion
+            module={currentModule.moduleName}
+            title={currentQuestion.question}
+            description={currentQuestion.description}
+            placeholder={currentQuestion.placeholder}
+            options={transformOptions(currentQuestion.options || [])}
+            isRequired={currentQuestion.is_required}
+            // currentStep={currentStepIndex + 1}
+            value={responses[currentQuestion._id] || ''}
+            onChange={(res) => setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }))}
+            index={index}
+          />
+        );
+      case 'multiple_choice_grid':
+        return (
+          <GridQuestion
+            module={currentModule.moduleName}
+            title={currentQuestion.question}
+            description={currentQuestion.description}
+            instruction={currentQuestion.instruction}
+            columns={transformGridColumns(currentQuestion.grid_columns || [])}
+            rows={transformGridRows(currentQuestion.grid_rows || [])}
+            isRequired={currentQuestion.is_required}
+            // currentStep={currentStepIndex + 1}
+            value={responses[currentQuestion._id] || {}}
+            onChange={(res) => setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }))}
+            index={index}
+          />
+        );
+      default:
+        return <div key={currentQuestion._id}>Unsupported question type: {currentQuestion.type}</div>;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-muted/30 p-6">
+      <div className="max-w-4xl mx-auto">
+        {/* <AssessmentHeader /> */}
+        <ProgressBar />
+        {renderCurrentStep()}
+      </div>
+    </div>
+  );
 }
