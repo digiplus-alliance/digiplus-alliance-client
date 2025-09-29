@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import OurPartners from "../widgets/our-partners";
 import { ArticleCard } from "./widgets/ArticleCard";
 import { FeaturedArticle } from "./widgets/FeaturedArticle";
 import { SidebarArticle } from "./widgets/SideBarArticle";
@@ -108,10 +107,6 @@ export default function Blog() {
         totalPages={totalPages}
         onPageChange={handlePageChange}
       />
-
-      <div className="my-20">
-        <OurPartners />
-      </div>
     </div>
   );
 }

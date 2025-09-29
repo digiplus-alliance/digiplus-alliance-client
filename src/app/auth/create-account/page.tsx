@@ -227,14 +227,21 @@ export default function RegisterPage() {
 
           <p className="text-xs text-[#5E5B5B]">
             By signing up, you agree with our{" "}
-            <a href="#" className="text-black hover:underline">
+            <Link
+              href="https://www.8thgearpartners.com/privacy-policy"
+              className="text-black hover:underline"
+              target="_blank"
+            >
               privacy policy
-            </a>{" "}
+            </Link>{" "}
             and{" "}
-            <a href="#" className="text-black hover:underline">
+            <Link
+              href="https://www.8thgearpartners.com/terms-and-conditions"
+              className="text-black hover:underline"
+              target="_blank"
+            >
               terms of use
-            </a>
-            .
+            </Link>
           </p>
 
           <Button type="submit" className="w-full mt-4">
@@ -244,7 +251,7 @@ export default function RegisterPage() {
       </div>
 
       {/* Social login */}
-      <div className="flex flex-col md:hidden gap-2 items-center justify-center">
+      {/* <div className="flex flex-col md:hidden gap-2 items-center justify-center">
         <Button
           variant="ghost"
           className="text-[#171616] text-base px-8 py-4 font-normal border border-[#D6D4D4] flex items-center gap-3"
@@ -257,7 +264,7 @@ export default function RegisterPage() {
           variant="ghost"
           className="text-[#171616] text-base px-8 py-4 font-normal border border-[#D6D4D4] flex items-center gap-3"
         >
-          {/* <FcGoogle className="w-5 h-5" /> */}
+          <FcGoogle className="w-5 h-5" />
           <Image
             src="/google-logo.svg"
             alt="Google Logo"
@@ -266,7 +273,7 @@ export default function RegisterPage() {
           />
           <span>Continue with Google</span>
         </Button>
-      </div>
+      </div> */}
 
       {showSuccessModal && (
         <NotificationModal

@@ -8,7 +8,6 @@ import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Clock, Calendar, User, Share2 } from "lucide-react";
 import { blogPosts, allPosts } from "../data/blog-data";
-import OurPartners from "../../widgets/our-partners";
 
 interface BlogPostPageProps {
   params: {
@@ -221,11 +220,6 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               </div>
             </Card>
           </div>
-        </div>
-
-        {/* Partners Section */}
-        <div className="my-20">
-          <OurPartners />
         </div>
       </div>
     </div>
