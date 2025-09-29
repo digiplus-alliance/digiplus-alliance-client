@@ -117,7 +117,7 @@ const ProfileCard = () => {
               )} */}
             </div>
             <div className="space-y-3 sm:space-y-4 text-xs sm:text-sm text-center flex flex-col items-center justify-start pt-6 sm:pt-8 lg:pt-10 pb-0 w-full border-t border-[#D9D9D9]">
-              <div className="flex items-center justify-between gap-2 w-full max-w-[85%] sm:max-w-[70%]">
+              {/* <div className="flex items-center justify-between gap-2 w-full max-w-[85%] sm:max-w-[70%]">
                 <div className="flex flex-col items-start gap-0.5 w-full max-w-[98%]">
                   <span className="text-muted-foreground text-xs sm:text-sm">Assessment</span>
                   <p className="bg-[#FFF6D3] text-[#5E5B5B] px-4 sm:px-6 py-1 sm:py-2 rounded-lg w-full text-center text-xs sm:text-sm">
@@ -127,7 +127,7 @@ const ProfileCard = () => {
                 <button>
                   <ChevronRight color="#B8B8B8" />
                 </button>
-              </div>
+              </div> */}
               <div className="flex items-center justify-between gap-2 text-sm w-full max-w-[70%]">
                 <div className=" flex flex-col items-start gap-0.5 w-full max-w-[98%]">
                   <p className="text-muted-foreground">Policies</p>

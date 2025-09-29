@@ -55,12 +55,15 @@ export function CheckboxQuestion({
       <CardContent className="p-0 -mt-6">
         <div className="space-y-4">
           {options.map((option) => (
-            <Label key={option.id} className="flex items-start space-x-3 text-[#3D3A3A] leading-relaxed cursor-pointer">
+            <Label
+              key={option._id}
+              className="flex items-start space-x-3 text-[#3D3A3A] leading-relaxed cursor-pointer"
+            >
               <Checkbox
-                id={option.id}
+                id={option._id}
                 checked={value.includes(option._id)}
                 onCheckedChange={(checked) => handleSelectionChange(option._id, checked as boolean)}
-                disabled={!value.includes(option.id) && maxSelections ? value.length >= maxSelections : false}
+                disabled={!value.includes(option._id) && maxSelections ? value.length >= maxSelections : false}
               />
               <span className="flex-1">{option.text || option.label}</span>
             </Label>

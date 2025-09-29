@@ -14,6 +14,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { groupQuestionsByModuleAndStep, IGroupedModule } from '@/utils/assessmentUtils';
+import { type AssessmentSubmissionResponse } from '@/types/assessment';
 
 // Import types from the assessment types file
 import type { Assessment, AssessmentQuestion } from '@/types/assessment';
@@ -51,6 +52,7 @@ export default function Assessment() {
   } = useGetAssessmentById(currentAssessmentId || '', !!currentAssessmentId);
 
   const submitAssessment = useSubmitAssessment();
+  const [assessmentResult, setAssessmentResult] = useState<AssessmentSubmissionResponse | null>(null);
 
   // Group questions by module and step
   const groupedModules: IGroupedModule[] = useMemo(
@@ -103,9 +105,11 @@ export default function Assessment() {
   if (allAssessmentsCompleted) {
     return (
       <AssessmentResults
-        score={20}
-        maxScore={45}
-        level="Beginner"
+        score={assessmentResult?.data?.user_score || 0}
+        maxScore={Math.max(
+          ...(assessmentResult?.data?.recommended_services?.map((service) => service.max_points) || [])
+        )}
+        level={assessmentResult?.data?.user_level || 'Beginner'}
         onSuggestions={() => {
           router.push('/user-dashboard/services');
         }}
@@ -117,6 +121,7 @@ export default function Assessment() {
           setCompletedAssessments(new Set());
           setAllAssessmentsCompleted(false);
         }}
+        assessment_title={assessmentResult?.data?.assessment_title || ''}
       />
     );
   }
@@ -211,11 +216,14 @@ export default function Assessment() {
 
         setIsSubmitting(true);
 
-        await submitAssessment.mutateAsync({
+        const response = await submitAssessment.mutateAsync({
           assessment_id: currentAssessmentId!,
           user_id: user._id, // Make sure user is defined
           responses: finalResponses,
         });
+
+        console.log(response.score);
+        setAssessmentResult(response);
 
         // Mark current assessment as completed
         const newCompletedAssessments = new Set(completedAssessments);
@@ -267,7 +275,7 @@ export default function Assessment() {
   // Progress calculation across all assessments
   const totalAssessments = availableAssessments?.length || 1;
   const progressInCurrentAssessment =
-    (currentModuleIndex + (currentStepIndex + 1) / totalStepsInModule) / groupedModules.length;
+    (currentModuleIndex + currentStepIndex / totalStepsInModule) / groupedModules.length;
   const overallProgress = ((currentAssessmentIndex + progressInCurrentAssessment) / totalAssessments) * 100;
 
   // Progress bar component
@@ -358,33 +366,44 @@ export default function Assessment() {
             ))
           )}
 
-          {/* Shared Navigation for the step */}
-          <div className="mt-8 flex justify-between">
-            <Button
-              variant="outline"
-              onClick={handleBack}
-              disabled={currentModuleIndex === 0 && currentStepIndex === 0}
-              className=" bg-transparent cursor-pointer py-4 border-[#227C9D]"
-            >
-              Back
-            </Button>
-            <Button
-              onClick={() => {
-                const stepResponses = currentQuestions.reduce((acc: any, q: any) => {
-                  acc[q._id] = responses[q._id] || null; // Use existing response or null
-                  return acc;
-                }, {} as Record<string, any>);
-                handleNext(stepResponses);
-              }}
-              disabled={isSubmitting}
-              className=" cursor-pointer py-4"
-            >
-              {isLastStepOverall ? (isSubmitting ? 'Submitting Assessment...' : 'Finish Assessment') : 'Next'}
-            </Button>
-          </div>
-          <div className="text-center text-sm text-muted-foreground mt-4">
-            Step {currentStepIndex + 1} of {totalStepsInModule}
-          </div>
+          {showAssessment && (
+            <>
+              {/* Shared Navigation for the step */}
+              <div className="mt-8 flex justify-between">
+                <Button
+                  variant="outline"
+                  onClick={handleBack}
+                  disabled={currentModuleIndex === 0 && currentStepIndex === 0}
+                  className=" bg-transparent cursor-pointer py-4 border-[#227C9D]"
+                >
+                  Back
+                </Button>
+                <Button
+                  onClick={() => {
+                    const stepResponses = currentQuestions.reduce((acc: any, q: any) => {
+                      acc[q._id] = responses[q._id] || null; // Use existing response or null
+                      return acc;
+                    }, {} as Record<string, any>);
+
+                    const checkIfAnyIsNull = Object.values(stepResponses).some((value) => value === null);
+
+                    if (checkIfAnyIsNull) {
+                      toast.error('Please answer all questions before proceeding.');
+                      return;
+                    }
+                    handleNext(stepResponses);
+                  }}
+                  disabled={isSubmitting}
+                  className=" cursor-pointer py-4"
+                >
+                  {isLastStepOverall ? (isSubmitting ? 'Submitting Assessment...' : 'Finish Assessment') : 'Next'}
+                </Button>
+              </div>
+              <div className="text-center text-sm text-muted-foreground mt-4">
+                Step {currentStepIndex + 1} of {totalStepsInModule}
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
     );

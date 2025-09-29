@@ -34,12 +34,29 @@ interface ServiceDetailProps {
     updatedAt: string;
     formatted_price: string;
     formatted_discounted_price: string;
+    pricing_unit: string;
   }[];
   pricing_unit: string;
   onApply?: () => void;
+  handleClick?: (service: {
+    _id: string;
+    name: string;
+    service_type: string;
+    image: string;
+    images: string[];
+    price: number;
+    discounted_price: number;
+    short_description: string;
+    long_description: string;
+    createdAt: string;
+    updatedAt: string;
+    formatted_price: string;
+    formatted_discounted_price: string;
+    pricing_unit: string;
+  }) => void;
 }
 
-const ServiceDetail: FC<ServiceDetailProps> = ({ service, relatedServices, onApply, pricing_unit }) => {
+const ServiceDetail: FC<ServiceDetailProps> = ({ service, relatedServices, onApply, pricing_unit, handleClick }) => {
   const defaultFullDescription = `Vivamus adipiscing nisl ut dolor dignissim semper. Nulla luctus malesuada tincidunt. Class aptent taciti sociosqu ad litora torquent! Vivamus adipiscing nisl ut dolor dignissim semper.
 Vivamus adipiscing nisl ut dolor dignissim semper. Nulla luctus malesuada tincidunt. Class aptent taciti sociosqu ad litora torquent! Vivamus adipiscing nisl ut dolor dignissim semper.
 Vivamus adipiscing nisl ut dolor dignissim semper. Nulla luctus malesuada tincidunt. Class aptent taciti sociosqu ad litora torquent! Vivamus adipiscing nisl ut dolor dignissim semper.
@@ -90,7 +107,13 @@ Vivamus adipiscing nisl ut dolor dignissim semper. Nulla luctus malesuada tincid
         <h2 className="text-2xl sm:text-3xl lg:text-4xl text-center font-semibold text-[#171616]">More like this</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {relatedServices.slice(0, 4).map((relatedService) => (
-            <ServiceCard key={relatedService._id} {...relatedService} />
+            <ServiceCard
+              key={relatedService._id}
+              {...relatedService}
+              onClick={() => {
+                if (handleClick) handleClick(relatedService);
+              }}
+            />
           ))}
         </div>
       </div>
