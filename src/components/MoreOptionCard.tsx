@@ -16,7 +16,7 @@ interface CustomCardProps {
 
 export function MoreOptionCard({ image, title, body, footer }: CustomCardProps) {
   return (
-    <Card className="md:w-xs max-w-[400px] overflow-hidden p-0">
+    <Card className="md:w-xs max-w-[400px] min-h-[28rem] overflow-hidden p-0 flex flex-col justify-between">
       {/* Image */}
       <div className="relative w-full h-32">
         <Image
@@ -33,12 +33,12 @@ export function MoreOptionCard({ image, title, body, footer }: CustomCardProps) 
       </CardHeader>
 
       {/* Body */}
-      <CardContent>
+      <CardContent className="flex-grow">
         <p className="text-base text-[#5E5B5B]">{body}</p>
       </CardContent>
 
       {/* Footer */}
-      <CardFooter className="justify-end py-4">
+  <CardFooter className="justify-end py-4">
         <span className="text-lg text-[#171616] font-semibold">{footer}</span>
       </CardFooter>
     </Card>

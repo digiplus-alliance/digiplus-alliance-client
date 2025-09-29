@@ -1,7 +1,31 @@
 import InfoSection from "../widgets/info-section";
-import MoreOption from "../widgets/more-option";
+import MoreOption, { OptionItem } from "../widgets/more-option";
 import ServiceHero from "../widgets/service-hero";
 import Value from "../widgets/value-section";
+
+const items: OptionItem[] = [
+  {
+    image: "/services/transformation-advisory/more-card-one.png",
+    title: "Market & Policy Insight",
+    body: "Launch your website. Set up your socials. Get custom emails. Go digital with ease and get the support to stay ahead.",
+    footer: "NGN 10 000 000",
+    link: "/landing/services/market-and-policy-insight",
+  },
+ {
+    image: "/services/transformation-advisory/more-card-two.png",
+    title: "Digital Transformation Advisory",
+    body: "Tap into a vibrant support network that helps MSMEs connect, collaborate, and thrive because no business should grow alone.",
+    footer: "NGN 100 000",
+    link: "/landing/services/digital-transformation-advisory",
+  },
+  {
+    image: "/services/transformation-advisory/more-card-three.png",
+    title: "Taster Sessions: Digital Tools & Platforms",
+    body: "From DSE (Digital Skills for Entrepreneurs) to MIRE (Market & Investment Readiness), we offer hands-on programs that teach what really works in today’s market.",
+    footer: "FREE",
+    link: "/landing/services/digital-tools-and-platforms",
+  },
+];
 
 export default function AccessToFinance() {
   return (
@@ -67,7 +91,7 @@ export default function AccessToFinance() {
         image="/services/access-to-finance/value.png"
       />
 
-      <MoreOption />
+      <MoreOption items={items} />
     </main>
   );
 }

@@ -2,7 +2,31 @@ import { IoCheckmarkDoneCircleOutline } from "react-icons/io5";
 import InfoSection from "../widgets/info-section";
 import ServiceHero from "../widgets/service-hero";
 import Value from "../widgets/value-section";
-import MoreOption from "../widgets/more-option";
+import MoreOption, { OptionItem } from "../widgets/more-option";
+
+const defaultItems: OptionItem[] = [
+  {
+    image: "/services/transformation-advisory/more-card-one.png",
+    title: "Market Access Support",
+    body: "Struggling to expand your reach? The Market Access Support service connects MSMEs to larger markets using the right blend of digital tools, strategic partnerships, and curated networking opportunities.",
+    footer: "NGN 100 000",
+    link: "/landing/services/market-access-support",
+  },
+  {
+    image: "/services/transformation-advisory/more-card-two.png",
+    title: "Digital Transformation Advisory",
+    body: "Tap into a vibrant support network that helps MSMEs connect, collaborate, and thrive because no business should grow alone.",
+    footer: "NGN 100 000",
+    link: "/landing/services/digital-transformation-advisory",
+  },
+  {
+    image: "/services/transformation-advisory/more-card-three.png",
+    title: "Digital Infrastructure Support",
+    body: "From DSE (Digital Skills for Entrepreneurs) to MIRE (Market & Investment Readiness), we offer hands-on programs that teach what really works in today’s market.",
+    footer: "NGN 350 000",
+    link: "/landing/services/digital-infrastructure-support",
+  },  
+];
 
 export default function DigitalToolsAndPlatforms() {
   const items = [
@@ -21,7 +45,7 @@ export default function DigitalToolsAndPlatforms() {
         ]}
         buttonText="Join the Next Free Session"
         buttonLink="/contact"
-        mainImage="/services/digital-tools/hero-one.png"
+        mainImage="/services/services-hero.png"
         sideImages={[
           "/services/digital-tools/hero-three.png",
           "/services/digital-tools/hero-two.png",
@@ -66,7 +90,7 @@ export default function DigitalToolsAndPlatforms() {
         button={{ label: "Join the next free session", href: "/contact" }}
       />
 
-      <MoreOption />
+      <MoreOption items={defaultItems}/>
     </main>
   );
 }
