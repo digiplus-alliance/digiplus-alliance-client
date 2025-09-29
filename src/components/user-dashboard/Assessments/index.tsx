@@ -42,6 +42,7 @@ export default function Assessment() {
     isLoading: loadingAssessments,
     error: assessmentsError,
   } = useGetAvailableAssessments();
+  const { suggestedServices, setSuggestedServices } = useAuthStore();
 
   const currentAssessmentId = availableAssessments?.[currentAssessmentIndex]?._id || null;
 
@@ -111,6 +112,9 @@ export default function Assessment() {
         )}
         level={assessmentResult?.data?.user_level || 'Beginner'}
         onSuggestions={() => {
+          setSuggestedServices(
+            assessmentResult?.data?.recommended_services?.map((service) => service.service_name) || []
+          );
           router.push('/user-dashboard/services');
         }}
         onRestart={() => {
