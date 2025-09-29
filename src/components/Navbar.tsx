@@ -36,15 +36,15 @@ export function Navbar() {
   };
 
   return (
-    <header className="border-b   bg-background px-4 md:px-10 pt-4 pb-2 w-full max-w-[1500px] mx-auto">
+    <header className="border-b bg-background px-4 md:px-10 md:py-4 pt-4 pb-2 w-full max-w-[1500px] mx-auto">
       <div className="w-full flex h-16 items-center justify-between">
         {/* Logo */}
         <Link href="/" className="font-bold text-xl">
           <Image
             src="/colored-logo.png"
             alt="DigiPlus"
-            width={100}
-            height={50}
+            width={180}
+            height={80}
           />
         </Link>
 

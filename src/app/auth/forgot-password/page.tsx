@@ -99,7 +99,7 @@ const InitiateChangePassword: React.FC<{
             </Link>
             <h1 className="text-lg md:text-2xl font-bold">Email Sent!</h1>
             <p className="mt-1 text-xs md:text-lg text-[#5E5B5B] max-w-lg py-4 md:py-0">
-              A verification code has been sent to your email. Please check your
+              A verification link has been sent to your email. Please check your
               inbox and follow the instructions to reset your password.
             </p>
           </div>
@@ -138,7 +138,7 @@ const InitiateChangePassword: React.FC<{
             Oops! you have forgotten your password
           </h1>
           <p className="mt-1 text-xs md:text-lg text-[#5E5B5B] max-w-lg py-4 md:py-0">
-            Input your email and we will send you a verification code if you
+            Input your email and we will send you a verification link if you
             have registered with us.
           </p>
         </div>
@@ -167,7 +167,7 @@ const InitiateChangePassword: React.FC<{
           </div>
 
           <Button type="submit" className="w-full mt-8">
-            {isPending ? <SpinnerIcon /> : "Send verification code"}
+            {isPending ? <SpinnerIcon /> : "Send verification link"}
           </Button>
         </form>
       </div>

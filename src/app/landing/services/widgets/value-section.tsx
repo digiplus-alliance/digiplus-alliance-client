@@ -1,5 +1,8 @@
+'use client'
+
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { IoCheckmarkDoneCircleOutline } from "react-icons/io5";
 
 interface ButtonProps {
@@ -23,6 +26,7 @@ export default function Value({
   reverse = false,
   button,
 }: FeatureCardProps) {
+  const router = useRouter();
   return (
     <div className="my-20 md:my-28">
       <div
@@ -67,7 +71,7 @@ export default function Value({
           <Button
             className="w-full sm:w-auto px-6 py-3 text-xs sm:text-base"
             size="lg"
-            onClick={button.onClick}
+            onClick={() => router.push("/auth/login")}
           >
             {button.label}
           </Button>

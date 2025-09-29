@@ -183,10 +183,10 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <p className="text-xs text-center text-[#5E5B5B]">
+          {/* <p className="text-xs text-center text-[#5E5B5B]">
             We will remember your presence for at most five days, then you will
             need to log in again.
-          </p>
+          </p> */}
 
           <Button
             type="submit"

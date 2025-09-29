@@ -1,6 +1,30 @@
 import InfoSection from "../widgets/info-section";
-import MoreOption from "../widgets/more-option";
+import MoreOption, { OptionItem } from "../widgets/more-option";
 import ServiceHero from "../widgets/service-hero";
+
+const items: OptionItem[] = [
+  {
+    image: "/services/transformation-advisory/more-card-one.png",
+    title: "Market & Policy Insight",
+    body: "Launch your website. Set up your socials. Get custom emails. Go digital with ease and get the support to stay ahead.",
+    footer: "NGN 10 000 000",
+    link: "/landing/services/market-and-policy-insight",
+  },
+  {
+    image: "/services/transformation-advisory/more-card-two.png",
+    title: "Access to Finance",
+    body: "From DSE (Digital Skills for Entrepreneurs) to MIRE (Market & Investment Readiness), we offer hands-on programs that teach what really works in today’s market.",
+    footer: "NGN 250 000",
+    link: "/landing/services/access-to-finance",
+  },
+  {
+    image: "/services/transformation-advisory/more-card-three.png",
+    title: "Taster Sessions: Digital Tools & Platforms",
+    body: "From DSE (Digital Skills for Entrepreneurs) to MIRE (Market & Investment Readiness), we offer hands-on programs that teach what really works in today’s market.",
+    footer: "FREE",
+    link: "/landing/services/digital-tools-and-platforms",
+  },
+];
 
 export default function MarketAccessSupport() {
   return (
@@ -54,7 +78,7 @@ export default function MarketAccessSupport() {
         imageHeight="h-48 md:h-58"
       />
 
-       <MoreOption />
+       <MoreOption items={items} />
     </main>
   );
 }

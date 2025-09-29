@@ -1,7 +1,31 @@
 import InfoSection from "../widgets/info-section";
-import MoreOption from "../widgets/more-option";
+import MoreOption, { OptionItem } from "../widgets/more-option";
 import ServiceHero from "../widgets/service-hero";
 import Value from "../widgets/value-section";
+
+const defaultItems: OptionItem[] = [
+  {
+    image: "/services/transformation-advisory/more-card-one.png",
+    title: "Market Access Support",
+    body: "Struggling to expand your reach? The Market Access Support service connects MSMEs to larger markets using the right blend of digital tools, strategic partnerships, and curated networking opportunities.",
+    footer: "NGN 100 000",
+    link: "/landing/services/market-access-support",
+  },
+  {
+    image: "/services/transformation-advisory/more-card-two.png",
+    title: "Digital Transformation Advisory",
+    body: "Tap into a vibrant support network that helps MSMEs connect, collaborate, and thrive because no business should grow alone.",
+    footer: "NGN 100 000",
+    link: "/landing/services/digital-transformation-advisory",
+  },
+  {
+    image: "/services/transformation-advisory/more-card-three.png",
+    title: "Research Commercialisation",
+    body: "We go beyond the numbers. Our deep-dive assessments and on-the-ground research help shape smarter policies and programs because impactful solutions start with real-world insight.",
+    footer: "Equity-based",
+    link: "/landing/services/research-commercialisation",
+  },  
+];
 
 export default function HubMembership() {
   return (
@@ -50,7 +74,7 @@ export default function HubMembership() {
         button={{ label: "Subscribe Now", href: "/contact" }}
       />
 
-      <MoreOption />
+      <MoreOption items={defaultItems} />
     </main>
   );
 }

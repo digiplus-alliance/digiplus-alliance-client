@@ -1,6 +1,30 @@
 import InfoSection from "../widgets/info-section";
-import MoreOption from "../widgets/more-option";
+import MoreOption, { OptionItem } from "../widgets/more-option";
 import ServiceHero from "../widgets/service-hero";
+
+const items: OptionItem[] = [
+  {
+    image: "/services/transformation-advisory/more-card-one.png",
+    title: "Capacity Building & Training",
+    body: "Tap into a vibrant support network that helps MSMEs connect, collaborate, and thrive because no business should grow alone.",
+    footer: "NGN 200 000",
+    link: "/landing/services/capacity-building-and-training",
+  },
+  {
+    image: "/services/transformation-advisory/more-card-two.png",
+    title: "Digital Infrastructure Support",
+    body: "From DSE (Digital Skills for Entrepreneurs) to MIRE (Market & Investment Readiness), we offer hands-on programs that teach what really works in today’s market.",
+    footer: "NGN 350 000",
+    link: "/landing/services/digital-infrastructure-support",
+  },
+  {
+    image: "/services/transformation-advisory/more-card-three.png",
+    title: "Taster Sessions: Digital Tools & Platforms",
+    body: "From DSE (Digital Skills for Entrepreneurs) to MIRE (Market & Investment Readiness), we offer hands-on programs that teach what really works in today’s market.",
+    footer: "FREE",
+    link: "/landing/services/digital-tools-and-platforms",
+  },
+];
 
 export default function DigitalTransformationAdvisory() {
   return (
@@ -52,10 +76,10 @@ export default function DigitalTransformationAdvisory() {
         reverse
         button={{ label: "Request Service", href: "/contact" }}
         layout="balanced"
-        imageHeight="h-48 md:h-64" // ✅ override height
+        imageHeight="h-48 md:h-64" 
       />
 
-      <MoreOption />
+      <MoreOption items={items} />
     </main>
   );
 }
