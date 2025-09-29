@@ -194,3 +194,34 @@ export interface AssessmentNavigation {
   currentStep: number;
   totalSteps: number;
 }
+
+//Assessment Submissions History
+export const AssessmentSubmissionHistoryResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+  data: z
+    .object({
+      _id: z.string(),
+      user_id: z.string(),
+      assessment_id: z.string(),
+      answers: z.array(
+        z.object({
+          question_id: z.string(),
+          answer: z.union([z.string(), z.array(z.string()), z.record(z.string(), z.string())]),
+        })
+      ),
+      user_score: z.number(),
+      max_possible_score: z.number(),
+      percentage_score: z.number(),
+      recommended_services: z.array(ServiceRecommendationSchema),
+
+      completed_at: z.string(),
+      createdAt: z.string(),
+      updatedAt: z.string(),
+      __v: z.number(),
+    })
+    .array(),
+});
+
+export type AssessmentSubmission = z.infer<typeof AssessmentSubmissionHistoryResponseSchema>;
+export type AssessmentSubmissionHistoryResponse = z.infer<typeof AssessmentSubmissionHistoryResponseSchema>;
