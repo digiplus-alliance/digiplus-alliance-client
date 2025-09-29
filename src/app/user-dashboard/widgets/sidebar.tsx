@@ -30,12 +30,12 @@ const items = [
     icon: Calendar,
     iconLogo: '/icons/sidebar-icon-two.svg',
   },
-  {
-    title: 'Assessment Grades',
-    url: 'assessment-grades',
-    icon: Search,
-    iconLogo: '/icons/sidebar-icon-two.svg',
-  },
+  // {
+  //   title: 'Assessment Grades',
+  //   url: 'assessment-grades',
+  //   icon: Search,
+  //   iconLogo: '/icons/sidebar-icon-two.svg',
+  // },
 ];
 
 const personalizationItems = [
@@ -45,12 +45,12 @@ const personalizationItems = [
     icon: Settings,
     iconLogo: '/icons/sidebar-icon-three.svg',
   },
-  {
-    title: 'Settings',
-    url: 'settings',
-    icon: Settings,
-    iconLogo: '/icons/sidebar-icon-four.svg',
-  },
+  // {
+  //   title: 'Settings',
+  //   url: 'settings',
+  //   icon: Settings,
+  //   iconLogo: '/icons/sidebar-icon-four.svg',
+  // },
   {
     title: 'Notifications',
     url: 'notifications',
@@ -73,7 +73,7 @@ const UserSidebar = ({ children }: { children: React.ReactNode }) => {
         navItems={items}
         personalizationItems={personalizationItems}
         basePath="/user-dashboard"
-        logoHref="/user-dashboard/home"
+        logoHref="/user-dashboard"
         showProfileMenu
         className="bg-white"
       />

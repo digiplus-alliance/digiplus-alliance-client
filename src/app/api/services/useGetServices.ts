@@ -16,6 +16,9 @@ export const ServiceSchema = z.object({
   short_description: z.string().optional(),
   long_description: z.string().optional(),
   discounted_price: z.number().optional(),
+  formatted_price: z.string().optional(),
+  formatted_discounted_price: z.string().optional(),
+  pricing_unit: z.string().optional(),
 });
 
 export const ServicesResponseSchema = z.array(ServiceSchema);

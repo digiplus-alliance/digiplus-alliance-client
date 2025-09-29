@@ -40,6 +40,10 @@ type AuthState = {
   setAccessToken: (token: string) => void;
   clearUser: () => void;
   clearAuth: () => void;
+  openNotification: boolean;
+  setOpenNotification: (open: boolean) => void;
+  suggestedServices: string[];
+  setSuggestedServices: (services: string[]) => void;
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -56,6 +60,10 @@ export const useAuthStore = create<AuthState>()(
           localStorage.removeItem('auth-storage');
         }
       },
+      openNotification: false,
+      setOpenNotification: (open) => set({ openNotification: open }),
+      suggestedServices: [],
+      setSuggestedServices: (services) => set({ suggestedServices: services }),
     }),
     {
       name: 'auth-storage',

@@ -8,7 +8,7 @@ export async function PATCH(req: NextRequest) {
     const cookieHeader = req.headers.get('cookie') || '';
 
     let body: FormData | string;
-    let headers: Record<string, string> = {
+    const headers: Record<string, string> = {
       Cookie: cookieHeader,
       Authorization: 'Bearer ' + req.cookies.get('accessToken')?.value,
     };

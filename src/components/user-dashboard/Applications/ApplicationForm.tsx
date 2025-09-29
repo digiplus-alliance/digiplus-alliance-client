@@ -196,7 +196,7 @@ const ApplicationForm = () => {
                     type="submit"
                     className="w-full h-12 bg-[#FF5C5C] mt-6 hover:bg-[#FF4444] text-white  rounded-lg"
                   >
-                    Submit
+                    {isPending ? 'Submitting...' : 'Submit'}
                   </Button>
                 </form>
               </div>
