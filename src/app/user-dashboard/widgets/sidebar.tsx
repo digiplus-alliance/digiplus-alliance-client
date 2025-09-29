@@ -30,12 +30,12 @@ const items = [
     icon: Calendar,
     iconLogo: '/icons/sidebar-icon-two.svg',
   },
-  // {
-  //   title: 'Assessment Grades',
-  //   url: 'assessment-grades',
-  //   icon: Search,
-  //   iconLogo: '/icons/sidebar-icon-two.svg',
-  // },
+  {
+    title: 'Assessment Grades',
+    url: 'grades',
+    icon: Search,
+    iconLogo: '/icons/sidebar-icon-two.svg',
+  },
 ];
 
 const personalizationItems = [

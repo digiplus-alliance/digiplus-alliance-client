@@ -110,7 +110,7 @@ export default function Assessment() {
         maxScore={Math.max(
           ...(assessmentResult?.data?.recommended_services?.map((service) => service.max_points) || [])
         )}
-        level={assessmentResult?.data?.user_level || 'Beginner'}
+        level={assessmentResult?.data?.recommended_services?.[0]?.levels?.[0] || 'Beginner'}
         onSuggestions={() => {
           setSuggestedServices(
             assessmentResult?.data?.recommended_services?.map((service) => service.service_name) || []
