@@ -2,25 +2,17 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
-import { useGetApplicationSubmissions } from '@/app/api/user/useGetApplicationSubmissions';
-import { ApplicationSubmission } from '@/types/applications';
-import { useMemo } from 'react';
+import { Calendar, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { useGetAssessmentHistorySubmissions } from '@/app/api/user/useGetAssessmentHistory';
-import { AssessmentSubmission } from '@/types/assessment';
 import PageHeader from '@/components/PageHeader';
 import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
+import { Card, CardHeader, CardTitle } from '../../ui/card';
 import { Input } from '@/components/ui/input';
-
-// Helper function to format currency
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-NG', {
-    style: 'currency',
-    currency: 'NGN',
-    minimumFractionDigits: 0,
-  }).format(amount);
-};
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { format } from 'date-fns';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 
 // Helper function to format date
 const formatDate = (dateString: string) => {
@@ -35,17 +27,6 @@ const formatDate = (dateString: string) => {
       hour12: true,
     })
     .replace(',', ' •');
-};
-
-// Helper function to format start/end dates
-const formatStartDate = (dateString: string | null) => {
-  if (!dateString) return 'Null';
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
 };
 
 const getStatusBadge = (status: string) => {
@@ -85,11 +66,35 @@ const getStatusBadge = (status: string) => {
   }
 };
 
-interface AssessmentHistoryTableProps {
-  filters?: any;
-}
+const scoreRanges = [
+  {
+    min: 0,
+    max: 20,
+    value: '0-20',
+  },
+  {
+    min: 21,
+    max: 40,
+    value: '21-40',
+  },
+  {
+    min: 41,
+    max: 60,
+    value: '41-60',
+  },
+  {
+    min: 61,
+    max: 80,
+    value: '61-80',
+  },
+  {
+    min: 81,
+    max: 100,
+    value: '81-100',
+  },
+];
 
-export function AssessmentHistoryTable({ filters = {} }: AssessmentHistoryTableProps) {
+export function AssessmentHistoryTable() {
   const {
     data: assessments,
     isLoading,
@@ -99,6 +104,70 @@ export function AssessmentHistoryTable({ filters = {} }: AssessmentHistoryTableP
     isLoading: boolean;
     error: any;
   };
+
+  const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
+
+  const [filters, setFilters] = useState<{
+    score?: {
+      min?: number;
+      max?: number;
+    };
+    status?: string;
+    dateFrom?: Date;
+    dateTo?: Date;
+  }>({});
+
+  const handleDateRangeChange = (from?: Date, to?: Date) => {
+    setDateRange({ from, to });
+    setFilters((prev) => ({
+      ...prev,
+      dateFrom: from,
+      dateTo: to,
+    }));
+  };
+
+  // Filter applications based on the provided filters
+  const filteredAssessments = useMemo(() => {
+    console.log('No assessments found.', assessments?.data);
+
+    if (!assessments?.data) return [];
+
+    return assessments?.data?.filter((assessment: any) => {
+      // Score filter
+      if (filters.score && assessment.user_score !== undefined) {
+        const { min, max } = filters.score;
+        if (min !== undefined && max !== undefined) {
+          if (assessment.user_score < min || assessment.user_score > max) {
+            return false;
+          }
+        }
+      }
+
+      // Status filter
+      if (filters.status && assessment.status !== filters.status) {
+        return false;
+      }
+
+      // Date range filter
+      if (filters.dateFrom || filters.dateTo) {
+        const submissionDate = new Date(assessment.completed_at ?? assessment.createdAt);
+
+        if (filters.dateFrom && submissionDate < filters.dateFrom) {
+          return false;
+        }
+
+        if (filters.dateTo) {
+          const endOfDay = new Date(filters.dateTo);
+          endOfDay.setHours(23, 59, 59, 999);
+          if (submissionDate > endOfDay) {
+            return false;
+          }
+        }
+      }
+
+      return true;
+    });
+  }, [assessments?.data, filters]);
 
   if (isLoading) {
     return (
@@ -155,16 +224,75 @@ export function AssessmentHistoryTable({ filters = {} }: AssessmentHistoryTableP
               </CardTitle>
             </div>
             {/* Filters Section - Responsive */}
-            {/* <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:gap-4 sm:space-y-0 mt-4 bg-[#FBFBFD] rounded-lg p-3 sm:p-5 justify-between">
-              <div className="relative flex-1 max-w-full sm:max-w-sm">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search assessments..."
-                  className="pl-10 bg-muted border-0 text-sm sm:text-base"
-                  onChange={(e) => {}}
-                />
+            <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:gap-4 sm:space-y-0 mt-4 bg-[#FBFBFD] rounded-lg p-3 sm:p-5 justify-between">
+              {/* Filter Controls */}
+              <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4 sm:space-y-0">
+                <Select
+                  onValueChange={(value) => {
+                    if (value === 'all') {
+                      setFilters({ ...filters, score: undefined });
+                    } else {
+                      setFilters({
+                        ...filters,
+                        score: scoreRanges.find((score) => score.value === value),
+                      });
+                    }
+                  }}
+                >
+                  <SelectTrigger className="w-full sm:w-[180px] bg-white border-[#DDDDDD] text-sm sm:text-base">
+                    <SelectValue placeholder="Filter by Score Range" className="text-[#706C6C]" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Score Range</SelectItem>
+                    {scoreRanges.map((score) => (
+                      <SelectItem key={score.value} value={score.value}>
+                        {score.value}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {/* Date Range Filter */}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full sm:w-auto border-[#DDDDDD] bg-white text-[#b1afaf] hover:bg-[#FBFBFD] text-sm sm:text-base"
+                    >
+                      {dateRange.from ? (
+                        dateRange.to ? (
+                          <>
+                            {format(dateRange.from, 'LLL dd, y')} - {format(dateRange.to, 'LLL dd, y')}
+                          </>
+                        ) : (
+                          format(dateRange.from, 'LLL dd, y')
+                        )
+                      ) : (
+                        'Filter Date Range'
+                      )}
+                      <Calendar className="w-4 h-4 ml-2" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <CalendarComponent
+                      initialFocus
+                      mode="range"
+                      defaultMonth={dateRange.from}
+                      selected={{ from: dateRange.from, to: dateRange.to }}
+                      onSelect={(range) => {
+                        if (range) {
+                          handleDateRangeChange(range.from, range.to);
+                        } else {
+                          handleDateRangeChange(undefined, undefined);
+                        }
+                      }}
+                      numberOfMonths={2}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
-            </div> */}
+            </div>
 
             <>
               {/* Desktop Table View */}
@@ -182,7 +310,7 @@ export function AssessmentHistoryTable({ filters = {} }: AssessmentHistoryTableP
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {assessments?.data?.map((app: any) => (
+                    {filteredAssessments?.map((app: any) => (
                       <TableRow key={app._id} className="hover:bg-[#EBFBFF] border-white">
                         <TableCell className="font-medium text-[#06516C] text-xs xl:text-sm">
                           {new Date(app.createdAt).toLocaleDateString()}
