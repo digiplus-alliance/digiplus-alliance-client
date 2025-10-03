@@ -5,12 +5,45 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { useChangePassword } from '@/app/api/user/useChangePassword';
+import { toast } from 'sonner';
+import { useAuthStore } from '@/store/auth';
+import { useAuthGuard } from '@/components/AuthGuard';
 
 const SettingsPage = () => {
   const [showResetPassword, setShowResetPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [oldPassword, setOldPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const { mutate: changePassword, isPending } = useChangePassword();
+  const { redirectToLogin } = useAuthGuard();
 
   const handleResetPasswordClick = () => {
     setShowResetPassword(true);
+  };
+
+  const handleResetPassword = () => {
+    if (newPassword !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+
+    changePassword(
+      {
+        oldPassword: oldPassword,
+        newPassword: confirmPassword,
+      },
+      {
+        onSuccess: () => {
+          toast.success('Password changed successfully');
+          setShowResetPassword(false);
+          redirectToLogin();
+        },
+        onError: () => {
+          toast.error('Failed to change password');
+        },
+      }
+    );
   };
 
   return (
@@ -50,17 +83,43 @@ const SettingsPage = () => {
           <div className="space-y-4">
             <div>
               <label htmlFor="new-password" className="block text-sm font-medium text-gray-700">
+                Old Password
+              </label>
+              <Input
+                id="old-password"
+                type="password"
+                className="mt-1 block w-full"
+                value={oldPassword}
+                onChange={(e) => setOldPassword(e.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="new-password" className="block text-sm font-medium text-gray-700">
                 New Password
               </label>
-              <Input id="new-password" type="password" className="mt-1 block w-full" />
+              <Input
+                id="new-password"
+                type="password"
+                className="mt-1 block w-full"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
             </div>
             <div>
               <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">
                 Confirm Password
               </label>
-              <Input id="confirm-password" type="password" className="mt-1 block w-full" />
+              <Input
+                id="confirm-password"
+                type="password"
+                className="mt-1 block w-full"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
             </div>
-            <Button className="w-full">Reset</Button>
+            <Button onClick={handleResetPassword} disabled={isPending} className="w-full cursor-pointer">
+              Reset
+            </Button>
           </div>
         </Card>
       )}

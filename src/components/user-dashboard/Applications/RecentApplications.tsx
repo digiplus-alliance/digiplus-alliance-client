@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useGetApplicationSubmissions } from '@/app/api/user';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -49,6 +50,29 @@ export function RecentApplications() {
   const { data: applications, isLoading, error } = useGetApplicationSubmissions();
 
   const [recentApplications, setRecentApplications] = useState(applications?.slice(0, 6));
+  const [fetching, setFetching] = useState(false);
+
+  const fetchRecentApplications = async () => {
+    try {
+      setFetching(true);
+      const request = await fetch('/api/user/submissions');
+      const response = await request.json();
+      if (request.ok) {
+        setRecentApplications(response?.slice(0, 6));
+      } else {
+        toast.error(response.message || 'An error occurred fetching recent applications');
+        setRecentApplications([]);
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'An error occurred fetching recent applications');
+    } finally {
+      setFetching(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRecentApplications();
+  }, []);
 
   useEffect(() => {
     setRecentApplications(applications);
@@ -56,7 +80,7 @@ export function RecentApplications() {
 
   const router = useRouter();
 
-  if (isLoading) {
+  if (fetching) {
     return (
       <div className="space-y-4">
         <div className="flex justify-center items-center py-8">
@@ -80,7 +104,7 @@ export function RecentApplications() {
         </Button>
       </CardHeader>
       <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6">
-        {recentApplications ? (
+        {recentApplications && recentApplications?.length > 0 ? (
           recentApplications.map((app) => (
             <div key={app._id} className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 border-b">
               <Image
