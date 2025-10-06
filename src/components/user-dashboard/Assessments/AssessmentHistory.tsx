@@ -128,8 +128,6 @@ export function AssessmentHistoryTable() {
 
   // Filter applications based on the provided filters
   const filteredAssessments = useMemo(() => {
-    console.log('No assessments found.', assessments?.data);
-
     if (!assessments?.data) return [];
 
     return assessments?.data?.filter((assessment: any) => {
@@ -189,15 +187,15 @@ export function AssessmentHistoryTable() {
     );
   }
 
-  if (!assessments || assessments?.data?.length === 0) {
-    return (
-      <div className="space-y-4">
-        <div className="flex justify-center items-center py-8">
-          <div className="text-sm text-gray-500">No assessments found.</div>
-        </div>
-      </div>
-    );
-  }
+  // if (!assessments || assessments?.data?.length === 0) {
+  //   return (
+  //     <div className="space-y-4">
+  //       <div className="flex justify-center items-center py-8">
+  //         <div className="text-sm text-gray-500">No assessments found.</div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="space-y-6">
@@ -310,21 +308,29 @@ export function AssessmentHistoryTable() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredAssessments?.map((app: any) => (
-                      <TableRow key={app._id} className="hover:bg-[#EBFBFF] border-white">
-                        <TableCell className="font-medium text-[#06516C] text-xs xl:text-sm">
-                          {new Date(app.createdAt).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell className="text-xs xl:text-sm">{formatDate(app.completed_at)}</TableCell>
+                    {filteredAssessments.length > 0 ? (
+                      filteredAssessments?.map((app: any) => (
+                        <TableRow key={app._id} className="hover:bg-[#EBFBFF] border-white">
+                          <TableCell className="font-medium text-[#06516C] text-xs xl:text-sm">
+                            {new Date(app.createdAt).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell className="text-xs xl:text-sm">{formatDate(app.completed_at)}</TableCell>
 
-                        <TableCell className="text-xs xl:text-sm">{app.user_score}</TableCell>
-                        <TableCell>{getStatusBadge(app?.status || 'Submitted')}</TableCell>
-                        {/* 
+                          <TableCell className="text-xs xl:text-sm">{app.user_score}</TableCell>
+                          <TableCell>{getStatusBadge(app?.status || 'Submitted')}</TableCell>
+                          {/* 
                 <TableCell className="text-xs xl:text-sm capitalize"></TableCell>
                 <TableCell className="text-xs xl:text-sm"></TableCell>
                 <TableCell className="text-xs xl:text-sm"></TableCell> */}
-                      </TableRow>
-                    ))}
+                        </TableRow>
+                      ))
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="flex justify-center items-center py-8 border max-w-[90%]">
+                          <div className="text-sm text-gray-500">No assessments found.</div>
+                        </div>
+                      </div>
+                    )}
                   </TableBody>
                 </Table>
               </div>

@@ -21,6 +21,8 @@ import type { Assessment, AssessmentQuestion } from '@/types/assessment';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { useGetServices } from '@/app/api/services/useGetServices';
+import { useValidateResponse } from '@/app/api/assessments/useValidateResponse';
 
 export default function Assessment() {
   const [currentAssessmentIndex, setCurrentAssessmentIndex] = useState(0);
@@ -35,6 +37,9 @@ export default function Assessment() {
   const { user } = useAuthStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [validateResponseData, setValidateResponseData] = useState<any>(null);
+  const [validatingResponse, setValidatingResponse] = useState(false);
+
   const router = useRouter();
 
   const {
@@ -46,11 +51,17 @@ export default function Assessment() {
 
   const currentAssessmentId = availableAssessments?.[currentAssessmentIndex]?._id || null;
 
+  // const {
+  //   data: assessmentData,
+  //   isLoading,
+  //   error,
+  // } = useGetAssessmentById(currentAssessmentId || '68dec54109ae0fe9fd7c43cb', !!currentAssessmentId);
+
   const {
     data: assessmentData,
     isLoading,
     error,
-  } = useGetAssessmentById(currentAssessmentId || '', !!currentAssessmentId);
+  } = useGetAssessmentById('68dec54109ae0fe9fd7c43cb', !!currentAssessmentId);
 
   const submitAssessment = useSubmitAssessment();
   const [assessmentResult, setAssessmentResult] = useState<AssessmentSubmissionResponse | null>(null);
@@ -226,7 +237,6 @@ export default function Assessment() {
           responses: finalResponses,
         });
 
-        console.log(response.score);
         setAssessmentResult(response);
 
         // Mark current assessment as completed
@@ -363,11 +373,19 @@ export default function Assessment() {
               onStart={() => setShowAssessment(true)}
             />
           ) : (
-            currentQuestions.map((currentQuestion: AssessmentQuestion, index) => (
-              <div key={currentQuestion._id} className="mb-6 last:mb-0">
-                {renderQuestion(currentQuestion, index)}
-              </div>
-            ))
+            currentQuestions.map((currentQuestion: AssessmentQuestion, index) => {
+              const findResponse =
+                validateResponseData &&
+                validateResponseData?.results?.find((resp: any) => resp.field === currentQuestion._id && !resp.isValid);
+              return (
+                <div key={currentQuestion._id} className="mb-6 last:mb-0">
+                  {renderQuestion(currentQuestion, index)}
+                  {findResponse && findResponse?.errors[0] && (
+                    <p className=" text-red-600 text-sm mt-1.5">{findResponse.errors[0].message}</p>
+                  )}
+                </div>
+              );
+            })
           )}
 
           {showAssessment && (
@@ -383,24 +401,67 @@ export default function Assessment() {
                   Back
                 </Button>
                 <Button
-                  onClick={() => {
+                  onClick={async () => {
                     const stepResponses = currentQuestions.reduce((acc: any, q: any) => {
                       acc[q._id] = responses[q._id] || null; // Use existing response or null
                       return acc;
                     }, {} as Record<string, any>);
 
-                    const checkIfAnyIsNull = Object.values(stepResponses).some((value) => value === null);
+                    const fields = currentQuestions.map((question) => {
+                      return {
+                        questionIdentifier: question._id,
+                        value: responses[question._id] || null,
+                      };
+                    });
 
-                    if (checkIfAnyIsNull) {
-                      toast.error('Please answer all questions before proceeding.');
-                      return;
-                    }
-                    handleNext(stepResponses);
+                    setValidatingResponse(true);
+
+                    await fetch('/api/assessments/validate', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({
+                        formId: '68dec54109ae0fe9fd7c43cb',
+                        formType: 'assessment',
+                        fields,
+                      }),
+                    })
+                      .then((res) => res.json())
+                      .then((data) => {
+                        if (!data.isValid) {
+                          setValidateResponseData(data);
+                          toast.error('Please confirm your answers before proceeding.');
+                          return;
+                        } else {
+                          const checkIfAnyIsNull = Object.values(stepResponses).some((value) => value === null);
+
+                          if (checkIfAnyIsNull) {
+                            toast.error('Error validating response, please confirm your answers before proceeding.');
+                            return;
+                          }
+                          handleNext(stepResponses);
+                        }
+                      })
+                      .catch((err) => toast.error(err.message || 'Something went wrong'))
+                      .finally(() => {
+                        setValidatingResponse(false);
+                      });
                   }}
                   disabled={isSubmitting}
                   className=" cursor-pointer py-4"
                 >
-                  {isLastStepOverall ? (isSubmitting ? 'Submitting Assessment...' : 'Finish Assessment') : 'Next'}
+                  {isLastStepOverall
+                    ? isSubmitting
+                      ? 'Submitting Assessment...'
+                      : validatingResponse
+                      ? 'Validating Response...'
+                      : 'Submit Assessment'
+                    : isSubmitting
+                    ? 'Submitting...'
+                    : validatingResponse
+                    ? 'Validating Response...'
+                    : 'Next'}
                 </Button>
               </div>
               <div className="text-center text-sm text-muted-foreground mt-4">
@@ -427,7 +488,6 @@ export default function Assessment() {
             value={responses[currentQuestion._id] || ''}
             onChange={(res) => {
               setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }));
-              console.log(res);
             }}
             index={index}
           />

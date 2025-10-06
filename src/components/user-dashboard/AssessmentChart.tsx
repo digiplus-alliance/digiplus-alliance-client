@@ -6,7 +6,17 @@ import { useGetAvailableAssessments } from '@/app/api/assessments';
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/store/auth';
 import { toast } from 'sonner';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+const YEARS = [
+  { label: '2025', value: 2025 },
+  { label: '2026', value: 2026 },
+  { label: '2027', value: 2027 },
+
+  { label: '2028', value: 2028 },
+
+  { label: '2029', value: 2029 },
+];
 export function AssessmentChart() {
   const [fetching, setFetching] = useState(false);
   const [year, setYear] = useState(new Date().getFullYear());
@@ -54,17 +64,38 @@ export function AssessmentChart() {
   }
   return (
     <Card>
-      <CardHeader className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 p-4 sm:p-6">
+      <CardHeader className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 p-4 sm:p-6 flex-wrap gap-y-2">
         <CardTitle className="text-base sm:text-lg font-normal text-[#A3A3A3]">Assessment Scores</CardTitle>
-        <Button
-          variant="default"
-          size="sm"
-          className="w-full sm:w-auto bg-transparent hover:bg-transparent hover:underline hover:text-[#0E5F7D] underline-offset-4 shadow-none drop-shadow-none text-[#0E5F7D] text-sm"
-        >
-          <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" color="#0E5F7D" />
-          <span className="hidden sm:inline">Download Reports →</span>
-          <span className="sm:hidden">Download →</span>
-        </Button>
+
+        <div className=" flex items-center gap-2 justify-end  w-full">
+          <Select
+            onValueChange={(value) => {
+              setYear(parseInt(value));
+            }}
+          >
+            <SelectTrigger className="w-full sm:w-[180px] bg-white border-[#DDDDDD] text-sm sm:text-base">
+              <SelectValue placeholder={new Date().getFullYear()} className="text-[#706C6C]" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={new Date().getFullYear().toString()}>Year</SelectItem>
+              {YEARS.map((year) => (
+                <SelectItem key={year.value} value={year.value.toString()}>
+                  {year.value}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Button
+            variant="default"
+            size="sm"
+            className="w-full sm:w-auto bg-transparent hover:bg-transparent hover:underline hover:text-[#0E5F7D] underline-offset-4 shadow-none drop-shadow-none text-[#0E5F7D] text-sm"
+          >
+            <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" color="#0E5F7D" />
+            <span className="hidden sm:inline">Download Reports →</span>
+            <span className="sm:hidden">Download →</span>
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="p-4 sm:p-6">
         {chartData.length > 0 ? (

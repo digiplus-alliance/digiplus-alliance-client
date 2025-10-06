@@ -118,7 +118,7 @@ const SettingsPage = () => {
               />
             </div>
             <Button onClick={handleResetPassword} disabled={isPending} className="w-full cursor-pointer">
-              Reset
+              {isPending ? 'Changing your password' : 'Change Password'}
             </Button>
           </div>
         </Card>
