@@ -45,12 +45,12 @@ const personalizationItems = [
     icon: Settings,
     iconLogo: '/icons/sidebar-icon-three.svg',
   },
-  // {
-  //   title: 'Settings',
-  //   url: 'settings',
-  //   icon: Settings,
-  //   iconLogo: '/icons/sidebar-icon-four.svg',
-  // },
+  {
+    title: 'Settings',
+    url: 'settings',
+    icon: Settings,
+    iconLogo: '/icons/sidebar-icon-four.svg',
+  },
   {
     title: 'Notifications',
     url: 'notifications',
