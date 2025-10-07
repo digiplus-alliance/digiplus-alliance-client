@@ -44,7 +44,15 @@ export default function Notifications({ open, onOpenChange }: NotificationsProps
   }, [openNotification]);
 
   return (
-    <DropdownMenu open={isOpen} onOpenChange={() => setOpen(!isOpen)} modal={false}>
+    <DropdownMenu
+      open={isOpen}
+      onOpenChange={() => {
+        const currentState = isOpen;
+        setOpen(!currentState);
+        setOpenNotification(!currentState);
+      }}
+      modal={false}
+    >
       <DropdownMenuTrigger className="group shrink-0 font-secondary lg:bg-[#EBFBFF] w-fit p-1 size-8 rounded-full md:bg-[#EBFBFF] relative">
         <CiBellOn className="text-[#1E293B] size-full" />
         {notifications?.length > 0 && (

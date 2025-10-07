@@ -42,6 +42,8 @@ type AuthState = {
   clearAuth: () => void;
   openNotification: boolean;
   setOpenNotification: (open: boolean) => void;
+  suggestedServices: string[];
+  setSuggestedServices: (services: string[]) => void;
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -60,6 +62,8 @@ export const useAuthStore = create<AuthState>()(
       },
       openNotification: false,
       setOpenNotification: (open) => set({ openNotification: open }),
+      suggestedServices: [],
+      setSuggestedServices: (services) => set({ suggestedServices: services }),
     }),
     {
       name: 'auth-storage',

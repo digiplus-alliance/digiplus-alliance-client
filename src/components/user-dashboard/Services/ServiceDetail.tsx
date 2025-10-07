@@ -105,17 +105,25 @@ Vivamus adipiscing nisl ut dolor dignissim semper. Nulla luctus malesuada tincid
       {/* More like this Section */}
       <div className="space-y-4 sm:space-y-6 mt-8 sm:mt-10">
         <h2 className="text-2xl sm:text-3xl lg:text-4xl text-center font-semibold text-[#171616]">More like this</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-          {relatedServices.slice(0, 4).map((relatedService) => (
-            <ServiceCard
-              key={relatedService._id}
-              {...relatedService}
-              onClick={() => {
-                if (handleClick) handleClick(relatedService);
-              }}
-            />
-          ))}
-        </div>
+        {relatedServices.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            {relatedServices.slice(0, 4).map((relatedService) => (
+              <ServiceCard
+                key={relatedService._id}
+                {...relatedService}
+                onClick={() => {
+                  if (handleClick) handleClick(relatedService);
+                }}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex justify-center items-center py-8">
+              <div className="text-sm text-gray-500">No related services</div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

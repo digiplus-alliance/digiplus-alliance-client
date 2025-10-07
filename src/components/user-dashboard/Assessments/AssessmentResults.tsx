@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CheckCircle } from 'lucide-react';
 import { useState } from 'react';
+import { useAuthStore } from '@/store/auth';
 
 interface AssessmentResultsProps {
   score: number;
@@ -29,6 +30,8 @@ export function AssessmentResults({
   const circumference = 2 * Math.PI * radius;
   const strokeDasharray = circumference;
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+  const { suggestedServices, setSuggestedServices } = useAuthStore();
 
   return (
     <div className=" bg-muted/30 flex items-center justify-center p-6">
