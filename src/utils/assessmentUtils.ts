@@ -77,3 +77,68 @@ export function groupQuestionsByModuleAndStep(assessmentData: AssessmentByIdData
 
   return result;
 }
+
+export function groupApplicationQuestionsByModuleAndStep(assessmentData: AssessmentByIdData): IGroupedModule[] {
+  if (!assessmentData || !assessmentData.questions || !assessmentData.modules) {
+    return [];
+  }
+
+  const { questions, modules, assessment } = assessmentData;
+  console.log('Questions', questions);
+  console.log('Modules', modules);
+  console.log('Assessment', assessment);
+
+  // Use a Map for efficient grouping: ModuleID -> StepNumber -> Questions[]
+  const groupedData = new Map<string, Map<number, AssessmentQuestion[]>>();
+
+  let i: number = 0;
+  // Populate the map
+  for (const question of questions) {
+    if (!question.module_ref) continue;
+
+    const question_module_id = `${question.module_ref}_${i++}`;
+
+    if (!groupedData.has(question.module_ref)) {
+      groupedData.set(question.module_ref, new Map<number, AssessmentQuestion[]>());
+    }
+    const moduleGroup = groupedData.get(question.module_ref)!;
+
+    if (!moduleGroup.has(question.step)) {
+      moduleGroup.set(question.step, []);
+    }
+    const stepGroup = moduleGroup.get(question.step)!;
+    stepGroup.push(question);
+  }
+
+  console.log('Grouped Data', groupedData);
+
+  // Convert the map to the final array structure, ordered by the assessment's modules array
+  const result: IGroupedModule[] = [];
+  for (const moduleInfo of modules) {
+    if (!moduleInfo.temp_id) continue;
+    const moduleQuestions = groupedData.get(moduleInfo.temp_id);
+
+    if (moduleQuestions) {
+      const steps: IGroupedStep[] = [];
+      // Sort steps by step number and convert to the desired object structure
+      const sortedStepNumbers = Array.from(moduleQuestions.keys()).sort((a, b) => a - b);
+
+      for (const stepNumber of sortedStepNumbers) {
+        steps.push({
+          step: stepNumber,
+          questions: moduleQuestions.get(stepNumber)!,
+        });
+      }
+
+      if (steps.length > 0) {
+        result.push({
+          moduleId: moduleInfo.temp_id,
+          moduleName: moduleInfo.title,
+          steps: steps,
+        });
+      }
+    }
+  }
+
+  return result;
+}

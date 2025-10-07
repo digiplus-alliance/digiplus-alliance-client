@@ -16,7 +16,11 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify(payload),
     });
+
+    console.log(response);
     const responseData = await response.json();
+
+    console.log(responseData);
 
     if (response.ok) {
       return new NextResponse(JSON.stringify(responseData), { status: 200 });
