@@ -14,6 +14,7 @@ import { useGetServiceTypes } from '@/app/api/services/useGetServiceTypes';
 import { useCreateApplication } from '@/app/api/user/useCreateApplication';
 import { toast } from 'sonner';
 import { useGetServices } from '@/app/api/services/useGetServices';
+import UserApplicationForm from './UserApplicationForm';
 
 const ApplicationForm = () => {
   const router = useRouter();
@@ -108,7 +109,7 @@ const ApplicationForm = () => {
         </div>
 
         {/* Right Side - Form */}
-        <div className="w-full">
+        {/* <div className="w-full">
           <Card className="bg-white border border-gray-200 rounded-[24px]">
             <CardContent className="px-10 py-6">
               <div className="space-y-6">
@@ -117,7 +118,6 @@ const ApplicationForm = () => {
                 </h3>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Service Selection */}
                   <div className="space-y-2">
                     <label className="text-sm  text-[#706C6C]">Service</label>
                     <Select onValueChange={(value) => handleInputChange('service', value)}>
@@ -134,7 +134,6 @@ const ApplicationForm = () => {
                     </Select>
                   </div>
 
-                  {/* Company Name and Full Name */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-sm  text-[#706C6C]">Company Name</label>
@@ -156,7 +155,6 @@ const ApplicationForm = () => {
                     </div>
                   </div>
 
-                  {/* Email and Phone */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-sm  text-[#706C6C]">Confirm Email</label>
@@ -180,7 +178,6 @@ const ApplicationForm = () => {
                     </div>
                   </div>
 
-                  {/* Reason for applying */}
                   <div className="space-y-2">
                     <label className="text-sm  text-[#706C6C]">Reason for applying</label>
                     <Textarea
@@ -191,7 +188,6 @@ const ApplicationForm = () => {
                     />
                   </div>
 
-                  {/* Submit Button */}
                   <Button
                     type="submit"
                     className="w-full h-12 bg-[#FF5C5C] mt-6 hover:bg-[#FF4444] text-white  rounded-lg"
@@ -202,7 +198,9 @@ const ApplicationForm = () => {
               </div>
             </CardContent>
           </Card>
-        </div>
+        </div> */}
+
+        <UserApplicationForm />
       </div>
 
       {/* Success Modal */}
