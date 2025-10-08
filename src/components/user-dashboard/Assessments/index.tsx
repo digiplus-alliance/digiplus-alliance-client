@@ -465,14 +465,18 @@ export default function Assessment() {
                     isSubmitting ? (
                       'Submitting Assessment...'
                     ) : validatingResponse ? (
-                      <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+                      <p className=" flex items-center justify-center pt-3">
+                        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+                      </p>
                     ) : (
                       'Submit Assessment'
                     )
                   ) : isSubmitting ? (
                     'Submitting...'
                   ) : validatingResponse ? (
-                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+                    <p className=" flex items-center justify-center pt-3">
+                      <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+                    </p>
                   ) : (
                     'Next'
                   )}
