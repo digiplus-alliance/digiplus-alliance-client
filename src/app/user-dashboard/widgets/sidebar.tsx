@@ -4,6 +4,8 @@ import SidebarLayout from '@/components/app-sidebar';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import Image from 'next/image';
 import { Calendar, Home, Inbox, Search, Settings } from 'lucide-react';
+import ProfileMenu from '@/components/profile-menu';
+import Notifications from '@/components/Notifications';
 
 const items = [
   {
@@ -65,7 +67,10 @@ const UserSidebar = ({ children }: { children: React.ReactNode }) => {
       <SidebarInset className="fixed top-0 left-0 w-full h-14 sm:h-16 bg-white border-b z-10 md:hidden">
         <div className="flex items-center justify-between px-3 sm:px-4 h-full">
           <Image src="/mobile-logo.png" alt="App Logo" width={70} height={70} className="sm:w-20 sm:h-20" />
-          <SidebarTrigger className="top-3 sm:top-4 left-3 sm:left-4 z-20 p-1.5 sm:p-2" />
+          <div className="flex items-center gap-2 sm:gap-3">
+            <ProfileMenu className="md:hidden" />
+            <SidebarTrigger className="top-3 sm:top-4 left-3 sm:left-4 z-20 p-1.5 sm:p-2" />
+          </div>
         </div>
       </SidebarInset>
 

@@ -67,13 +67,13 @@ export function AssessmentChart() {
       <CardHeader className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 p-4 sm:p-6 flex-wrap gap-y-2">
         <CardTitle className="text-base sm:text-lg font-normal text-[#A3A3A3]">Assessment Scores</CardTitle>
 
-        <div className=" flex items-center gap-2 justify-end  w-full">
+        <div className=" flex items-center gap-2 justify-end flex- w-full">
           <Select
             onValueChange={(value) => {
               setYear(parseInt(value));
             }}
           >
-            <SelectTrigger className="w-full sm:w-[180px] bg-white border-[#DDDDDD] text-sm sm:text-base">
+            <SelectTrigger className="w-min  bg-white border-[#DDDDDD] text-sm sm:text-base">
               <SelectValue placeholder={new Date().getFullYear()} className="text-[#706C6C]" />
             </SelectTrigger>
             <SelectContent>
@@ -89,7 +89,7 @@ export function AssessmentChart() {
           <Button
             variant="default"
             size="sm"
-            className="w-full sm:w-auto bg-transparent hover:bg-transparent hover:underline hover:text-[#0E5F7D] underline-offset-4 shadow-none drop-shadow-none text-[#0E5F7D] text-sm"
+            className="w-auto bg-transparent hover:bg-transparent hover:underline hover:text-[#0E5F7D] underline-offset-4 shadow-none drop-shadow-none text-[#0E5F7D] text-sm"
           >
             <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" color="#0E5F7D" />
             <span className="hidden sm:inline">Download Reports →</span>

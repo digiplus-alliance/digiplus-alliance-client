@@ -459,19 +459,23 @@ export default function Assessment() {
                       });
                   }}
                   disabled={isSubmitting}
-                  className=" cursor-pointer py-4"
+                  className=" cursor-pointer py-4 bg-[#FF5C5C]"
                 >
-                  {isLastStepOverall
-                    ? isSubmitting
-                      ? 'Submitting Assessment...'
-                      : validatingResponse
-                      ? 'Validating Response...'
-                      : 'Submit Assessment'
-                    : isSubmitting
-                    ? 'Submitting...'
-                    : validatingResponse
-                    ? 'Validating Response...'
-                    : 'Next'}
+                  {isLastStepOverall ? (
+                    isSubmitting ? (
+                      'Submitting Assessment...'
+                    ) : validatingResponse ? (
+                      <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+                    ) : (
+                      'Submit Assessment'
+                    )
+                  ) : isSubmitting ? (
+                    'Submitting...'
+                  ) : validatingResponse ? (
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+                  ) : (
+                    'Next'
+                  )}
                 </Button>
               </div>
               <div className="text-center text-sm text-muted-foreground mt-4">
