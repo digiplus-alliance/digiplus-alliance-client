@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -20,6 +20,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useGetAllUsers } from "@/app/api/admin/users";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Extended type for table data that matches current structure
 type TableUser = {
@@ -29,119 +31,19 @@ type TableUser = {
   business: string;
   timestamp: string;
   applications: number;
-  assessmentStatus: string;
+  assessment: number;
+  // Additional fields for AdminUser compatibility
+  userId: string;
+  business_name: string;
+  applications_count: number;
+  profile_picture: string;
+  phone: string;
+  website: string;
+  role: string;
+  assessments_count: number;
+  created_at: string;
+  updated_at: string;
 };
-
-const users: TableUser[] = [
-  {
-    id: "AP/2030222",
-    name: "Oyebode Anjoke",
-    email: "anjoke@gmail.com",
-    business: "Company Name",
-    timestamp: "2023-10-01 10:00 AM",
-    applications: 5,
-    assessmentStatus: "Submitted",
-  },
-  {
-    id: "PY/093456U",
-    name: "Chukwu Emeka",
-    email: "emeka@example.com",
-    business: "Emeka Foods",
-    timestamp: "2023-10-02 11:30 AM",
-    applications: 3,
-    assessmentStatus: "Being Processed",
-  },
-  {
-    id: "MM/1320CSAD",
-    name: "Amina Bello",
-    email: "amina@example.com",
-    business: "Bello Traders",
-    timestamp: "2023-10-03 02:15 PM",
-    applications: 4,
-    assessmentStatus: "Approved",
-  },
-  {
-    id: "UP/89ASD98",
-    name: "Grace Ife",
-    email: "grace@example.com",
-    business: "Ife Logistics",
-    timestamp: "2023-10-04 09:45 AM",
-    applications: 2,
-    assessmentStatus: "Rejected",
-  },
-  {
-    id: "LO/12309AS0",
-    name: "Tunde Bakare",
-    email: "tunde@example.com",
-    business: "Bakare Services",
-    timestamp: "2023-10-05 01:20 PM",
-    applications: 6,
-    assessmentStatus: "Completed",
-  },
-  {
-    id: "ZZ/999999",
-    name: "Extra User",
-    email: "extra@example.com",
-    business: "Extra LLC",
-    timestamp: "2023-10-06 03:30 PM",
-    applications: 1,
-    assessmentStatus: "Submitted",
-  },
-  {
-    id: "AP/2030222",
-    name: "Oyebode Anjoke",
-    email: "anjoke@gmail.com",
-    business: "Company Name",
-    timestamp: "2023-10-01 10:00 AM",
-    applications: 5,
-    assessmentStatus: "Submitted",
-  },
-  {
-    id: "PY/093456U",
-    name: "Chukwu Emeka",
-    email: "emeka@example.com",
-    business: "Emeka Foods",
-    timestamp: "2023-10-02 11:30 AM",
-    applications: 3,
-    assessmentStatus: "Being Processed",
-  },
-  {
-    id: "MM/1320CSAD",
-    name: "Amina Bello",
-    email: "amina@example.com",
-    timestamp: "2023-10-03 02:15 PM",
-    applications: 4,
-    assessmentStatus: "Not Started",
-    business: "Bello Traders",
-  },
-  {
-    id: "UP/89ASD98",
-    name: "Grace Ife",
-    email: "grace@example.com",
-    business: "Ife Logistics",
-    timestamp: "2023-10-04 09:45 AM",
-    applications: 2,
-    assessmentStatus: "Rejected",
-  },
-  {
-    id: "LO/12309AS0",
-    name: "Tunde Bakare",
-    email: "tunde@example.com",
-    business: "Bakare Services",
-    timestamp: "2023-10-05 01:20 PM",
-    applications: 6,
-    assessmentStatus: "Completed",
-  },
-  {
-    id: "ZZ/999999",
-    name: "Extra User",
-    email: "extra@example.com",
-    business: "Extra LLC",
-    timestamp: "2023-10-06 03:30 PM",
-    applications: 1,
-    assessmentStatus: "Submitted",
-  },
-];
 
 export default function UsersTable() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -149,7 +51,37 @@ export default function UsersTable() {
   const [userInfoModalOpen, setUserInfoModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<TableUser | null>(null);
+  const { data: apiUsers, isLoading, error } = useGetAllUsers();
+  const [tableData, setTableData] = useState<TableUser[]>([]);
+
   const pageSize = 10;
+
+  // Map API users to table data
+  useEffect(() => {
+    if (apiUsers) {
+      const mapped = apiUsers.map((u) => ({
+        id: u._id,
+        userId: u._id,
+        name: `${u.first_name ?? ""} ${u.last_name ?? ""}`.trim() || u.email,
+        email: u.email,
+        business: u.business_name ?? "",
+        business_name: u.business_name ?? "",
+        timestamp: new Date(u.createdAt).toLocaleString(),
+        applications: u.applications_count ?? 0,
+        applications_count: u.applications_count ?? 0,
+        assessment: u.assessments_count ?? 0,
+        assessments_count: u.assessments_count ?? 0,
+        profile_picture: u.profile_picture ?? "",
+        phone: "", // Not available in API response
+        website: "", // Not available in API response
+        role: u.role ?? "",
+        created_at: u.createdAt,
+        updated_at: u.updatedAt,
+      }));
+      setTableData(mapped);
+      setCurrentPage(1);
+    }
+  }, [apiUsers]);
 
   const handleViewUser = (user: TableUser) => {
     setSelectedUser(user);
@@ -167,31 +99,12 @@ export default function UsersTable() {
     setUserToDelete(null);
   };
 
-  const getAssessmentStatusStyles = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case "submitted":
-        return "bg-[#EBFFFC] text-[#117D70]";
-      case "being processed":
-        return "bg-[#FFF6D3] text-[#5E5B5B]";
-      case "completed":
-        return "bg-[#EBFBFF] text-[#227C9D]";
-      case "rejected":
-        return "bg-[#FFEBEB] text-[#850C0C]";
-      case "approved":
-        return "bg-[#EBFFFC] text-[#117D70]";
-      case "not started":
-        return "bg-[#FFEBEB] text-[#850C0C]";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
-  const totalPages = Math.ceil(users.length / pageSize);
+  const totalPages = Math.ceil(tableData.length / pageSize);
 
   const pageData = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
-    return users.slice(start, start + pageSize);
-  }, [currentPage]);
+    return tableData.slice(start, start + pageSize);
+  }, [currentPage, tableData]);
   const columns: ColumnDef<TableUser>[] = [
     {
       accessorKey: "id",
@@ -251,19 +164,15 @@ export default function UsersTable() {
       },
     },
     {
-      accessorKey: "assessmentStatus",
-      header: "Assessment Status",
+      accessorKey: "assessment",
+      header: "Assessment",
       cell: (info: any) => {
         const row = info.row.original as any;
-        const status = row.assessmentStatus;
-        const styleClasses = getAssessmentStatusStyles(status);
         return (
           <div>
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-medium border ${styleClasses}`}
-            >
-              {status}
-            </span>
+            <p className="font-medium text-[#171616] text-sm text-center">
+              {row.assessment}
+            </p>
           </div>
         );
       },
@@ -307,6 +216,59 @@ export default function UsersTable() {
     getCoreRowModel: getCoreRowModel(),
   });
 
+  // Error state
+  if (error) {
+    return (
+      <div className="p-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <h3 className="text-red-800 font-semibold mb-2">Failed to load users</h3>
+          <p className="text-sm text-red-600">
+            {error instanceof Error ? error.message : String(error)}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Loading state - show skeleton table
+  if (isLoading) {
+    return (
+      <>
+        <Table>
+          <TableHeader className="bg-[#FBFBFD]">
+            <TableRow className="text-left text-[#B8B8B8] text-sm font-inter">
+              <TableHead className="px-4 py-2 text-[#B8B8B8] font-bold">User ID</TableHead>
+              <TableHead className="px-4 py-2 text-[#B8B8B8] font-bold">Name/Email</TableHead>
+              <TableHead className="px-4 py-2 text-[#B8B8B8] font-bold">Timestamp</TableHead>
+              <TableHead className="px-4 py-2 text-[#B8B8B8] font-bold">Business name</TableHead>
+              <TableHead className="px-4 py-2 text-[#B8B8B8] font-bold">Applications</TableHead>
+              <TableHead className="px-4 py-2 text-[#B8B8B8] font-bold">Assessment Status</TableHead>
+              <TableHead className="px-4 py-2 text-[#B8B8B8] font-bold">More</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 10 }).map((_, i) => (
+              <TableRow key={i} className="border-t">
+                <TableCell className="px-4 py-3"><Skeleton className="h-4 w-24" /></TableCell>
+                <TableCell className="px-4 py-3"><Skeleton className="h-4 w-40" /></TableCell>
+                <TableCell className="px-4 py-3"><Skeleton className="h-4 w-32" /></TableCell>
+                <TableCell className="px-4 py-3"><Skeleton className="h-4 w-32" /></TableCell>
+                <TableCell className="px-4 py-3"><Skeleton className="h-4 w-12" /></TableCell>
+                <TableCell className="px-4 py-3"><Skeleton className="h-4 w-24" /></TableCell>
+                <TableCell className="px-4 py-3"><Skeleton className="h-4 w-16" /></TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </>
+    );
+  }
+
+  // Empty state
+  if (!tableData || tableData.length === 0) {
+    return <div className="text-center text-sm text-gray-500 p-8">Empty</div>;
+  }
+
   return (
     <>
       <Table>
@@ -317,7 +279,10 @@ export default function UsersTable() {
               className="text-left text-[#B8B8B8] text-sm font-inter"
             >
               {hg.headers.map((header) => (
-                <TableHead key={header.id} className="px-4 py-2 text-[#B8B8B8] font-bold">
+                <TableHead
+                  key={header.id}
+                  className="px-4 py-2 text-[#B8B8B8] font-bold"
+                >
                   {flexRender(
                     header.column.columnDef.header,
                     header.getContext()

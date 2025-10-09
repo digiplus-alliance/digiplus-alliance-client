@@ -9,6 +9,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useCreateService } from "@/app/api/admin/services/create-service";
+import SpinnerIcon from "@/components/icons/spinner";
 
 const serviceSchema = z.object({
   name: z.string().min(2, "Service name is required"),
@@ -24,19 +33,49 @@ const serviceSchema = z.object({
     .refine((val) => !val || /^\d+$/.test(val), {
       message: "Discounted price must be a number",
     }),
+  serviceType: z.string().min(1, "Service type is required"),
+  pricingUnit: z.string().min(1, "Pricing unit is required"),
   image: z.instanceof(File, { message: "Image file is required" }).optional(),
 });
 
 type ServiceFormData = z.infer<typeof serviceSchema>;
 
+const serviceTypes = [
+  { value: "Ecosystem Building", label: "Ecosystem Building" },
+  { value: "Digital Skills & Training", label: "Digital Skills & Training" },
+  {
+    value: "Digital Infrastructure / Tools",
+    label: "Digital Infrastructure / Tools",
+  },
+  {
+    value: "Business Advisory & Ecosystem Support",
+    label: "Business Advisory & Ecosystem Support",
+  },
+  { value: "Research & Insights", label: "Research & Insights" },
+  {
+    value: "Innovation & Co-creation Labs",
+    label: "Innovation & Co-creation Labs",
+  },
+];
+
+const pricingUnits = [
+  { value: "per_hour", label: "Per Hour" },
+  { value: "per_project", label: "Per Project" },
+  { value: "one_time", label: "One Time" },
+  { value: "per_day", label: "Per Day" },
+  { value: "per_month", label: "Per Month" },
+];
+
 export default function CreateService() {
   const [preview, setPreview] = useState<string | null>(null);
+  const { mutate: createService, isPending } = useCreateService();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     watch,
+    reset,
     setValue,
   } = useForm<ServiceFormData>({
     resolver: zodResolver(serviceSchema),
@@ -46,13 +85,38 @@ export default function CreateService() {
       longDescription: "",
       price: "",
       discountedPrice: "",
+      serviceType: "",
+      pricingUnit: "",
     },
   });
 
   const watchAll = watch();
 
   const onSubmit = (data: ServiceFormData) => {
-    console.log("Form Data:", data);
+    const formData = new FormData();
+
+    formData.append("name", data.name);
+    formData.append("service_type", data.serviceType);
+    formData.append("short_description", data.shortDescription);
+    formData.append("long_description", data.longDescription);
+    formData.append("price", data.price);
+
+    if (data.discountedPrice) {
+      formData.append("discounted_price", data.discountedPrice);
+    }
+
+    formData.append("pricing_unit", data.pricingUnit);
+
+    if (data.image) {
+      formData.append("images", data.image);
+    }
+
+    createService(formData as any, {
+      onSuccess: () => {
+        reset();
+        setPreview(null);
+      }
+    });
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -135,7 +199,7 @@ export default function CreateService() {
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="text-sm font-medium text-[#706C6C]">
               Product Price
@@ -158,13 +222,63 @@ export default function CreateService() {
           </div>
         </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="text-sm font-medium text-[#706C6C]">
+              Service Type
+            </label>
+            <Select
+              onValueChange={(value) => setValue("serviceType", value)}
+              defaultValue={watchAll.serviceType}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select service type" />
+              </SelectTrigger>
+              <SelectContent>
+                {serviceTypes.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.serviceType && (
+              <p className="text-red-500 text-sm">
+                {errors.serviceType.message}
+              </p>
+            )}
+          </div>
+          <div>
+            <label className="text-sm font-medium text-[#706C6C]">
+              Pricing Unit
+            </label>
+            <Select
+              onValueChange={(value) => setValue("pricingUnit", value)}
+              defaultValue={watchAll.pricingUnit}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select pricing unit" />
+              </SelectTrigger>
+              <SelectContent>
+                {pricingUnits.map((unit) => (
+                  <SelectItem key={unit.value} value={unit.value}>
+                    {unit.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.pricingUnit && (
+              <p className="text-red-500 text-sm">
+                {errors.pricingUnit.message}
+              </p>
+            )}
+          </div>
+        </div>
+
         <div className="flex gap-3 pt-4 items-center justify-center">
           <Button type="submit" className="w-32">
-            Save
+            {isPending ? <SpinnerIcon className="animate-spin" /> : "Save"}
           </Button>
-          {/* <Button type="button" variant="outline" className="bg-transparent">
-            Add another service
-          </Button> */}
         </div>
       </form>
 

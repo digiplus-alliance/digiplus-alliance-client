@@ -29,9 +29,5 @@ export function useGetAllServices() {
     url: 'services',
     hasAuth: true,
     schema: AllServicesResponseSchema,
-    queryKey: ['all-services'],
-    reactQueryOptions: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-    },
   });
 }
