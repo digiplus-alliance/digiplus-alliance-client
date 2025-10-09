@@ -17,6 +17,8 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
+import { Button } from './ui/button';
+import { useAuthStore } from '@/store/auth';
 
 interface SidebarItem {
   title: string;
@@ -48,6 +50,7 @@ export default function SidebarLayout({
 }: SidebarLayoutProps) {
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
+  const { openNotification, setOpenNotification } = useAuthStore();
 
   return (
     <Sidebar {...props} className="bg-white border-none">
@@ -71,8 +74,8 @@ export default function SidebarLayout({
                         <Link
                           href={url}
                           className={cn(
-                            "p-2 h-auto !rounded-4xl flex items-center gap-1 hover:bg-[#F1F8F8]",
-                            pathname.startsWith(url) && "bg-[#EBFBFF]"
+                            'p-2 h-auto !rounded-4xl flex items-center gap-1 hover:bg-[#F1F8F8]',
+                            pathname.startsWith(url) && 'bg-[#EBFBFF]'
                           )}
                         >
                           {item.iconLogo && (
@@ -108,8 +111,8 @@ export default function SidebarLayout({
                         >
                           <div
                             className={cn(
-                              "h-auto !rounded-4xl flex items-center gap-1 hover:bg-[#F1F8F8] cursor-pointer w-full",
-                              pathname.startsWith(url) && "bg-[#F1F8F8]"
+                              'h-auto !rounded-4xl flex items-center gap-1 hover:bg-[#F1F8F8] cursor-pointer w-full',
+                              pathname.startsWith(url) && 'bg-[#F1F8F8]'
                             )}
                           >
                             {item.iconLogo && (
@@ -121,36 +124,50 @@ export default function SidebarLayout({
                                 className="object-contain"
                               />
                             )}
-                            <span className="text-sm font-secondary text-[#706C6C]">
-                              {item.title}
-                            </span>
+                            <span className="text-sm font-secondary text-[#706C6C]">{item.title}</span>
                           </div>
                         </SidebarMenuButton>
                       ) : (
-                        <SidebarMenuButton
-                          asChild
-                          onClick={() => setOpenMobile(false)}
-                        >
-                          <Link
-                            href={url}
-                            className={cn(
-                              "p-2 h-auto !rounded-4xl flex items-center gap-1 hover:bg-[#F1F8F8]",
-                              pathname.startsWith(url) && "bg-[#F1F8F8]"
-                            )}
-                          >
-                            {item.iconLogo && (
-                              <Image
-                                src={item.iconLogo}
-                                alt="Coming Soon"
-                                width={20}
-                                height={20}
-                                className="object-contain"
-                              />
-                            )}
-                            <span className="text-sm font-secondary text-[#706C6C]">
-                              {item.title}
-                            </span>
-                          </Link>
+                        <SidebarMenuButton asChild onClick={() => setOpenMobile(false)}>
+                          {item.title === 'Notifications' ? (
+                            <Button
+                              className={cn(
+                                'p-2 h-auto !rounded-4xl flex items-center justify-start  font-normal gap-[7px] hover:bg-[#F1F8F8] border-none text-start bg-transparent shadow-none drop-shadow-none cursor-pointer',
+                                openNotification && 'bg-[#F1F8F8]'
+                              )}
+                              onClick={() => setOpenNotification(!openNotification)}
+                            >
+                              {item.iconLogo && (
+                                <Image
+                                  src={item.iconLogo}
+                                  alt="Coming Soon"
+                                  width={20}
+                                  height={20}
+                                  className="object-contain"
+                                />
+                              )}
+                              <span className="text-sm font-secondary text-[#706C6C]">{item.title}</span>
+                            </Button>
+                          ) : (
+                            <Link
+                              href={url}
+                              className={cn(
+                                'p-2 h-auto !rounded-4xl flex items-center gap-1 hover:bg-[#F1F8F8]',
+                                pathname.startsWith(url) && 'bg-[#F1F8F8]'
+                              )}
+                            >
+                              {item.iconLogo && (
+                                <Image
+                                  src={item.iconLogo}
+                                  alt="Coming Soon"
+                                  width={20}
+                                  height={20}
+                                  className="object-contain"
+                                />
+                              )}
+                              <span className="text-sm font-secondary text-[#706C6C]">{item.title}</span>
+                            </Link>
+                          )}
                         </SidebarMenuButton>
                       )}
                     </SidebarMenuItem>

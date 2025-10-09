@@ -14,9 +14,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { groupQuestionsByModuleAndStep, IGroupedModule } from '@/utils/assessmentUtils';
+import { type AssessmentSubmissionResponse } from '@/types/assessment';
 
 // Import types from the assessment types file
 import type { Assessment, AssessmentQuestion } from '@/types/assessment';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 export default function Assessment() {
   const [currentAssessmentIndex, setCurrentAssessmentIndex] = useState(0);
@@ -29,12 +33,16 @@ export default function Assessment() {
   const [completedAssessments, setCompletedAssessments] = useState<Set<string>>(new Set());
   const [allAssessmentsCompleted, setAllAssessmentsCompleted] = useState(false);
   const { user } = useAuthStore();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const router = useRouter();
 
   const {
     data: availableAssessments,
     isLoading: loadingAssessments,
     error: assessmentsError,
   } = useGetAvailableAssessments();
+  const { suggestedServices, setSuggestedServices } = useAuthStore();
 
   const currentAssessmentId = availableAssessments?.[currentAssessmentIndex]?._id || null;
 
@@ -45,6 +53,7 @@ export default function Assessment() {
   } = useGetAssessmentById(currentAssessmentId || '', !!currentAssessmentId);
 
   const submitAssessment = useSubmitAssessment();
+  const [assessmentResult, setAssessmentResult] = useState<AssessmentSubmissionResponse | null>(null);
 
   // Group questions by module and step
   const groupedModules: IGroupedModule[] = useMemo(
@@ -97,10 +106,17 @@ export default function Assessment() {
   if (allAssessmentsCompleted) {
     return (
       <AssessmentResults
-        score={20}
-        maxScore={45}
-        level="Beginner"
-        onSuggestions={() => {}}
+        score={assessmentResult?.data?.user_score || 0}
+        maxScore={Math.max(
+          ...(assessmentResult?.data?.recommended_services?.map((service) => service.max_points) || [])
+        )}
+        level={assessmentResult?.data?.recommended_services?.[0]?.levels?.[0] || 'Beginner'}
+        onSuggestions={() => {
+          setSuggestedServices(
+            assessmentResult?.data?.recommended_services?.map((service) => service.service_name) || []
+          );
+          router.push('/user-dashboard/services');
+        }}
         onRestart={() => {
           // Reset state for restarting all assessments
           setCurrentAssessmentIndex(0);
@@ -109,6 +125,7 @@ export default function Assessment() {
           setCompletedAssessments(new Set());
           setAllAssessmentsCompleted(false);
         }}
+        assessment_title={assessmentResult?.data?.assessment_title || ''}
       />
     );
   }
@@ -167,9 +184,9 @@ export default function Assessment() {
   const isLastStepOverall = isLastStepInModule && isLastModule;
 
   // Transform API data to match component interfaces
-  const transformOptions = (options: any[]) => options.map((opt) => ({ ...opt, id: opt._id }));
-  const transformGridColumns = (columns: any[]) => columns.map((col) => ({ ...col, id: col._id }));
-  const transformGridRows = (rows: any[]) => rows.map((row) => ({ ...row, id: row._id }));
+  const transformOptions = (options: any[]) => options.map((opt) => ({ ...opt, id: opt._id, _id: opt.id }));
+  const transformGridColumns = (columns: any[]) => columns.map((col) => ({ ...col, id: col.id }));
+  const transformGridRows = (rows: any[]) => rows.map((row) => ({ ...row, id: row.id }));
 
   // A helper to handle single or multiple question responses for a step
   const handleNext = async (stepResponses: Record<string, any>) => {
@@ -201,11 +218,16 @@ export default function Assessment() {
           throw new Error('User not authenticated');
         }
 
-        await submitAssessment.mutateAsync({
+        setIsSubmitting(true);
+
+        const response = await submitAssessment.mutateAsync({
           assessment_id: currentAssessmentId!,
           user_id: user._id, // Make sure user is defined
           responses: finalResponses,
         });
+
+        console.log(response.score);
+        setAssessmentResult(response);
 
         // Mark current assessment as completed
         const newCompletedAssessments = new Set(completedAssessments);
@@ -223,7 +245,8 @@ export default function Assessment() {
           setCurrentStepIndex(0);
         }
       } catch (error) {
-        console.error('Failed to submit assessment:', error);
+        toast.error('Failed to submit assessment');
+
         // Still move to next assessment even if submission fails
         if (currentAssessmentIndex === (availableAssessments?.length || 0) - 1) {
           setAllAssessmentsCompleted(true);
@@ -232,7 +255,10 @@ export default function Assessment() {
           setCurrentModuleIndex(0); // Reset for new assessment
           setCurrentStepIndex(0);
         }
+      } finally {
+        setIsSubmitting(false);
       }
+    } else {
       // Reset responses for the next assessment
       setResponses({});
     }
@@ -253,7 +279,7 @@ export default function Assessment() {
   // Progress calculation across all assessments
   const totalAssessments = availableAssessments?.length || 1;
   const progressInCurrentAssessment =
-    (currentModuleIndex + (currentStepIndex + 1) / totalStepsInModule) / groupedModules.length;
+    (currentModuleIndex + currentStepIndex / totalStepsInModule) / groupedModules.length;
   const overallProgress = ((currentAssessmentIndex + progressInCurrentAssessment) / totalAssessments) * 100;
 
   // Progress bar component
@@ -319,8 +345,10 @@ export default function Assessment() {
     // and instead rely on a shared set of controls.
     // For this example, I'll keep them as they are, but ideally, you'd refactor them.
     return (
-      <Card>
-        <CardContent className="p-6 md:p-8">
+      <Card className={cn('', !showAssessment && 'bg-transparent border-none shadow-none drop-shadow-none ')}>
+        <CardContent
+          className={cn('p-6 md:p-8', !showAssessment && 'bg-transparent border-none shadow-none drop-shadow-none ')}
+        >
           {showAssessment && (
             <>
               <p className="text-[#227C9D] text-sm font-medium text-center">module {currentModuleIndex + 1}</p>
@@ -342,32 +370,44 @@ export default function Assessment() {
             ))
           )}
 
-          {/* Shared Navigation for the step */}
-          <div className="mt-8 flex justify-between">
-            <Button
-              variant="outline"
-              onClick={handleBack}
-              disabled={currentModuleIndex === 0 && currentStepIndex === 0}
-              className=" bg-transparent cursor-pointer py-4 border-[#227C9D]"
-            >
-              Back
-            </Button>
-            <Button
-              onClick={() => {
-                const stepResponses = currentQuestions.reduce((acc: any, q: any) => {
-                  acc[q._id] = responses[q._id] || null; // Use existing response or null
-                  return acc;
-                }, {} as Record<string, any>);
-                handleNext(stepResponses);
-              }}
-              className=" cursor-pointer py-4"
-            >
-              {isLastStepOverall ? 'Finish Assessment' : 'Next'}
-            </Button>
-          </div>
-          <div className="text-center text-sm text-muted-foreground mt-4">
-            Step {currentStepIndex + 1} of {totalStepsInModule}
-          </div>
+          {showAssessment && (
+            <>
+              {/* Shared Navigation for the step */}
+              <div className="mt-8 flex justify-between">
+                <Button
+                  variant="outline"
+                  onClick={handleBack}
+                  disabled={currentModuleIndex === 0 && currentStepIndex === 0}
+                  className=" bg-transparent cursor-pointer py-4 border-[#227C9D]"
+                >
+                  Back
+                </Button>
+                <Button
+                  onClick={() => {
+                    const stepResponses = currentQuestions.reduce((acc: any, q: any) => {
+                      acc[q._id] = responses[q._id] || null; // Use existing response or null
+                      return acc;
+                    }, {} as Record<string, any>);
+
+                    const checkIfAnyIsNull = Object.values(stepResponses).some((value) => value === null);
+
+                    if (checkIfAnyIsNull) {
+                      toast.error('Please answer all questions before proceeding.');
+                      return;
+                    }
+                    handleNext(stepResponses);
+                  }}
+                  disabled={isSubmitting}
+                  className=" cursor-pointer py-4"
+                >
+                  {isLastStepOverall ? (isSubmitting ? 'Submitting Assessment...' : 'Finish Assessment') : 'Next'}
+                </Button>
+              </div>
+              <div className="text-center text-sm text-muted-foreground mt-4">
+                Step {currentStepIndex + 1} of {totalStepsInModule}
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
     );
@@ -385,7 +425,10 @@ export default function Assessment() {
             options={transformOptions(currentQuestion.options || [])}
             // currentStep={currentStepIndex + 1}
             value={responses[currentQuestion._id] || ''}
-            onChange={(res) => setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }))}
+            onChange={(res) => {
+              setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }));
+              console.log(res);
+            }}
             index={index}
           />
         );
@@ -465,7 +508,7 @@ export default function Assessment() {
     <div className="min-h-screen bg-muted/30 p-6">
       <div className="max-w-4xl mx-auto">
         {/* <AssessmentHeader /> */}
-        <ProgressBar />
+        {showAssessment && <ProgressBar />}
         {renderCurrentStep()}
       </div>
     </div>

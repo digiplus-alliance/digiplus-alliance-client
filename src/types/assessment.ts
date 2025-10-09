@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 // Assessment Option Schema
 export const AssessmentOptionSchema = z.object({
@@ -38,7 +38,7 @@ export const AssessmentQuestionSchema = z.object({
     'short_text',
     'long_text',
     'dropdown',
-    'multiple_choice_grid'
+    'multiple_choice_grid',
   ]),
   question: z.string(),
   options: z.array(AssessmentOptionSchema).default([]),
@@ -141,22 +141,24 @@ export const AssessmentDetailsResponseSchema = z.object({
 export const AssessmentSubmissionRequestSchema = z.object({
   assessment_id: z.string(),
   user_id: z.string(),
-  responses: z.record(z.string(), z.union([
-    z.string(),
-    z.array(z.string()),
-    z.record(z.string(), z.string()),
-  ])),
+  responses: z.record(z.string(), z.union([z.string(), z.array(z.string()), z.record(z.string(), z.string())])),
 });
 
 // Assessment Submission Response Schema
 export const AssessmentSubmissionResponseSchema = z.object({
   success: z.boolean(),
   message: z.string(),
-  data: z.object({
-    submission_id: z.string().optional(),
-    score: z.number().optional(),
-    recommendations: z.array(ServiceRecommendationSchema).optional(),
-  }).optional(),
+  data: z
+    .object({
+      submission_id: z.string().optional(),
+      user_score: z.number().optional(),
+      recommended_services: z.array(ServiceRecommendationSchema).optional(),
+      user_level: z.string().optional(),
+      percentage_score: z.number().optional(),
+      total_possible_points: z.number().optional(),
+      assessment_title: z.string().optional(),
+    })
+    .optional(),
 });
 
 // TypeScript Types
@@ -192,3 +194,34 @@ export interface AssessmentNavigation {
   currentStep: number;
   totalSteps: number;
 }
+
+//Assessment Submissions History
+export const AssessmentSubmissionHistoryResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+  data: z
+    .object({
+      _id: z.string(),
+      user_id: z.string(),
+      assessment_id: z.string(),
+      answers: z.array(
+        z.object({
+          question_id: z.string(),
+          answer: z.union([z.string(), z.array(z.string()), z.record(z.string(), z.string())]),
+        })
+      ),
+      user_score: z.number(),
+      max_possible_score: z.number(),
+      percentage_score: z.number(),
+      recommended_services: z.array(ServiceRecommendationSchema),
+
+      completed_at: z.string(),
+      createdAt: z.string(),
+      updatedAt: z.string(),
+      __v: z.number(),
+    })
+    .array(),
+});
+
+export type AssessmentSubmission = z.infer<typeof AssessmentSubmissionHistoryResponseSchema>;
+export type AssessmentSubmissionHistoryResponse = z.infer<typeof AssessmentSubmissionHistoryResponseSchema>;

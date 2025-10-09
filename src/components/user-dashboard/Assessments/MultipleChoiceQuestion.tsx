@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 
 interface MultipleChoiceOption {
-  id: string;
+  _id: string;
   text: string;
   value?: number;
   points?: number;
@@ -44,9 +44,9 @@ export function MultipleChoiceQuestion({
       <CardContent className="p-0 -mt-2">
         <RadioGroup value={value} onValueChange={onChange} className="space-y-4">
           {options.map((option) => (
-            <div key={option.id} className="flex items-start space-x-3">
-              <RadioGroupItem value={option.id} id={option.id} className="mt-1" />
-              <Label htmlFor={option.id} className="text-[#3D3A3A] leading-relaxed cursor-pointer">
+            <div key={option._id} className="flex items-start space-x-3">
+              <RadioGroupItem value={option._id} id={option._id} className="mt-1" />
+              <Label htmlFor={option._id} className="text-[#3D3A3A] leading-relaxed cursor-pointer">
                 {option.text}
               </Label>
             </div>

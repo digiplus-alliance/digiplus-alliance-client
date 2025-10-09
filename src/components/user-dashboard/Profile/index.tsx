@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import ProfileCard from './ProfileCard';
 import PageHeader from '@/components/PageHeader';
 import UpdateProfileCompo from './UpdateProfile';
+import { useRouter } from 'next/navigation';
 
 const ProfileComponent = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -12,7 +13,10 @@ const ProfileComponent = () => {
     setIsEditing(true);
   };
 
+  const router = useRouter();
+
   const handleClose = () => {
+    window.location.reload();
     setIsEditing(false);
   };
 

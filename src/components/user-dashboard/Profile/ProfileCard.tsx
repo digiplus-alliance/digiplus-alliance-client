@@ -21,18 +21,24 @@ const ProfileCard = () => {
           <div className="flex flex-col items-center text-center space-y-0 gap-4 sm:gap-6">
             <div className="flex flex-col items-center text-center space-y-4 sm:space-y-6">
               <div className="relative">
-                <Image
-                  src={
-                    user?.logo_url ||
-                    user?.profile_picture ||
-                    businessProfile?.logo_url ||
-                    '/about/team-placeholder-four.png'
-                  }
-                  alt={`${user?.first_name} ${user?.last_name}` || 'Profile'}
-                  className="w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] lg:w-[120px] lg:h-[120px] rounded-full object-cover ring-4 ring-green-100"
-                  width={120}
-                  height={120}
-                />
+                {user?.logo_url || user?.profile_picture || businessProfile?.logo_url ? (
+                  <Image
+                    src={
+                      user?.logo_url ||
+                      user?.profile_picture ||
+                      businessProfile?.logo_url ||
+                      '/about/team-placeholder-four.png'
+                    }
+                    alt={`${user?.first_name} ${user?.last_name}` || 'Profile'}
+                    className="w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] lg:w-[120px] lg:h-[120px] rounded-full object-cover ring-4 ring-green-100"
+                    width={120}
+                    height={120}
+                  />
+                ) : (
+                  <div className="w-[80px] h-[80px] text-4xl sm:w-[100px] sm:h-[100px] lg:w-[120px] lg:h-[120px] rounded-full object-cover flex items-center justify-center bg-green-100">
+                    {user?.first_name?.charAt(0) || '' + user?.last_name?.charAt(0) || ''}
+                  </div>
+                )}
               </div>
               <div className="space-y-2 sm:space-y-3">
                 <h3 className="text-xl sm:text-2xl lg:text-3xl capitalize">
@@ -117,7 +123,7 @@ const ProfileCard = () => {
               )} */}
             </div>
             <div className="space-y-3 sm:space-y-4 text-xs sm:text-sm text-center flex flex-col items-center justify-start pt-6 sm:pt-8 lg:pt-10 pb-0 w-full border-t border-[#D9D9D9]">
-              <div className="flex items-center justify-between gap-2 w-full max-w-[85%] sm:max-w-[70%]">
+              {/* <div className="flex items-center justify-between gap-2 w-full max-w-[85%] sm:max-w-[70%]">
                 <div className="flex flex-col items-start gap-0.5 w-full max-w-[98%]">
                   <span className="text-muted-foreground text-xs sm:text-sm">Assessment</span>
                   <p className="bg-[#FFF6D3] text-[#5E5B5B] px-4 sm:px-6 py-1 sm:py-2 rounded-lg w-full text-center text-xs sm:text-sm">
@@ -127,14 +133,18 @@ const ProfileCard = () => {
                 <button>
                   <ChevronRight color="#B8B8B8" />
                 </button>
-              </div>
+              </div> */}
               <div className="flex items-center justify-between gap-2 text-sm w-full max-w-[70%]">
                 <div className=" flex flex-col items-start gap-0.5 w-full max-w-[98%]">
                   <p className="text-muted-foreground">Policies</p>
                   <button
                     className=" "
                     onClick={() => {
-                      router.push('/privacy');
+                      window.open(
+                        'https://www.8thgearpartners.com/terms-and-conditions',
+                        '_blank',
+                        'noopener,noreferrer'
+                      );
                     }}
                   >
                     Read all Terms and conditions
@@ -142,7 +152,11 @@ const ProfileCard = () => {
                 </div>
                 <button
                   onClick={() => {
-                    router.push('/privacy');
+                    window.open(
+                      'https://www.8thgearpartners.com/terms-and-conditions',
+                      '_blank',
+                      'noopener,noreferrer'
+                    );
                   }}
                 >
                   <ChevronRight color="#B8B8B8" />

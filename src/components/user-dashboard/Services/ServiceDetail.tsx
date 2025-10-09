@@ -17,6 +17,8 @@ interface ServiceDetailProps {
     long_description: string;
     createdAt: string;
     updatedAt: string;
+    formatted_price: string;
+    formatted_discounted_price: string;
   };
   relatedServices: {
     _id: string;
@@ -30,11 +32,31 @@ interface ServiceDetailProps {
     long_description: string;
     createdAt: string;
     updatedAt: string;
+    formatted_price: string;
+    formatted_discounted_price: string;
+    pricing_unit: string;
   }[];
+  pricing_unit: string;
   onApply?: () => void;
+  handleClick?: (service: {
+    _id: string;
+    name: string;
+    service_type: string;
+    image: string;
+    images: string[];
+    price: number;
+    discounted_price: number;
+    short_description: string;
+    long_description: string;
+    createdAt: string;
+    updatedAt: string;
+    formatted_price: string;
+    formatted_discounted_price: string;
+    pricing_unit: string;
+  }) => void;
 }
 
-const ServiceDetail: FC<ServiceDetailProps> = ({ service, relatedServices, onApply }) => {
+const ServiceDetail: FC<ServiceDetailProps> = ({ service, relatedServices, onApply, pricing_unit, handleClick }) => {
   const defaultFullDescription = `Vivamus adipiscing nisl ut dolor dignissim semper. Nulla luctus malesuada tincidunt. Class aptent taciti sociosqu ad litora torquent! Vivamus adipiscing nisl ut dolor dignissim semper.
 Vivamus adipiscing nisl ut dolor dignissim semper. Nulla luctus malesuada tincidunt. Class aptent taciti sociosqu ad litora torquent! Vivamus adipiscing nisl ut dolor dignissim semper.
 Vivamus adipiscing nisl ut dolor dignissim semper. Nulla luctus malesuada tincidunt. Class aptent taciti sociosqu ad litora torquent! Vivamus adipiscing nisl ut dolor dignissim semper.
@@ -58,8 +80,9 @@ Vivamus adipiscing nisl ut dolor dignissim semper. Nulla luctus malesuada tincid
 
           <p className="text-[#706C6C] text-sm sm:text-base leading-relaxed">{service.short_description}</p>
 
-          <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#D63A3A] mb-4 sm:mb-6">
-            NGN {service.price?.toLocaleString()}
+          <div className="text-2xl sm:text-3xl lg:text-4xl flex items-center font-bold text-[#D63A3A] mb-4 sm:mb-6">
+            NGN {service.price.toLocaleString()}
+            <p className="text-[#706C6C] text-base "> {pricing_unit ? `/${pricing_unit}` : ''}</p>
           </div>
 
           <button
@@ -82,11 +105,25 @@ Vivamus adipiscing nisl ut dolor dignissim semper. Nulla luctus malesuada tincid
       {/* More like this Section */}
       <div className="space-y-4 sm:space-y-6 mt-8 sm:mt-10">
         <h2 className="text-2xl sm:text-3xl lg:text-4xl text-center font-semibold text-[#171616]">More like this</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-          {relatedServices.slice(0, 4).map((relatedService) => (
-            <ServiceCard key={relatedService._id} {...relatedService} />
-          ))}
-        </div>
+        {relatedServices.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            {relatedServices.slice(0, 4).map((relatedService) => (
+              <ServiceCard
+                key={relatedService._id}
+                {...relatedService}
+                onClick={() => {
+                  if (handleClick) handleClick(relatedService);
+                }}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex justify-center items-center py-8">
+              <div className="text-sm text-gray-500">No related services</div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -21,7 +21,7 @@ export default function UserDashboard() {
         <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4 sm:space-y-0">
           <Button
             className="w-full sm:w-auto text-sm sm:text-base"
-            onClick={() => router.push('/user-dashboard/assessments')}
+            onClick={() => router.push('/user-dashboard/assessment')}
           >
             Take Assessments
           </Button>
@@ -56,7 +56,7 @@ export default function UserDashboard() {
         <div className="space-y-4 sm:space-y-6 order-2 xl:order-1">
           {/* Recent Applications */}
           <RecentApplications />
-          <AssessmentChart />
+          {/* <AssessmentChart /> */}
         </div>
         <div className="order-1 xl:order-2">
           <ProfileCard />

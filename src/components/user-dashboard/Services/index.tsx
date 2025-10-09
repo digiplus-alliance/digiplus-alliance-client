@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useGetServices } from '@/app/api/services/useGetServices';
+import { useAuthStore } from '@/store/auth';
 
 const services: {
   id: number;
@@ -96,6 +97,14 @@ const services: {
   },
 ];
 
+export enum PricingUnit {
+  PER_HOUR = 'per_hour',
+  PER_PROJECT = 'per_project',
+  ONE_TIME = 'one_time',
+  PER_DAY = 'per_day',
+  PER_MONTH = 'per_month',
+}
+
 interface ServiceCard {
   _id: string;
   name: string;
@@ -108,7 +117,27 @@ interface ServiceCard {
   long_description: string;
   createdAt: string;
   updatedAt: string;
+  formatted_price: string;
+  formatted_discounted_price: string;
+  pricing_unit: string;
 }
+
+const getPricingUnit = (unit: string) => {
+  switch (unit) {
+    case 'per_hour':
+      return 'Per Hour';
+    case 'per_project':
+      return 'Per Project';
+    case 'one_time':
+      return 'One Time';
+    case 'per_day':
+      return 'Per Day';
+    case 'per_month':
+      return 'Per Month';
+    default:
+      return '';
+  }
+};
 
 export default function ServicesComponent() {
   const router = useRouter();
@@ -116,10 +145,21 @@ export default function ServicesComponent() {
   const { data, isLoading } = useGetServices();
 
   const [servicesAvailable, setServicesAvailable] = useState<ServiceCard[]>([]);
+  const { suggestedServices, setSuggestedServices } = useAuthStore();
+
+  const [currentSuggestedServices, setCurrentSuggestedServices] = useState<string[]>(suggestedServices);
+
+  console.log(currentSuggestedServices);
 
   useEffect(() => {
     if (data) {
-      setServicesAvailable(data as any);
+      if (currentSuggestedServices.length > 0) {
+        const filteredServices = data.filter((service) => currentSuggestedServices.includes(service.name));
+        setSuggestedServices([]);
+        setServicesAvailable(filteredServices as any);
+      } else {
+        setServicesAvailable(data as any);
+      }
     }
   }, [isLoading, data]);
 
@@ -160,6 +200,8 @@ export default function ServicesComponent() {
           service={selectedService}
           relatedServices={getRelatedServices(selectedService._id)}
           onApply={handleApply}
+          pricing_unit={getPricingUnit(selectedService.pricing_unit)}
+          handleClick={handleServiceClick}
         />
       </div>
     );
@@ -175,13 +217,21 @@ export default function ServicesComponent() {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <PageHeader title="Services" />
+      <PageHeader title={currentSuggestedServices.length > 0 ? 'Suggested Services' : 'Services'} />
 
       {/* Services Grid - Responsive */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-        {servicesAvailable.map((service) => (
-          <ServiceCard key={service._id} {...service} onClick={() => handleServiceClick(service)} />
-        ))}
+        {servicesAvailable && servicesAvailable?.length > 0 ? (
+          servicesAvailable.map((service) => (
+            <ServiceCard key={service._id} {...service} onClick={() => handleServiceClick(service)} />
+          ))
+        ) : (
+          <div className="space-y-4">
+            <div className="flex justify-center items-center py-8">
+              <div className="text-sm text-gray-500">No services available</div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
