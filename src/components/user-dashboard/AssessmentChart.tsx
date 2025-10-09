@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/store/auth';
 import { toast } from 'sonner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useGetAssessmentHistorySubmissions } from '@/app/api/user/useGetAssessmentHistory';
+import { exportToCSV } from '@/utils/exportCSV';
 
 const YEARS = [
   { label: '2025', value: 2025 },
@@ -27,6 +29,15 @@ export function AssessmentChart() {
     }[]
   >([]);
   const { user } = useAuthStore();
+  // const {
+  //   data: assessments,
+  //   isLoading,
+  //   error,
+  // } = useGetAssessmentHistorySubmissions() as {
+  //   data: any;
+  //   isLoading: boolean;
+  //   error: any;
+  // };
 
   const fetchStats = async () => {
     try {
@@ -43,6 +54,10 @@ export function AssessmentChart() {
     } finally {
       setFetching(false);
     }
+  };
+
+  const exportAssessmentToCSV = async () => {
+    // exportToCSV(assessments.data, 'assessments-history.csv');
   };
 
   useEffect(() => {
@@ -89,6 +104,7 @@ export function AssessmentChart() {
           <Button
             variant="default"
             size="sm"
+            onClick={exportAssessmentToCSV}
             className="w-auto bg-transparent hover:bg-transparent hover:underline hover:text-[#0E5F7D] underline-offset-4 shadow-none drop-shadow-none text-[#0E5F7D] text-sm"
           >
             <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" color="#0E5F7D" />
