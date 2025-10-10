@@ -25,7 +25,7 @@ export default function ContactInfo() {
           <p className="font-semibold text-[#171616]">Call us</p>
           <div className="flex items-center gap-2 text-[#5E5B5B] py-2">
             <Phone className="w-5 h-5" />
-            <span>+234 933 246 2400</span>
+            <span>+234 913 246 2410</span>
           </div>
         </div>
 

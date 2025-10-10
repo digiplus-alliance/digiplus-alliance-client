@@ -4,22 +4,22 @@ import Image from "next/image";
 export function Footer() {
   return (
     <footer className="bg-[#24262D] px-4 md:px-10 text-muted-foreground">
-      <div className="container grid grid-cols-1 gap-12 py-12 lg:grid-cols-6">
+      <div className="container grid grid-cols-1 gap-8 py-12 md:grid-cols-6">
         {/* Logo & description */}
         <div className="md:col-span-2">
           <div className="md:flex hidden items-center space-x-2">
             <Image
               src="/plain-logo.png"
               alt="DigiPlus Logo"
-              width={100}
-              height={40}
+              width={180}
+              height={80}
             />
           </div>
           <div className="flex items-center space-x-2 md:hidden">
             <Image
               src="/mobile-logo.png"
               alt="DigiPlus Logo"
-              width={100}
+              width={150}
               height={40}
             />
           </div>
@@ -60,7 +60,7 @@ export function Footer() {
                 target="_blank"
                 className="hover:underline"
               >
-                Privacy Policies
+                Privacy Policy
               </Link>
             </li>
           </ul>

@@ -40,6 +40,13 @@ export function AuthGuard({
         return;
       }
 
+      // Check if user is verified (skip verification check for verification page)
+      const currentPath = window.location.pathname;
+      if (!user.is_verified && !currentPath.includes('/auth/verification')) {
+        router.replace('/auth/verification');
+        return;
+      }
+
       // Check if user has required role
       if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
         // Redirect based on user role
@@ -97,7 +104,8 @@ export function useAuthGuard(allowedRoles?: string[]) {
   const router = useRouter();
 
   const isAuthenticated = !!(user && accessToken);
-  const isAuthorized = isAuthenticated && (
+  const isVerified = user?.is_verified || false;
+  const isAuthorized = isAuthenticated && isVerified && (
     !allowedRoles || 
     allowedRoles.length === 0 || 
     allowedRoles.includes(user?.role || '')
@@ -116,11 +124,17 @@ export function useAuthGuard(allowedRoles?: string[]) {
     router.replace(dashboardUrl);
   };
 
+  const redirectToVerification = () => {
+    router.replace('/auth/verification');
+  };
+
   return {
     isAuthenticated,
+    isVerified,
     isAuthorized,
     user,
     redirectToLogin,
     redirectToDashboard,
+    redirectToVerification,
   };
 }

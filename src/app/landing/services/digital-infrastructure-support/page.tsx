@@ -1,7 +1,31 @@
 import InfoSection from "../widgets/info-section";
-import MoreOption from "../widgets/more-option";
+import MoreOption, { OptionItem } from "../widgets/more-option";
 import ServiceHero from "../widgets/service-hero";
 import Value from "../widgets/value-section";
+
+const defaultItems: OptionItem[] = [
+  {
+    image: "/services/transformation-advisory/more-card-one.png",
+    title: "Market Access Support",
+    body: "Struggling to expand your reach? The Market Access Support service connects MSMEs to larger markets using the right blend of digital tools, strategic partnerships, and curated networking opportunities.",
+    footer: "NGN 100 000",
+    link: "/landing/services/market-access-support",
+  },
+  {
+    image: "/services/transformation-advisory/more-card-two.png",
+    title: "Digital Transformation Advisory",
+    body: "Tap into a vibrant support network that helps MSMEs connect, collaborate, and thrive because no business should grow alone.",
+    footer: "NGN 100 000",
+    link: "/landing/services/digital-transformation-advisory",
+  },
+  {
+    image: "/services/transformation-advisory/more-card-three.png",
+    title: "Taster Sessions: Digital Tools & Platforms",
+    body: "From DSE (Digital Skills for Entrepreneurs) to MIRE (Market & Investment Readiness), we offer hands-on programs that teach what really works in today’s market.",
+    footer: "FREE",
+    link: "/landing/services/digital-tools-and-platforms",
+  },  
+];
 
 export default function DigitalInfrastructureSupport() {
   return (
@@ -50,7 +74,7 @@ export default function DigitalInfrastructureSupport() {
         button={{ label: "Apply Now", href: "/contact" }}
       />
 
-      <MoreOption />
+      <MoreOption items={defaultItems} />
     </main>
   );
 }

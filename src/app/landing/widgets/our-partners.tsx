@@ -36,11 +36,11 @@ export default function OurPartners() {
         {/* Consortium Partners */}
         <div className="flex flex-col sm:flex-row sm:items-center  gap-3 md:gap-6">
           <div className="flex items-center gap-2  sm:flex-shrink-0">
-            <p className="text-[#5E5B5B] text-base md:text-2xl font-medium">Consortium Partners</p>
+            <p className="text-[#5E5B5B] text-base text-center md:text-2xl font-medium">Consortium Partners</p>
           </div>
 
-          <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap mt-2 sm:mt-0">
-            <div className="w-15 h-15">
+          <div className="items-center grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 flex-wrap sm:flex-nowrap mt-2 sm:mt-0">
+            <div className="w-20 h-20">
               <Image
                 src="/partners-logo/futa.png"
                 alt="FUTA logo"
@@ -50,7 +50,7 @@ export default function OurPartners() {
                 className="object-contain"
               />
             </div>
-            <div className="w-18 h-18">
+            <div className="w-20 h-20">
               <Image
                 src="/partners-logo/sterlin.svg"
                 alt="Sterlin logo"
@@ -60,7 +60,7 @@ export default function OurPartners() {
                 className="object-contain"
               />
             </div>
-            <div className="w-18 h-18">
+            <div className="w-20 h-20">
               <Image
                 src="/partners-logo/sme.png"
                 alt="SME logo"
@@ -70,7 +70,7 @@ export default function OurPartners() {
                 className="object-contain"
               />
             </div>
-            <div className="w-18 h-18">
+            <div className="w-28 h-28">
               <Image
                 src="/partners-logo/inkeeper.svg"
                 alt="Inkeeper logo"
@@ -89,7 +89,7 @@ export default function OurPartners() {
             <p className="text-[#5E5B5B] text-base md:text-2xl font-medium">Technical Partners</p>
           </div>
 
-          <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap mt-2 sm:mt-0">
+          <div className="items-center grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 flex-wrap sm:flex-nowrap mt-2 sm:mt-0">
             <div className="w-15 h-15">
               <Image
                 src="/partners-logo/mtn.svg"
@@ -129,13 +129,13 @@ export default function OurPartners() {
             <p className="text-[#5E5B5B] text-base md:text-2xl font-medium">Supporters</p>
           </div>
 
-          <div className="flex items-center gap-3 sm:flex-nowrap mt-2 sm:mt-0">
-            <div className="w-60 h-20">
+          <div className="flex items-center justify-center gap-3 sm:flex-nowrap mt-2 md:my-10 sm:mt-0">
+            <div className="w-60 md:w-96 h-20">
               <Image
                 src="/partners-logo/group.svg"
                 alt="GIZ logo"
                 layout="responsive"
-                width={960}
+                width={10500}
                 height={480}
                 className="object-contain"
               />

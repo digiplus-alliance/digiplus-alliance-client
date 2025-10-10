@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+const apiUrl = process.env.NEXT_PUBLIC_STAGING_API_URL;
+// const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export async function POST(req: NextRequest) {
   try {
     // Get the refreshToken from cookies
     const refreshToken = req.cookies.get("refreshToken")?.value;
-    
+
     if (!refreshToken) {
       return new NextResponse(
-        JSON.stringify({ message: "No refresh token found" }), 
+        JSON.stringify({ message: "No refresh token found" }),
         { status: 401 }
       );
     }
@@ -26,7 +27,11 @@ export async function POST(req: NextRequest) {
     const responseData = await response.json().catch(() => ({}));
 
     if (response.ok) {
-      const { accessToken, refreshToken: newRefreshToken, message } = responseData;
+      const {
+        accessToken,
+        refreshToken: newRefreshToken,
+        message,
+      } = responseData;
 
       const res = new NextResponse(JSON.stringify({ message, accessToken }), {
         status: 200,
@@ -71,7 +76,8 @@ export async function POST(req: NextRequest) {
       { status: response.status }
     );
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Token refresh failed";
+    const message =
+      error instanceof Error ? error.message : "Token refresh failed";
     return new NextResponse(JSON.stringify({ message }), { status: 500 });
   }
 }

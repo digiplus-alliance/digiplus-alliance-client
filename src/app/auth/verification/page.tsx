@@ -17,12 +17,14 @@ import SpinnerIcon from "@/components/icons/spinner";
 import { useVerification } from "@/app/api/auth/useVerification";
 import { useRequestVerification } from "@/app/api/auth/useRequestVerification";
 import { useLogout } from "@/lib/logout";
+import { useAuthStore } from "@/store/auth";
 
 export default function VerificationPage() {
   const [isVerificationSuccess, setIsVerificationSuccess] = useState(false);
   const [countdown, setCountdown] = useState(5);
   const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
+  const { user } = useAuthStore();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -32,14 +34,28 @@ export default function VerificationPage() {
   const animationFrameRef = useRef<number>(0);
   const startTimeRef = useRef<number>(0);
   const { mutate: verify } = useVerification();
-  const { mutate: requestVerification, isPending: requestingVerification } = useRequestVerification();
+  const { mutate: requestVerification, isPending: requestingVerification } =
+    useRequestVerification();
   const { mutate: logoutMutate } = useLogout();
 
   const handleLogout = useCallback(() => {
     logoutMutate();
   }, [logoutMutate]);
 
-  const userVerified = false;
+  // Check if user is already verified, redirect to dashboard
+  useEffect(() => {
+    if (user?.is_verified) {
+      const dashboardUrl =
+        user.role === "admin" ? "/admin-dashboard" : "/user-dashboard";
+      router.replace(dashboardUrl);
+    }
+  }, [user, router]);
+
+  // If no user is logged in, redirect to login
+  // if (!user && !token) {
+  //   router.replace("/auth/login");
+  //   return null;
+  // }
 
   const handleResend = () => {
     requestVerification(
@@ -50,8 +66,12 @@ export default function VerificationPage() {
           setIsVerificationSuccess(true);
         },
         onError: (error) => {
-          toast.error(error instanceof Error ? error.message : "Failed to send verification email");
-        }
+          toast.error(
+            error instanceof Error
+              ? error.message
+              : "Failed to send verification email"
+          );
+        },
       }
     );
   };
@@ -88,13 +108,23 @@ export default function VerificationPage() {
   useEffect(() => {
     if (token) {
       verify(
-        { code: token },
+        { token: token },
         {
           onSuccess: () => {
             toast.success("Verification successful!");
+
+            // Update user verification status in the store
+            if (user) {
+              const updatedUser = { ...user, is_verified: true };
+              useAuthStore.getState().setUser(updatedUser);
+            }
+
             setIsVerificationSuccess(true);
             setTimeout(() => {
-              handleLogout();
+              // Redirect to dashboard after successful verification
+              const dashboardUrl =
+                user?.role === "admin" ? "/admin-dashboard" : "/user-dashboard";
+              router.replace(dashboardUrl);
             }, 2000);
           },
           onError: () => {
@@ -104,7 +134,7 @@ export default function VerificationPage() {
         }
       );
     }
-  }, [token, router, verify, handleLogout]);
+  }, [token, router, verify, handleLogout, user]);
 
   if (token) {
     return (
@@ -138,7 +168,7 @@ export default function VerificationPage() {
     );
   }
 
-  if (!userVerified)
+  if (!user?.is_verified && !token)
     return (
       <Dialog open={true}>
         <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-md pointer-events-none" />
@@ -148,33 +178,35 @@ export default function VerificationPage() {
         >
           <DialogHeader>
             <DialogTitle>Verify your email</DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-gray-500">
               Request a verification email, then check your inbox and verify
               your email address to continue using your account.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              className="w-full"
-              onClick={handleResend}
-              disabled={requestingVerification}
-              variant="secondary"
-            >
-              {requestingVerification ? (
-                <>
-                  <SpinnerIcon /> Requesting...
-                </>
-              ) : (
-                "Request Verification Email"
-              )}
-            </Button>
-            <Button
-              className="w-full"
-              onClick={() => handleLogout()}
-              variant="destructive"
-            >
-              Logout
-            </Button>
+            <div className="w-full flex flex-col md:flex-row gap-2 items-center justify-center">
+              <Button
+                className=" bg-white text-black hover:bg-gray-100"
+                onClick={handleResend}
+                disabled={requestingVerification}
+                variant="secondary"
+              >
+                {requestingVerification ? (
+                  <>
+                    <SpinnerIcon /> Requesting...
+                  </>
+                ) : (
+                  "Request Verification Email"
+                )}
+              </Button>
+              <Button
+                className=""
+                onClick={() => handleLogout()}
+                variant="destructive"
+              >
+                Logout
+              </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>

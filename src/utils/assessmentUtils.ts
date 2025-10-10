@@ -27,7 +27,7 @@ export function groupQuestionsByModuleAndStep(assessmentData: AssessmentByIdData
     return [];
   }
 
-  const { questions, modules } = assessmentData;
+  const { questions, modules, assessment } = assessmentData;
 
   // Use a Map for efficient grouping: ModuleID -> StepNumber -> Questions[]
   const groupedData = new Map<string, Map<number, AssessmentQuestion[]>>();
