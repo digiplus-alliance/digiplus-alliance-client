@@ -134,8 +134,6 @@ export default function UserApplicationForm(props: WelcomeDatas) {
     const updatedResponses = { ...responses, ...stepResponses };
     setResponses(updatedResponses);
 
-    console.log('updatedResponses', updatedResponses);
-
     if (isLastStepInModule) {
       if (isLastModule) {
         // This is the last step of the last module of the current assessment
@@ -166,6 +164,7 @@ export default function UserApplicationForm(props: WelcomeDatas) {
         createApplication(payload, {
           onSuccess: () => {
             setShowSuccessModal(true);
+            setResponses({});
             toast.success('Application submitted successfully');
           },
           onError: (error) => {
@@ -241,15 +240,12 @@ export default function UserApplicationForm(props: WelcomeDatas) {
               {/* Shared Navigation for the step */}
               <div className="mt-8 flex justify-between">
                 <Button
-                  className="w-full h-12 bg-[#FF5C5C] mt-6 hover:bg-[#FF4444] text-white  rounded-lg"
+                  className="w-full h-12 bg-[#FF5C5C] mt-6 hover:bg-[#FF4444] text-black hover:text-white  rounded-lg"
                   onClick={async () => {
                     const stepResponses = currentQuestions.reduce((acc: any, q: any) => {
                       acc[q.data_key] = responses[q.data_key] || null; // Use existing response or null
                       return acc;
                     }, {} as Record<string, any>);
-
-                    console.log('-----------------------------------------');
-                    console.log(stepResponses);
 
                     const fields = currentQuestions.map((question) => {
                       return {
@@ -287,24 +283,32 @@ export default function UserApplicationForm(props: WelcomeDatas) {
                           handleNext(stepResponses);
                         }
                       })
-                      .catch((err) => toast.error(err.message || 'Something went wrong'))
-                      .finally(() => {
-                        setValidatingResponse(false);
-                      });
+                      .catch((err) => toast.error(err.message || 'Something went wrong'));
+                    // .finally(() => {
+                    //   setValidatingResponse(false);
+                    // });
                   }}
                   disabled={isSubmitting}
                 >
-                  {isLastStepOverall
-                    ? isSubmitting
-                      ? 'Submitting Application...'
-                      : validatingResponse
-                      ? 'Validating Response...'
-                      : 'Submit Application'
-                    : isSubmitting
-                    ? 'Submitting...'
-                    : validatingResponse
-                    ? 'Validating Response...'
-                    : 'Next'}
+                  {isLastStepOverall ? (
+                    isSubmitting ? (
+                      'Submitting Application...'
+                    ) : validatingResponse ? (
+                      <p className=" flex items-center justify-center pt-3">
+                        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+                      </p>
+                    ) : (
+                      'Submit Application'
+                    )
+                  ) : isSubmitting ? (
+                    'Submitting...'
+                  ) : validatingResponse ? (
+                    <p className=" flex items-center justify-center pt-3">
+                      <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+                    </p>
+                  ) : (
+                    'Next'
+                  )}
                 </Button>
               </div>
             </>

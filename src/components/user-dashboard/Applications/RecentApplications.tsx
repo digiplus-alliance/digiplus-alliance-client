@@ -114,13 +114,13 @@ export function RecentApplications() {
                 width={48}
                 height={48}
               />
-              <div className="flex-1 min-w-0">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1 sm:justify-between">
-                  <h4 className="font-medium text-sm sm:text-base truncate">{app.name}</h4>
+              <div className="flex-1  w-full">
+                <div className="flex flex-wrap w-full  sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1 justify-between">
+                  <h4 className="font-medium text-sm sm:text-base">{app.service}</h4>
                   <div className="flex-shrink-0">{getStatusBadge(app.status)}</div>
                 </div>
                 <p className="text-xs text-muted-foreground mb-1">
-                  <span className="text-[#D63A3A]">{app._id.slice(0, 11)}</span> • {formatDate(app.submission_time)}
+                  <span className="text-[#D63A3A]">N{app.payment_amount}</span> • {formatDate(app.submission_time)}
                 </p>
                 {/* <p className="text-xs sm:text-sm text-muted-foreground font-medium text-right">Qty: {app.quantity}</p> */}
               </div>

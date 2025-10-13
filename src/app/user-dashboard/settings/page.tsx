@@ -7,14 +7,13 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useChangePassword } from '@/app/api/user/useChangePassword';
 import { toast } from 'sonner';
-import { useAuthStore } from '@/store/auth';
 import { useAuthGuard } from '@/components/AuthGuard';
+import { PasswordInput } from '@/components/ui/password-input';
 
 const SettingsPage = () => {
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [oldPassword, setOldPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const { mutate: changePassword, isPending } = useChangePassword();
   const { redirectToLogin } = useAuthGuard();
 
@@ -23,15 +22,15 @@ const SettingsPage = () => {
   };
 
   const handleResetPassword = () => {
-    if (newPassword !== confirmPassword) {
-      toast.error('Passwords do not match');
+    if (!newPassword || !oldPassword) {
+      toast.error('Please fill in all fields');
       return;
     }
 
     changePassword(
       {
         oldPassword: oldPassword,
-        newPassword: confirmPassword,
+        newPassword: newPassword,
       },
       {
         onSuccess: () => {
@@ -85,7 +84,7 @@ const SettingsPage = () => {
               <label htmlFor="new-password" className="block text-sm font-medium text-gray-700">
                 Old Password
               </label>
-              <Input
+              <PasswordInput
                 id="old-password"
                 type="password"
                 className="mt-1 block w-full"
@@ -97,7 +96,7 @@ const SettingsPage = () => {
               <label htmlFor="new-password" className="block text-sm font-medium text-gray-700">
                 New Password
               </label>
-              <Input
+              <PasswordInput
                 id="new-password"
                 type="password"
                 className="mt-1 block w-full"
@@ -105,7 +104,7 @@ const SettingsPage = () => {
                 onChange={(e) => setNewPassword(e.target.value)}
               />
             </div>
-            <div>
+            {/* <div>
               <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">
                 Confirm Password
               </label>
@@ -116,7 +115,7 @@ const SettingsPage = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
-            </div>
+            </div> */}
             <Button onClick={handleResetPassword} disabled={isPending} className="w-full cursor-pointer">
               {isPending ? 'Changing your password' : 'Change Password'}
             </Button>
