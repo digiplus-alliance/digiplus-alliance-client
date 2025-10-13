@@ -49,7 +49,7 @@ const getStatusBadge = (status: string) => {
 export function RecentApplications() {
   const { data: applications, isLoading, error } = useGetApplicationSubmissions();
 
-  const [recentApplications, setRecentApplications] = useState(applications?.slice(0, 6));
+  const [recentApplications, setRecentApplications] = useState(applications?.slice(0, 3));
   const [fetching, setFetching] = useState(false);
 
   const fetchRecentApplications = async () => {
@@ -58,7 +58,7 @@ export function RecentApplications() {
       const request = await fetch('/api/user/submissions');
       const response = await request.json();
       if (request.ok) {
-        setRecentApplications(response?.slice(0, 6));
+        setRecentApplications(response?.slice(0, 3));
       } else {
         toast.error(response.message || 'An error occurred fetching recent applications');
         setRecentApplications([]);
