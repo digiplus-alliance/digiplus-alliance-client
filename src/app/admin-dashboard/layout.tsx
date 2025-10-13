@@ -73,7 +73,7 @@ export default function AdminDashboardLayout({
   const personalizationItems = [
     {
       title: "Notifications",
-      url: "notifications",
+      url: "/notifications",
       icon: Settings,
       iconLogo: "/icons/sidebar-icon-three.svg",
       onClick: handleNotificationClick,

@@ -16,7 +16,7 @@ export default function UsersMiniTable() {
   // map API users to table rows
   const mappedUsers = useMemo(() => {
     return (users ?? []).map((u: any) => ({
-      id: u._id,
+      id: u._id.slice(-6).toUpperCase(),
       name: `${u.first_name ?? ""} ${u.last_name ?? ""}`.trim() || u.email,
       email: u.email,
       business: u.business_name ?? "",
@@ -124,7 +124,7 @@ export default function UsersMiniTable() {
 
   return (
     <>
-      <div className="max-h-64 overflow-auto">
+      <div className=" overflow-auto">
         <table className="w-full text-sm border-collapse">
           <thead className="bg-[#FBFBFD]">
             {table.getHeaderGroups().map((hg) => (

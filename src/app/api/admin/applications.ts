@@ -18,12 +18,24 @@ export const ApplicationSchema = z.object({
 export const AllApplicationsResponseSchema = z.array(ApplicationSchema);
 
 export type Application = z.infer<typeof ApplicationSchema>;
-export type AllApplicationsResponse = z.infer<typeof AllApplicationsResponseSchema>;
+export type AllApplicationsResponse = z.infer<
+  typeof AllApplicationsResponseSchema
+>;
 
-export function useGetAllApplications() {
+interface UseGetAllApplicationsOptions {
+  service_type?: string;
+}
+
+export function useGetAllApplications(options?: UseGetAllApplicationsOptions) {
+  const queryString = options?.service_type
+    ? `?service_type=${encodeURIComponent(options.service_type)}`
+    : "";
+  const url = `admin/applications/list${queryString}`;
+
   return useFetch<AllApplicationsResponse>({
-    url: "admin/applications/list",
+    url,
     hasAuth: true,
     schema: AllApplicationsResponseSchema,
+    queryKey: ["applicationList"],
   });
 }

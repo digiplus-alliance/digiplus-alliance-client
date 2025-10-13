@@ -66,7 +66,7 @@ export default function UserInfoModal({
 
             {/* Status */}
             <span className="px-6 py-1 w-[20rem] rounded-full text-xs font-medium bg-[#EBFFFC] text-[#076C61]">
-              Online
+              Last login: {selectedUser.last_login || "No recent login"}
             </span>
 
             <hr className="w-full border-gray-200" />

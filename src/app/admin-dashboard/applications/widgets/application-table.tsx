@@ -23,6 +23,8 @@ import {
   getAssessmentStatusStyles,
 } from "@/lib/getStatusStyles";
 import { useGetAllApplications } from "@/app/api/admin/applications";
+import { useUpdatePaymentStatus } from "@/app/api/admin/applications/update-payment-status";
+import { useUpdateApplicationStatus } from "@/app/api/admin/applications/update-application-status";
 
 // Extended type for table data that matches current structure
 type TableUser = {
@@ -37,11 +39,28 @@ type TableUser = {
 };
 const users: TableUser[] = [];
 
-export default function ApplicationTable() {
+interface ApplicationTableProps {
+  serviceTypeFilter?: string;
+}
+
+export default function ApplicationTable({
+  serviceTypeFilter,
+}: ApplicationTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
-  const { data: applications, isLoading, error } = useGetAllApplications();
+  const {
+    data: applications,
+    isLoading,
+    error,
+  } = useGetAllApplications({
+    service_type: serviceTypeFilter || undefined,
+  });
   const [tableData, setTableData] = useState<TableUser[]>(users);
   const pageSize = 10;
+  const [applicationId, setApplicationId] = useState<string>("");
+  const { mutate, isPending: isUpdating } =
+    useUpdatePaymentStatus(applicationId);
+  const { mutate: updateStatus, isPending: isUpdatingStatus } =
+    useUpdateApplicationStatus(applicationId);
 
   // map API applications to table data when available
   useEffect(() => {
@@ -77,6 +96,8 @@ export default function ApplicationTable() {
         user.id === userId ? { ...user, status: newStatus } : user
       )
     );
+    setApplicationId(userId);
+    updateStatus({ status: newStatus });
   };
 
   const handlePaymentStatusChange = (userId: string, newStatus: string) => {
@@ -85,6 +106,8 @@ export default function ApplicationTable() {
         user.id === userId ? { ...user, paymentStatus: newStatus } : user
       )
     );
+    setApplicationId(userId);
+    mutate({ paymentStatus: newStatus });
   };
 
   const totalPages = Math.ceil(tableData.length / pageSize);
@@ -133,6 +156,7 @@ export default function ApplicationTable() {
             <DropdownMenu>
               <DropdownMenuTrigger
                 className={`w-full text-left px-3 py-1 rounded-full text-xs font-medium border ${styleClasses} cursor-pointer flex items-center justify-between`}
+                disabled={isUpdatingStatus}
               >
                 <span className="truncate">{currentStatus}</span>
                 <ChevronDown size={12} className="text-[#706C6C] ml-2" />
@@ -180,6 +204,7 @@ export default function ApplicationTable() {
             <DropdownMenu>
               <DropdownMenuTrigger
                 className={`w-full text-left px-3 py-1 rounded-full text-xs font-medium border ${styleClasses} cursor-pointer flex items-center justify-between`}
+                disabled={isUpdating}
               >
                 <span className="truncate">{paymentStatus}</span>
                 <ChevronDown size={12} className="text-[#706C6C] ml-2" />

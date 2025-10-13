@@ -14,6 +14,7 @@ export const UserSchema = z.object({
   profile_picture: z.string().nullable().optional(),
   is_verified: z.boolean(),
   locked_until: z.string().nullable().optional(),
+  last_login: z.string().nullable().optional(),
   is_in_recovery: z.boolean().optional(),
   is_verified_for_recovery: z.boolean().optional(),
   login_attempts: z.number().optional(),
@@ -30,10 +31,20 @@ export const AllUsersResponseSchema = z.array(UserSchema);
 export type User = z.infer<typeof UserSchema>;
 export type AllUsersResponse = z.infer<typeof AllUsersResponseSchema>;
 
-export function useGetAllUsers() {
+interface UseGetAllUsersOptions {
+  search?: string;
+}
+
+export function useGetAllUsers(options?: UseGetAllUsersOptions) {
+  const searchParam = options?.search
+    ? `?search=${encodeURIComponent(options.search)}`
+    : "";
+  const url = `admin/users${searchParam}`;
+
   return useFetch<AllUsersResponse>({
-    url: "admin/users",
+    url,
     hasAuth: true,
     schema: AllUsersResponseSchema,
+    queryKey: ["admin", "users", ...(options?.search ? [options.search] : [])],
   });
 }

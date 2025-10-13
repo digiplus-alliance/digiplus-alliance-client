@@ -5,6 +5,7 @@ export type AdminUser = {
   timestamp: string;
   business_name: string;
   applications_count: number;
+  last_login: string;
   profile_picture: string;
   phone: string;
   website: string;

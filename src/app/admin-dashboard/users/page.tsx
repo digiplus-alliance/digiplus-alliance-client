@@ -1,16 +1,19 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import React from "react";
+import React, { useState } from "react";
 import UsersTable from "./widgets/user-table";
-import FilterButton from "@/components/FilterButton";
 import { useRouter } from "next/navigation";
+import Searchbar from "@/components/Searchbar";
 
 export default function page() {
   const router = useRouter();
-  const handleFilterChange = (value: string) => {
-    console.log("Selected filter:", value);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
   };
+
   return (
     <div className="p-6 space-y-6 font-secondary md:bg-[#EBEBEB] rounded-tl-2xl">
       {/* Header */}
@@ -19,20 +22,18 @@ export default function page() {
           <h1 className="text-2xl text-primary font-bold">Users</h1>
         </div>
         <div className="hidden md:flex md:items-center md:gap-4">
-          <FilterButton
-            placeholder="Filter Status"
-            options={[
-              { label: "By Name", value: "name" },
-              { label: "By User ID", value: "userId" },
-              { label: "By Company", value: "company" },
-            ]}
-            onChange={handleFilterChange}
+          <Searchbar 
+            placeholder="Search users..." 
+            onSearch={handleSearch}
+            value={searchQuery}
           />
-          <Button onClick={() => router.push("/admin-dashboard/applications")}>View Applications</Button>
+          <Button onClick={() => router.push("/admin-dashboard/applications")}>
+            View Applications
+          </Button>
         </div>
       </div>
       <div className="overflow-x-auto bg-white rounded-tl-2xl p-4">
-        <UsersTable />
+        <UsersTable searchQuery={searchQuery} />
       </div>
     </div>
   );

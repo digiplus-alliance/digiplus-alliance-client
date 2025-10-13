@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-table";
 import Pagination from "@/components/Pagination";
 import { CiUser } from "react-icons/ci";
-import { Trash2 } from "lucide-react";
+// import { Trash2 } from "lucide-react";
 import UserInfoModal from "./profile-modal";
 import DeactivateUserModal from "./delete-modal";
 import { AdminUser } from "@/types/admin/user";
@@ -43,15 +43,26 @@ type TableUser = {
   assessments_count: number;
   created_at: string;
   updated_at: string;
+  last_login: string;
 };
 
-export default function UsersTable() {
+interface UsersTableProps {
+  searchQuery?: string;
+}
+
+export default function UsersTable({ searchQuery }: UsersTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedUser, setSelectedUser] = useState<TableUser | null>(null);
   const [userInfoModalOpen, setUserInfoModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<TableUser | null>(null);
-  const { data: apiUsers, isLoading, error } = useGetAllUsers();
+  const {
+    data: apiUsers,
+    isLoading,
+    error,
+  } = useGetAllUsers({
+    search: searchQuery,
+  });
   const [tableData, setTableData] = useState<TableUser[]>([]);
 
   const pageSize = 10;
@@ -72,9 +83,10 @@ export default function UsersTable() {
         assessment: u.assessments_count ?? 0,
         assessments_count: u.assessments_count ?? 0,
         profile_picture: u.profile_picture ?? "",
-        phone: "", // Not available in API response
-        website: "", // Not available in API response
+        phone: "",
+        website: "",
         role: u.role ?? "",
+        last_login: u.last_login ?? "",
         created_at: u.createdAt,
         updated_at: u.updatedAt,
       }));
@@ -88,10 +100,10 @@ export default function UsersTable() {
     setUserInfoModalOpen(true);
   };
 
-  const handleDeleteUser = (user: TableUser) => {
-    setUserToDelete(user);
-    setDeleteModalOpen(true);
-  };
+  // const handleDeleteUser = (user: TableUser) => {
+  //   setUserToDelete(user);
+  //   setDeleteModalOpen(true);
+  // };
 
   const confirmDeleteUser = () => {
     console.log("Deleting user:", userToDelete);
@@ -110,7 +122,9 @@ export default function UsersTable() {
       accessorKey: "id",
       header: "User ID",
       cell: (info: CellContext<TableUser, unknown>) => (
-        <span className="text-[#06516C]">{info.getValue() as string}</span>
+        <span className="text-[#06516C]">
+          {(info.getValue() as string).slice(-6).toUpperCase()}
+        </span>
       ),
     },
     {
@@ -194,7 +208,7 @@ export default function UsersTable() {
                 size={20}
               />
             </button>
-            <button
+            {/* <button
               onClick={() => handleDeleteUser(row)}
               className="p-1 hover:bg-gray-100 rounded"
               title="Delete user"
@@ -203,7 +217,7 @@ export default function UsersTable() {
                 size={16}
                 className="text-[#A3A3A3] group-hover:text-red-500 transition-colors"
               />
-            </button>
+            </button> */}
           </div>
         );
       },
@@ -221,7 +235,9 @@ export default function UsersTable() {
     return (
       <div className="p-4">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <h3 className="text-red-800 font-semibold mb-2">Failed to load users</h3>
+          <h3 className="text-red-800 font-semibold mb-2">
+            Failed to load users
+          </h3>
           <p className="text-sm text-red-600">
             {error instanceof Error ? error.message : String(error)}
           </p>
@@ -237,25 +253,53 @@ export default function UsersTable() {
         <Table>
           <TableHeader className="bg-[#FBFBFD]">
             <TableRow className="text-left text-[#B8B8B8] text-sm font-inter">
-              <TableHead className="px-4 py-2 text-[#B8B8B8] font-bold">User ID</TableHead>
-              <TableHead className="px-4 py-2 text-[#B8B8B8] font-bold">Name/Email</TableHead>
-              <TableHead className="px-4 py-2 text-[#B8B8B8] font-bold">Timestamp</TableHead>
-              <TableHead className="px-4 py-2 text-[#B8B8B8] font-bold">Business name</TableHead>
-              <TableHead className="px-4 py-2 text-[#B8B8B8] font-bold">Applications</TableHead>
-              <TableHead className="px-4 py-2 text-[#B8B8B8] font-bold">Assessment Status</TableHead>
-              <TableHead className="px-4 py-2 text-[#B8B8B8] font-bold">More</TableHead>
+              <TableHead className="px-4 py-2 text-[#B8B8B8] font-bold">
+                User ID
+              </TableHead>
+              <TableHead className="px-4 py-2 text-[#B8B8B8] font-bold">
+                Name/Email
+              </TableHead>
+              <TableHead className="px-4 py-2 text-[#B8B8B8] font-bold">
+                Timestamp
+              </TableHead>
+              <TableHead className="px-4 py-2 text-[#B8B8B8] font-bold">
+                Business name
+              </TableHead>
+              <TableHead className="px-4 py-2 text-[#B8B8B8] font-bold">
+                Applications
+              </TableHead>
+              <TableHead className="px-4 py-2 text-[#B8B8B8] font-bold">
+                Assessment Status
+              </TableHead>
+              <TableHead className="px-4 py-2 text-[#B8B8B8] font-bold">
+                More
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {Array.from({ length: 10 }).map((_, i) => (
               <TableRow key={i} className="border-t">
-                <TableCell className="px-4 py-3"><Skeleton className="h-4 w-24" /></TableCell>
-                <TableCell className="px-4 py-3"><Skeleton className="h-4 w-40" /></TableCell>
-                <TableCell className="px-4 py-3"><Skeleton className="h-4 w-32" /></TableCell>
-                <TableCell className="px-4 py-3"><Skeleton className="h-4 w-32" /></TableCell>
-                <TableCell className="px-4 py-3"><Skeleton className="h-4 w-12" /></TableCell>
-                <TableCell className="px-4 py-3"><Skeleton className="h-4 w-24" /></TableCell>
-                <TableCell className="px-4 py-3"><Skeleton className="h-4 w-16" /></TableCell>
+                <TableCell className="px-4 py-3">
+                  <Skeleton className="h-4 w-24" />
+                </TableCell>
+                <TableCell className="px-4 py-3">
+                  <Skeleton className="h-4 w-40" />
+                </TableCell>
+                <TableCell className="px-4 py-3">
+                  <Skeleton className="h-4 w-32" />
+                </TableCell>
+                <TableCell className="px-4 py-3">
+                  <Skeleton className="h-4 w-32" />
+                </TableCell>
+                <TableCell className="px-4 py-3">
+                  <Skeleton className="h-4 w-12" />
+                </TableCell>
+                <TableCell className="px-4 py-3">
+                  <Skeleton className="h-4 w-24" />
+                </TableCell>
+                <TableCell className="px-4 py-3">
+                  <Skeleton className="h-4 w-16" />
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
