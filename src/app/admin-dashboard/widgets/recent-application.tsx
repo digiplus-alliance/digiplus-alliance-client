@@ -104,7 +104,7 @@ export default function RecentApplication() {
             {applications.slice(0, 2).map((application) => (
               <div
                 key={application._id}
-                className="flex justify-between items-center p-4  border rounded-md space-x-4"
+                className="flex flex-col md:flex-row space-y-4 md:space-y-0 justify-between items-center p-4  border rounded-md space-x-4"
               >
                 <div className="flex items-center gap-3">
                   {application.image ? (
