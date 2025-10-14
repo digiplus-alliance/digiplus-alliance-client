@@ -22,27 +22,31 @@ const formatDate = (dateString: string) => {
 };
 
 const getStatusBadge = (status: string) => {
-  switch (status) {
-    case 'Submitted':
+  switch (status.toLowerCase()) {
+    case 'submitted':
       return (
-        <Badge variant="secondary" className="bg-[#EBFBFF] text-[#227C9D] h-8 rounded-[8px] font-normal">
+        <Badge variant="secondary" className="bg-[#EBFBFF] text-[#227C9D] h-8 rounded-[8px] font-normal text-[10px]">
           Submitted
         </Badge>
       );
-    case 'Processing':
+    case 'processing':
       return (
-        <Badge variant="secondary" className="bg-orange-100 text-orange-700 h-8 rounded-[8px] font-normal">
+        <Badge variant="secondary" className="bg-orange-100 text-orange-700 h-8 rounded-[8px] font-normal text-[10px]">
           Processing
         </Badge>
       );
-    case 'Completed':
+    case 'completed':
       return (
-        <Badge variant="secondary" className="bg-green-100 text-green-700 h-8 rounded-[8px] font-normal">
+        <Badge variant="secondary" className="bg-green-100 text-green-700 h-8 rounded-[8px] font-normal text-[10px]">
           Completed
         </Badge>
       );
     default:
-      return <Badge variant="secondary">{status}</Badge>;
+      return (
+        <Badge variant="secondary" className="h-8 rounded-[8px] font-normal text-[10px]">
+          {status}
+        </Badge>
+      );
   }
 };
 
