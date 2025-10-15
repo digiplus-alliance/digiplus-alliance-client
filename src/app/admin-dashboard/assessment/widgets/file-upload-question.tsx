@@ -11,18 +11,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAssessmentStore } from "@/store/assessment";
+import { useFormStore } from "@/store/form-store";
 import { Upload, File, X } from "lucide-react";
 
 type FileUploadData = {
-  question_no: number;
+  question_no?: number;
   question: string;
-  descriptions: string;
+  descriptions?: string;
   acceptedFileTypes: string[];
   max_file_size?: number; // in MB
   max_files?: number;
   upload_instruction?: string;
-  required_score: number;
+  required_score?: number;
   module: string;
   required_option: boolean;
   type: "file_upload";
@@ -71,8 +71,7 @@ export default function FileUploadQuestion({
   onSave,
   initialData,
 }: FileUploadQuestionProps) {
-  const modules = useAssessmentStore((state) => state.modules);
-  const formType = useAssessmentStore((state) => state.formType);
+  const { modules, formType } = useFormStore();
   const moduleOptions = modules.map((mod) => mod.title);
 
   const [question, setQuestion] = useState(initialData?.question || "");
@@ -128,14 +127,14 @@ export default function FileUploadQuestion({
 
   const handleSave = () => {
     const data: FileUploadData = {
-      question_no: questionNo,
+      // question_no: questionNo,
       question,
-      descriptions: description,
+      // descriptions: description,
       acceptedFileTypes,
-      max_file_size: maxFileSize,
-      max_files: maxFiles,
-      upload_instruction: uploadInstruction,
-      required_score: requiredScore,
+      // max_file_size: maxFileSize,
+      // max_files: maxFiles,
+      // upload_instruction: uploadInstruction,
+      // required_score: requiredScore,
       module: selectedModule,
       required_option: requiredOption,
       type: "file_upload",

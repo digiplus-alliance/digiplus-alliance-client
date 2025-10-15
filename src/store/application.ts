@@ -119,8 +119,8 @@ export type Question =
 
 export type QuestionType = Question["type"];
 
-// Assessment store interface
-interface AssessmentStore {
+// Application store interface
+interface ApplicationStore {
   formType: FormType;
   welcomeScreen: WelcomeScreenData | null;
   modules: Module[];
@@ -145,8 +145,8 @@ interface AssessmentStore {
 }
 
 // Create the store
-export const useAssessmentStore = create<AssessmentStore>((set, get) => ({
-  formType: "assessment", 
+export const useApplicationStore = create<ApplicationStore>((set, get) => ({
+  formType: "application", // Default to application
   welcomeScreen: null,
   modules: [],
   questions: [],
@@ -216,7 +216,7 @@ export const useAssessmentStore = create<AssessmentStore>((set, get) => ({
 
   clearAll: () =>
     set({
-      formType: "assessment", // reset to default
+      formType: "application", // reset to default
       welcomeScreen: null,
       modules: [],
       questions: [],

@@ -7,7 +7,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Trash2, Edit2, Check, X } from "lucide-react";
-import { useAssessmentStore, type Module } from "@/store/assessment";
+import { useFormStore, type Module } from "@/store/form-store";
 
 // Zod validation schema
 const welcomeFormSchema = z.object({
@@ -38,10 +38,7 @@ export default function AddModule({
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Get modules from store
-  const modules = useAssessmentStore((state) => state.modules);
-  const addModule = useAssessmentStore((state) => state.addModule);
-  const updateModule = useAssessmentStore((state) => state.updateModule);
-  const removeModule = useAssessmentStore((state) => state.removeModule);
+  const { modules, addModule, updateModule, removeModule } = useFormStore();
   
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");

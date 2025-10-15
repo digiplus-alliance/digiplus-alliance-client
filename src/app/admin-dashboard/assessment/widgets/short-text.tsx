@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAssessmentStore } from "@/store/assessment";
+import { useFormStore } from "@/store/form-store";
 
 type ShortTextData = {
   question_no: number;
@@ -37,8 +37,7 @@ export default function ShortText({
   onSave,
   initialData,
 }: ShortTextProps) {
-  const modules = useAssessmentStore((state) => state.modules);
-  const formType = useAssessmentStore((state) => state.formType);
+  const { modules, formType } = useFormStore();
   const moduleOptions = modules.map((mod) => mod.title);
 
   const [question, setQuestion] = useState(initialData?.question || "");
@@ -70,6 +69,7 @@ export default function ShortText({
       question,
       descriptions: description,
       answer_placeholder: answerPlaceholder,
+      min_characters: minCharacters,
       max_characters: maxCharacters,
       required_score: requiredScore,
       module: selectedModule,

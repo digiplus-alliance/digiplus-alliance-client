@@ -60,4 +60,5 @@ export const useGetApplicationForms = () =>
     errorMessage: "Failed to fetch application forms.",
     showErrorMessage: true,
     showSuccessMessage: false,
+    queryKey: ["allApplicationForms"],
   });

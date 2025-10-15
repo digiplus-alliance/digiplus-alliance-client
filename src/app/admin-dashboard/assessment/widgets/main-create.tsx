@@ -2,22 +2,13 @@ import { useState, useEffect } from "react";
 import WelcomePageQuestion from "../../assessment/widgets/welcome-screen";
 import AddModule from "../../assessment/widgets/add-module";
 import QuestionScreen from "../../assessment/widgets/question-screen";
-import { useAssessmentStore } from "@/store/assessment";
+import { FormTypeProvider } from "@/store/form-store";
 
 
 export default function MainCreate({type}: {type ?: 'assessment' | 'application'}) {
   const [activePage, setActivePage] = useState<
     "welcome" | "module" | "question" | "summary"
   >("welcome");
-
-  const setFormType = useAssessmentStore((state) => state.setFormType);
-
-  // Set the form type when component mounts
-  useEffect(() => {
-    if (type) {
-      setFormType(type);
-    }
-  }, [type, setFormType]);
 
   const navigateToModule = ({
     step,
@@ -59,5 +50,9 @@ export default function MainCreate({type}: {type ?: 'assessment' | 'application'
     }
   };
 
-  return <div>{renderComponent()}</div>;
+  return (
+    <FormTypeProvider formType={type || "assessment"}>
+      {renderComponent()}
+    </FormTypeProvider>
+  );
 }

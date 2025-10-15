@@ -4,18 +4,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  useAssessmentStore,
-  Question as StoreQuestion,
-  QuestionType,
-} from "@/store/assessment";
+  useFormStore,
+  type Question as StoreQuestion,
+  type QuestionType,
+} from "@/store/form-store";
 import { useCreateApplication } from "@/app/api/admin/applications/create-application";
+import { useUpdateApplication } from "@/app/api/admin/applications/update-application";
 import { cleanObject } from "@/utils/cleanQuestionObject";
 import { Question as APIQuestion } from "@/types/questions";
 import { Upload } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface PreviewModalProps {
   showPreview: boolean;
   onClose: () => void;
+  applicationId?: string;
 }
 
 const questionTypes: {
@@ -34,15 +37,24 @@ const questionTypes: {
 export default function PreviewModal({
   showPreview,
   onClose,
+  applicationId,
 }: PreviewModalProps) {
-  const formType = useAssessmentStore((state) => state.formType);
-  const welcomeScreen = useAssessmentStore((state) => state.welcomeScreen);
-  const modules = useAssessmentStore((state) => state.modules);
-  const questions = useAssessmentStore((state) => state.questions);
-  const clearQuestions = useAssessmentStore((state) => state.clearQuestions);
-  const clearAll = useAssessmentStore((state) => state.clearAll);
+  const {
+    formType,
+    welcomeScreen,
+    modules,
+    questions,
+    clearQuestions,
+    clearAll,
+  } = useFormStore();
 
-  const { mutate, isPending } = useCreateApplication();
+  const { mutate: createApplication, isPending: isCreating } = useCreateApplication();
+  const { mutate: updateApplication, isPending: isUpdating } = applicationId 
+    ? useUpdateApplication(applicationId) 
+    : { mutate: () => {}, isPending: false };
+  const router = useRouter();
+
+  const isPending = isCreating || isUpdating;
 
   const getQuestionTypeLabel = (type: QuestionType): string => {
     return (
@@ -148,6 +160,11 @@ export default function PreviewModal({
                 Max {question.max_characters} characters
               </p>
             )}
+            {question.min_characters && (
+              <p className="text-xs text-gray-500">
+                Min {question.min_characters} characters
+              </p>
+            )}
           </div>
         );
 
@@ -241,17 +258,23 @@ export default function PreviewModal({
             <div className="mt-4 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50">
               <Upload className="h-12 w-12 mx-auto text-gray-400 mb-3" />
               <p className="text-sm text-gray-600 mb-1">
-                {question.upload_instruction || "Click to upload or drag and drop"}
+                {question.upload_instruction ||
+                  "Click to upload or drag and drop"}
               </p>
-              {question.acceptedFileTypes && question.acceptedFileTypes.length > 0 && (
-                <p className="text-xs text-gray-500">
-                  {question.acceptedFileTypes.join(", ")}
-                </p>
-              )}
+              {question.acceptedFileTypes &&
+                question.acceptedFileTypes.length > 0 && (
+                  <p className="text-xs text-gray-500">
+                    {question.acceptedFileTypes.join(", ")}
+                  </p>
+                )}
               <p className="text-xs text-gray-500 mt-1">
-                {question.max_file_size && `Max ${question.max_file_size}MB per file`}
+                {question.max_file_size &&
+                  `Max ${question.max_file_size}MB per file`}
                 {question.max_file_size && question.max_files && ", "}
-                {question.max_files && `up to ${question.max_files} ${question.max_files === 1 ? "file" : "files"}`}
+                {question.max_files &&
+                  `up to ${question.max_files} ${
+                    question.max_files === 1 ? "file" : "files"
+                  }`}
               </p>
             </div>
           </div>
@@ -264,79 +287,92 @@ export default function PreviewModal({
 
   const handleFinalSave = () => {
     if (formType === "application") {
-      mutate(
-        {
-          welcome_title: welcomeScreen?.title,
-          welcome_description: welcomeScreen?.description,
-          welcome_instruction: welcomeScreen?.instruction,
-          modules: modules.map((mod) => ({
-            temp_id: `mod-${mod.step}`,
-            title: mod.title,
-            description: mod.description,
-            order: mod.step,
-          })),
-          questions: questions.map((q) => {
-            const apiQuestion: APIQuestion = {
-              type: q?.type,
-              question: q?.question,
-              description: q?.descriptions,
-              placeholder:
-                q.type === "short_text" || q.type === "long_text"
-                  ? q.answer_placeholder
-                  : q.type === "dropdown"
-                  ? q.dropdown_placeholder
-                  : undefined,
-              options:
-                "options" in q
+      const payload = {
+        welcome_title: welcomeScreen?.title,
+        welcome_description: welcomeScreen?.description,
+        welcome_instruction: welcomeScreen?.instruction,
+        modules: modules.map((mod) => ({
+          temp_id: `mod-${mod.step}`,
+          title: mod.title,
+          description: mod.description,
+          order: mod.step,
+        })),
+        questions: questions.map((q) => {
+          const apiQuestion: APIQuestion = {
+            type: q?.type,
+            question: q?.question,
+            description: q?.descriptions,
+            placeholder:
+              q.type === "short_text" || q.type === "long_text"
+                ? q.answer_placeholder
+                : q.type === "dropdown"
+                ? q.dropdown_placeholder
+                : undefined,
+            options:
+              "options" in q && q.options
+                ? q.type === "dropdown"
                   ? q.options?.map((opt, idx) => ({
+                      id: `opt-${idx + 1}`,
+                      text: opt?.option,
+                    }))
+                  : q.options?.map((opt, idx) => ({
                       id: `opt-${idx + 1}`,
                       text: opt?.option,
                       value: opt?.option.toLowerCase().replace(/\s+/g, "_"),
                     }))
-                  : undefined,
-              grid_columns:
-                "grid_columns" in q && q.grid_columns
-                  ? q.grid_columns.map((col) => ({
-                      id: col?.id,
-                      text: col?.text,
-                      value: col?.value,
-                    }))
-                  : undefined,
-              grid_rows:
-                "grid_rows" in q && q.grid_rows
-                  ? q.grid_rows.map((row) => ({
-                      id: row?.id,
-                      text: row?.text,
-                    }))
-                  : undefined,
-              min_selections: q?.min_selections,
-              max_selections:
-                q.type === "checkbox" ? q.max_selections : undefined,
-              min_characters:
-                q.type === "long_text" ? q.min_characters : undefined,
-              max_characters:
-                q.type === "short_text" || q.type === "long_text"
-                  ? q.max_characters
-                  : undefined,
-              is_required: q?.required_option,
-              step: q?.module
-                ? modules.find((m) => m.title === q?.module)?.step
-                : 1,
-              module_ref: q?.module,
-              acceptedFileTypes: q?.acceptedFileTypes,
-              max_file_size: q.type === "file_upload" ? q.max_file_size : undefined,
-              max_files: q.type === "file_upload" ? q.max_files : undefined,
-              upload_instruction: q.type === "file_upload" ? q.upload_instruction : undefined,
-            };
+                : undefined,
+            grid_columns:
+              "grid_columns" in q && q.grid_columns
+                ? q.grid_columns.map((col) => ({
+                    id: col?.id,
+                    text: col?.text,
+                  }))
+                : undefined,
+            grid_rows:
+              "grid_rows" in q && q.grid_rows
+                ? q.grid_rows.map((row) => ({
+                    id: row?.id,
+                    text: row?.text,
+                  }))
+                : undefined,
+            min_selections: q?.min_selections,
+            max_selections:
+              q.type === "checkbox" ? q.max_selections : undefined,
+            min_characters:
+              q.type === "long_text" || q.type === "short_text"
+                ? q.min_characters
+                : undefined,
+            max_characters:
+              q.type === "short_text" || q.type === "long_text"
+                ? q.max_characters
+                : undefined,
+            is_required: q?.required_option,
+            step: q?.module
+              ? modules.find((m) => m.title === q?.module)?.step
+              : 1,
+            module_ref: q?.module,
+            acceptedFileTypes: q?.acceptedFileTypes,
+            max_file_size:
+              q.type === "file_upload" ? q.max_file_size : undefined,
+            max_files: q.type === "file_upload" ? q.max_files : undefined,
+            upload_instruction:
+              q.type === "file_upload" ? q.upload_instruction : undefined,
+          };
 
-            return cleanObject(apiQuestion);
-          }),
-        },
+          return cleanObject(apiQuestion);
+        }),
+      };
+
+      const mutationFn = applicationId ? updateApplication : createApplication;
+      
+      mutationFn(
+        payload,
         {
           onSuccess: () => {
             onClose();
             clearQuestions();
             clearAll();
+            router.push('/admin-dashboard/applications');
           },
         }
       );
@@ -405,7 +441,10 @@ export default function PreviewModal({
         </div>
         <div className="border-t p-4 flex items-center justify-center">
           <Button variant="default" className="m-2" onClick={handleFinalSave}>
-            {isPending ? "Saving..." : "Save"}
+            {isPending 
+              ? (applicationId ? "Updating..." : "Saving...") 
+              : (applicationId ? "Update" : "Save")
+            }
           </Button>
         </div>
       </div>

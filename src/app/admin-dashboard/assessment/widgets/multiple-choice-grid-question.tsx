@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAssessmentStore } from "@/store/assessment";
+import { useFormStore } from "@/store/form-store";
 
 type GridColumn = {
   id: string;
@@ -27,7 +27,7 @@ type GridRow = {
 type MultipleChoiceGridData = {
   question_no: number;
   question: string;
-  descriptions: string;
+  descriptions?: string;
   grid_columns: GridColumn[];
   grid_rows: GridRow[];
   required_score: number;
@@ -47,8 +47,7 @@ export default function MultipleChoiceGridQuestion({
   onSave,
   initialData,
 }: MultipleChoiceGridQuestionProps) {
-  const modules = useAssessmentStore((state) => state.modules);
-  const formType = useAssessmentStore((state) => state.formType);
+  const { modules, formType } = useFormStore();
   const moduleOptions = modules.map((mod) => mod.title);
 
   const [question, setQuestion] = useState(initialData?.question || "");
@@ -145,7 +144,7 @@ export default function MultipleChoiceGridQuestion({
     const data: MultipleChoiceGridData = {
       question_no: questionNo,
       question,
-      descriptions: description,
+    //   descriptions: description,
       grid_columns: columns,
       grid_rows: rows,
       required_score: requiredScore,

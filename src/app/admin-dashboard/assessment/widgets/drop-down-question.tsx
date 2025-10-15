@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAssessmentStore } from "@/store/assessment";
+import { useFormStore } from "@/store/form-store";
 
 type Option = {
   option: string;
@@ -24,7 +24,7 @@ type DropDownQuestionData = {
   question: string;
   descriptions: string;
   options: Option[];
-  dropdown_placeholder: string;
+  dropdown_placeholder?: string;
   required_score: number;
   module: string;
   required_option: boolean;
@@ -42,8 +42,7 @@ export default function DropDownQuestion({
   onSave,
   initialData,
 }: DropDownQuestionProps) {
-  const modules = useAssessmentStore((state) => state.modules);
-  const formType = useAssessmentStore((state) => state.formType);
+  const { modules, formType } = useFormStore();
   const moduleOptions = modules.map((mod) => mod.title);
   
   const [question, setQuestion] = useState(initialData?.question || "");
@@ -107,7 +106,7 @@ export default function DropDownQuestion({
       question,
       descriptions: description,
       options,
-      dropdown_placeholder: dropdownPlaceholder,
+      // dropdown_placeholder: dropdownPlaceholder,
       required_score: requiredScore,
       module: selectedModule,
       required_option: requiredOption,

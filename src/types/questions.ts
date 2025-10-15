@@ -2,7 +2,7 @@
 export interface GridColumn {
   id: string;
   text: string;
-  value: string;
+  value?: string;
 }
 
 export interface GridRow {
@@ -14,7 +14,7 @@ export interface GridRow {
 export interface QuestionOption {
   id: string;
   text: string;
-  value: string;
+  value?: string;
 }
 
 // Comprehensive Question interface covering all possible question types

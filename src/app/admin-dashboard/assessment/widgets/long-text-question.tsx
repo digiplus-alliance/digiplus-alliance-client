@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAssessmentStore } from "@/store/assessment";
+import { useFormStore } from "@/store/form-store";
 
 type LongTextData = {
   question_no: number;
@@ -38,8 +38,7 @@ export default function LongTextQuestion({
   onSave,
   initialData,
 }: LongTextProps) {
-  const modules = useAssessmentStore((state) => state.modules);
-  const formType = useAssessmentStore((state) => state.formType);
+  const { modules, formType } = useFormStore();
   const moduleOptions = modules.map((mod) => mod.title);
   
   const [question, setQuestion] = useState(initialData?.question || "");

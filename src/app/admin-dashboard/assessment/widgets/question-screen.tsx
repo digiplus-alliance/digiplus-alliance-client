@@ -2,7 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
-import { useAssessmentStore, Question, QuestionType } from "@/store/assessment";
+import {
+  useFormStore,
+  type Question,
+  type QuestionType,
+} from "@/store/form-store";
 import MultipleChoice from "./multiple-choice";
 import ShortText from "./short-text";
 import LongTextQuestion from "./long-text-question";
@@ -26,11 +30,13 @@ interface ActiveQuestion {
 
 export default function QuestionScreen({
   navigateBack,
+  applicationId,
 }: {
   navigateBack?: () => void;
+  applicationId?: string;
 }) {
   const { formType, questions, addQuestion, removeQuestion, clearQuestions } =
-    useAssessmentStore();
+    useFormStore();
 
   const [activeQuestions, setActiveQuestions] = useState<ActiveQuestion[]>([]);
   const [showPreview, setShowPreview] = useState(false);
@@ -38,11 +44,10 @@ export default function QuestionScreen({
   // Load questions from store on mount
   useEffect(() => {
     if (questions.length > 0) {
-      // Convert stored questions to active questions (all unlocked for editing)
       const loadedQuestions = questions.map((q) => ({
         id: q.id,
         type: q.type,
-        isLocked: false,
+        isLocked: applicationId ? true : false,
       }));
       setActiveQuestions(loadedQuestions);
     } else {
@@ -51,7 +56,7 @@ export default function QuestionScreen({
         { id: generateId(), type: "multiple_choice", isLocked: false },
       ]);
     }
-  }, []);
+  }, [questions.length, applicationId]);
 
   const handleClearAllQuestions = () => {
     clearQuestions();
@@ -116,8 +121,7 @@ export default function QuestionScreen({
   };
 
   const unlockQuestion = (questionId: string) => {
-    // Remove from store and unlock for editing
-    removeQuestion(questionId);
+    // Just unlock for editing - keep data in store
     setActiveQuestions((prev) =>
       prev.map((q) => (q.id === questionId ? { ...q, isLocked: false } : q))
     );
@@ -194,9 +198,9 @@ export default function QuestionScreen({
       case "dropdown":
         return <DropDownQuestion {...props} />;
       case "multiple_choice_grid":
-        return <MultipleChoiceGridQuestion />;
+        return <MultipleChoiceGridQuestion {...props} />;
       case "file_upload":
-        return <FileUploadQuestion />;
+        return <FileUploadQuestion {...props} />;
       default:
         return <MultipleChoice {...props} />;
     }
@@ -291,6 +295,7 @@ export default function QuestionScreen({
       <PreviewModal
         showPreview={showPreview}
         onClose={() => setShowPreview(false)}
+        applicationId={applicationId}
       />
     </div>
   );
