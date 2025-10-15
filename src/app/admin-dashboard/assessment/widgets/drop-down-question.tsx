@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAssessmentStore } from "@/store/assessment";
 
 type Option = {
   option: string;
@@ -27,38 +28,38 @@ type DropDownQuestionData = {
   required_score: number;
   module: string;
   required_option: boolean;
-  type: "dropdown_question";
+  type: "dropdown";
 };
 
 interface DropDownQuestionProps {
   questionNo?: number;
   onSave?: (data: DropDownQuestionData) => void;
+  initialData?: DropDownQuestionData;
 }
 
-const moduleOptions = [
-  "Digital Literacy",
-  "Business Strategy", 
-  "Financial Management",
-  "Marketing & Sales",
-  "Technology Integration",
-  "Leadership & Management",
-];
-
-export default function DropDownQuestion({ 
-  questionNo = 1, 
-  onSave 
+export default function DropDownQuestion({
+  questionNo = 1,
+  onSave,
+  initialData,
 }: DropDownQuestionProps) {
-  const [question, setQuestion] = useState("");
-  const [description, setDescription] = useState("");
-  const [dropdownPlaceholder, setDropdownPlaceholder] = useState("Select an option");
-  const [requiredScore, setRequiredScore] = useState<number>(0);
-  const [selectedModule, setSelectedModule] = useState("");
-  const [requiredOption, setRequiredOption] = useState(false);
+  const modules = useAssessmentStore((state) => state.modules);
+  const formType = useAssessmentStore((state) => state.formType);
+  const moduleOptions = modules.map((mod) => mod.title);
   
-  const [options, setOptions] = useState<Option[]>([
-    { option: "A", optiondesc: "", point_value: 0 },
-    { option: "B", optiondesc: "", point_value: 0 },
-  ]);
+  const [question, setQuestion] = useState(initialData?.question || "");
+  const [description, setDescription] = useState(initialData?.descriptions || "");
+  const [dropdownPlaceholder, setDropdownPlaceholder] =
+    useState(initialData?.dropdown_placeholder || "Select an option");
+  const [requiredScore, setRequiredScore] = useState<number>(initialData?.required_score || 0);
+  const [selectedModule, setSelectedModule] = useState(initialData?.module || "");
+  const [requiredOption, setRequiredOption] = useState(initialData?.required_option || false);
+
+  const [options, setOptions] = useState<Option[]>(
+    initialData?.options || [
+      { option: "A", optiondesc: "", point_value: 0 },
+      { option: "B", optiondesc: "", point_value: 0 },
+    ]
+  );
 
   const getNextOptionLetter = (currentLength: number) => {
     return String.fromCharCode(65 + currentLength); // A=65, B=66, C=67, etc.
@@ -66,29 +67,35 @@ export default function DropDownQuestion({
 
   const addOption = () => {
     const nextLetter = getNextOptionLetter(options.length);
-    setOptions([...options, { 
-      option: nextLetter, 
-      optiondesc: "", 
-      point_value: 0 
-    }]);
+    setOptions([
+      ...options,
+      {
+        option: nextLetter,
+        optiondesc: "",
+        point_value: 0,
+      },
+    ]);
   };
 
-  const updateOption = (index: number, field: keyof Option, value: string | number) => {
+  const updateOption = (
+    index: number,
+    field: keyof Option,
+    value: string | number
+  ) => {
     setOptions((prev) =>
-      prev.map((opt, i) => 
-        i === index ? { ...opt, [field]: value } : opt
-      )
+      prev.map((opt, i) => (i === index ? { ...opt, [field]: value } : opt))
     );
   };
 
   const removeOption = (index: number) => {
-    if (options.length > 2) { // Keep minimum of 2 options
+    if (options.length > 2) {
+      // Keep minimum of 2 options
       setOptions((prev) => {
         const newOptions = prev.filter((_, i) => i !== index);
         // Re-assign letters after removal
         return newOptions.map((opt, i) => ({
           ...opt,
-          option: String.fromCharCode(65 + i)
+          option: String.fromCharCode(65 + i),
         }));
       });
     }
@@ -104,7 +111,7 @@ export default function DropDownQuestion({
       required_score: requiredScore,
       module: selectedModule,
       required_option: requiredOption,
-      type: "dropdown_question"
+      type: "dropdown",
     };
 
     if (onSave) {
@@ -117,7 +124,9 @@ export default function DropDownQuestion({
   const isFormValid = () => {
     return (
       question.trim() !== "" &&
-      options.every(opt => opt.optiondesc.trim() !== "" && opt.point_value >= 0) &&
+      options.every(
+        (opt) => opt.optiondesc.trim() !== "" && opt.point_value >= 0
+      ) &&
       dropdownPlaceholder.trim() !== "" &&
       requiredScore >= 0 &&
       selectedModule !== ""
@@ -129,9 +138,7 @@ export default function DropDownQuestion({
       {/* Left Panel */}
       <div className="flex-1 p-6 border-[#D6D4D4] rounded-lg border">
         <div className="w-full flex flex-row text-left justify-start items-center">
-          <div className="text-2xl pb-6 text-gray-500">
-            {questionNo}.
-          </div>
+          <div className="text-2xl pb-6 text-gray-500">{questionNo}.</div>
           <textarea
             rows={2}
             placeholder="Ask your question here"
@@ -140,7 +147,7 @@ export default function DropDownQuestion({
             className="w-full text-[#7A7A7A] text-left border-none shadow-none resize-none focus:ring-0 focus:outline-none px-4 flex items-center"
           />
         </div>
-        
+
         <div className="w-full text-center space-y-2">
           <textarea
             rows={2}
@@ -164,7 +171,8 @@ export default function DropDownQuestion({
               <SelectContent>
                 {options.map((opt, index) => (
                   <SelectItem key={index} value={opt.option}>
-                    {opt.option}. {opt.optiondesc || `Option ${opt.option}`} ({opt.point_value} pts)
+                    {opt.option}. {opt.optiondesc || `Option ${opt.option}`}
+                    {formType === "assessment" && ` (${opt.point_value} pts)`}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -200,16 +208,26 @@ export default function DropDownQuestion({
                 <Input
                   placeholder="Option description"
                   value={opt.optiondesc}
-                  onChange={(e) => updateOption(index, "optiondesc", e.target.value)}
+                  onChange={(e) =>
+                    updateOption(index, "optiondesc", e.target.value)
+                  }
                   className="flex-1 bg-blue-50 border-none focus-visible:ring-0"
                 />
-                <Input
-                  type="number"
-                  placeholder="Points"
-                  value={opt.point_value || ""}
-                  onChange={(e) => updateOption(index, "point_value", parseInt(e.target.value) || 0)}
-                  className="w-20 bg-[#EBFBFF] border border-[#0E5F7D]"
-                />
+                {formType === "assessment" && (
+                  <Input
+                    type="number"
+                    placeholder="Points"
+                    value={opt.point_value || ""}
+                    onChange={(e) =>
+                      updateOption(
+                        index,
+                        "point_value",
+                        parseInt(e.target.value) || 0
+                      )
+                    }
+                    className="w-20 bg-[#EBFBFF] border border-[#0E5F7D]"
+                  />
+                )}
                 {options.length > 2 && (
                   <Button
                     type="button"
@@ -239,19 +257,21 @@ export default function DropDownQuestion({
       {/* Right Panel */}
       <div className="w-72 border-[#D6D4D4] rounded-lg p-6 border flex flex-col justify-between">
         <div className="space-y-4 text-gray-600 text-sm">
-          <div className="flex justify-between items-center">
-            <span>Required Score</span>
-            <Input
-              type="number"
-              min="0"
-              max="99"
-              value={requiredScore || ""}
-              onChange={(e) => setRequiredScore(parseInt(e.target.value) || 0)}
-              className="w-16 h-8 text-right"
-              placeholder="0"
-            />
-          </div>
-          
+          {formType === "assessment" && (
+            <div className="flex justify-between items-center">
+              <span>Required Score</span>
+              <Input
+                type="number"
+                min="0"
+                max="99"
+                value={requiredScore || ""}
+                onChange={(e) => setRequiredScore(parseInt(e.target.value) || 0)}
+                className="w-16 h-8 text-right"
+                placeholder="0"
+              />
+            </div>
+          )}
+
           <div className="flex justify-between items-center">
             <span>Module</span>
             <Select value={selectedModule} onValueChange={setSelectedModule}>
@@ -270,15 +290,17 @@ export default function DropDownQuestion({
 
           <div className="flex justify-between items-center">
             <span>Required Option</span>
-            <Checkbox 
+            <Checkbox
               checked={requiredOption}
-              onCheckedChange={(checked) => setRequiredOption(checked as boolean)}
+              onCheckedChange={(checked) =>
+                setRequiredOption(checked as boolean)
+              }
             />
           </div>
         </div>
 
         <div className="flex gap-3 mt-6">
-          <Button 
+          <Button
             onClick={handleSave}
             disabled={!isFormValid()}
             className="flex-1 disabled:bg-gray-300 disabled:cursor-not-allowed"

@@ -1,16 +1,17 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAssessmentStore, Question, QuestionType } from "@/store/assessment";
 import MultipleChoice from "./multiple-choice";
 import ShortText from "./short-text";
 import LongTextQuestion from "./long-text-question";
 import DropDownQuestion from "./drop-down-question";
 import CheckboxQuestion from "./checkbox-question";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import PreviewModal from "./preview-modal";
 import { Lock, Edit2, Trash2, Eye } from "lucide-react";
+import MultipleChoiceGridQuestion from "./multiple-choice-grid-question";
+import FileUploadQuestion from "./file-upload-question";
 
 // Simple ID generator
 const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -23,47 +24,85 @@ interface ActiveQuestion {
   isLocked: boolean;
 }
 
-export default function QuestionScreen() {
-  const { questions, addQuestion, removeQuestion, clearQuestions, getNextQuestionNumber } = useAssessmentStore();
-  
-  const [activeQuestions, setActiveQuestions] = useState<ActiveQuestion[]>([
-    { id: generateId(), type: "multiple_choice", isLocked: false }
-  ]);
+export default function QuestionScreen({
+  navigateBack,
+}: {
+  navigateBack?: () => void;
+}) {
+  const { formType, questions, addQuestion, removeQuestion, clearQuestions } =
+    useAssessmentStore();
+
+  const [activeQuestions, setActiveQuestions] = useState<ActiveQuestion[]>([]);
   const [showPreview, setShowPreview] = useState(false);
+
+  // Load questions from store on mount
+  useEffect(() => {
+    if (questions.length > 0) {
+      // Convert stored questions to active questions (all unlocked for editing)
+      const loadedQuestions = questions.map((q) => ({
+        id: q.id,
+        type: q.type,
+        isLocked: false,
+      }));
+      setActiveQuestions(loadedQuestions);
+    } else {
+      // If no questions in store, start with one empty question
+      setActiveQuestions([
+        { id: generateId(), type: "multiple_choice", isLocked: false },
+      ]);
+    }
+  }, []);
+
+  const handleClearAllQuestions = () => {
+    clearQuestions();
+    setActiveQuestions([
+      { id: generateId(), type: "multiple_choice", isLocked: false },
+    ]);
+  };
 
   const questionTypes: {
     label: string;
     value: QuestionType;
   }[] = [
     { label: "Multiple Choice", value: "multiple_choice" },
-    { label: "Checkbox", value: "checkbox_question" },
+    { label: "Checkbox", value: "checkbox" },
     { label: "Short Text", value: "short_text" },
     { label: "Long Text", value: "long_text" },
-    { label: "Dropdown", value: "dropdown_question" },
+    { label: "Dropdown", value: "dropdown" },
+    { label: "Multiple Choice Grid", value: "multiple_choice_grid" },
+    { label: "File Upload", value: "file_upload" },
   ];
 
   const handleQuestionSave = (questionId: string, questionData: any) => {
-    // Add unique ID and save to store
+    // Check if question already exists in store
+    const existingQuestion = questions.find((q) => q.id === questionId);
+
     const questionWithId: Question = {
       ...questionData,
       id: questionId,
     };
-    
-    addQuestion(questionWithId);
-    
+
+    if (existingQuestion) {
+      // Update existing question
+      removeQuestion(questionId);
+      addQuestion(questionWithId);
+    } else {
+      // Add new question
+      addQuestion(questionWithId);
+    }
+
     // Lock the current question
-    setActiveQuestions(prev =>
-      prev.map(q =>
-        q.id === questionId ? { ...q, isLocked: true } : q
-      )
+    setActiveQuestions((prev) =>
+      prev.map((q) => (q.id === questionId ? { ...q, isLocked: true } : q))
     );
   };
 
-  const handleQuestionTypeChange = (questionId: string, newType: QuestionType) => {
-    setActiveQuestions(prev =>
-      prev.map(q =>
-        q.id === questionId ? { ...q, type: newType } : q
-      )
+  const handleQuestionTypeChange = (
+    questionId: string,
+    newType: QuestionType
+  ) => {
+    setActiveQuestions((prev) =>
+      prev.map((q) => (q.id === questionId ? { ...q, type: newType } : q))
     );
   };
 
@@ -71,43 +110,51 @@ export default function QuestionScreen() {
     const newQuestion: ActiveQuestion = {
       id: generateId(),
       type: "multiple_choice",
-      isLocked: false
+      isLocked: false,
     };
-    setActiveQuestions(prev => [...prev, newQuestion]);
+    setActiveQuestions((prev) => [...prev, newQuestion]);
   };
 
   const unlockQuestion = (questionId: string) => {
     // Remove from store and unlock for editing
     removeQuestion(questionId);
-    setActiveQuestions(prev =>
-      prev.map(q =>
-        q.id === questionId ? { ...q, isLocked: false } : q
-      )
+    setActiveQuestions((prev) =>
+      prev.map((q) => (q.id === questionId ? { ...q, isLocked: false } : q))
     );
   };
 
   const removeActiveQuestion = (questionId: string) => {
     // Remove from both active questions and store
     removeQuestion(questionId);
-    setActiveQuestions(prev => prev.filter(q => q.id !== questionId));
+    setActiveQuestions((prev) => prev.filter((q) => q.id !== questionId));
   };
 
-  const renderQuestionComponent = (questionId: string, type: QuestionType, isLocked: boolean, questionNumber: number) => {
+  const renderQuestionComponent = (
+    questionId: string,
+    type: QuestionType,
+    isLocked: boolean,
+    questionNumber: number
+  ) => {
+    // Get existing question data from store if available
+    const existingQuestion = questions.find((q) => q.id === questionId);
+
     const commonProps = {
       questionNo: questionNumber,
-      onSave: (data: any) => handleQuestionSave(questionId, data)
+      onSave: (data: any) => handleQuestionSave(questionId, data),
+      initialData: existingQuestion, // Pass existing data to prefill
+      formType: formType, // Pass the form type from store
     };
 
     if (isLocked) {
-      const savedQuestion = questions.find(q => q.id === questionId);
+      const savedQuestion = questions.find((q) => q.id === questionId);
       return (
         <div className="relative">
           <div className="absolute inset-0 bg-gray-100/80 z-10 rounded-lg flex items-center justify-center">
             <div className="bg-white p-4 rounded-lg shadow-lg flex items-center gap-3">
               <Lock className="h-5 w-5 text-gray-500" />
               <span className="text-gray-700 font-medium">Question Saved</span>
-              <Button 
-                size="sm" 
+              <Button
+                size="sm"
                 variant="outline"
                 onClick={() => unlockQuestion(questionId)}
                 className="ml-2"
@@ -115,8 +162,8 @@ export default function QuestionScreen() {
                 <Edit2 className="h-4 w-4 mr-1" />
                 Edit
               </Button>
-              <Button 
-                size="sm" 
+              <Button
+                size="sm"
                 variant="outline"
                 onClick={() => removeActiveQuestion(questionId)}
                 className="text-red-600 hover:text-red-700"
@@ -138,74 +185,21 @@ export default function QuestionScreen() {
     switch (type) {
       case "multiple_choice":
         return <MultipleChoice {...props} />;
-      case "checkbox_question":
+      case "checkbox":
         return <CheckboxQuestion {...props} />;
       case "short_text":
         return <ShortText {...props} />;
       case "long_text":
         return <LongTextQuestion {...props} />;
-      case "dropdown_question":
+      case "dropdown":
         return <DropDownQuestion {...props} />;
+      case "multiple_choice_grid":
+        return <MultipleChoiceGridQuestion />;
+      case "file_upload":
+        return <FileUploadQuestion />;
       default:
         return <MultipleChoice {...props} />;
     }
-  };
-
-  const getQuestionTypeLabel = (type: QuestionType): string => {
-    return questionTypes.find(qt => qt.value === type)?.label || "Multiple Choice";
-  };
-
-  const PreviewModal = () => {
-    if (!showPreview) return null;
-
-    return (
-      <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-          <div className="p-6 border-b">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Assessment Preview</h2>
-              <Button 
-                variant="outline" 
-                onClick={() => setShowPreview(false)}
-              >
-                Close
-              </Button>
-            </div>
-          </div>
-          <div className="p-6 space-y-6">
-            {questions.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">No questions saved yet.</p>
-            ) : (
-              questions.map((question, index) => (
-                <Card key={question.id} className="border-l-4 border-l-blue-500">
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <CardTitle className="text-lg">
-                        Question {question.question_no}
-                      </CardTitle>
-                      <Badge variant="outline">
-                        {getQuestionTypeLabel(question.type)}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <h3 className="font-semibold mb-2">{question.question}</h3>
-                    {question.descriptions && (
-                      <p className="text-gray-600 mb-4">{question.descriptions}</p>
-                    )}
-                    <div className="bg-gray-50 p-3 rounded text-sm">
-                      <p><strong>Module:</strong> {question.module}</p>
-                      <p><strong>Required Score:</strong> {question.required_score}</p>
-                      <p><strong>Required:</strong> {question.required_option ? 'Yes' : 'No'}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
-    );
   };
 
   return (
@@ -214,8 +208,8 @@ export default function QuestionScreen() {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Assessment Builder</h1>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setShowPreview(true)}
             className="flex items-center gap-2"
           >
@@ -223,12 +217,12 @@ export default function QuestionScreen() {
             Preview ({questions.length})
           </Button>
           {questions.length > 0 && (
-            <Button 
-              variant="outline" 
-              onClick={clearQuestions}
+            <Button
+              variant="outline"
+              onClick={handleClearAllQuestions}
               className="text-red-600 hover:text-red-700"
             >
-              Clear All
+              Clear All Questions
             </Button>
           )}
         </div>
@@ -238,7 +232,7 @@ export default function QuestionScreen() {
       <div className="space-y-8">
         {activeQuestions.map((activeQuestion, index) => {
           const questionNumber = index + 1;
-          
+
           return (
             <div key={activeQuestion.id} className="space-y-4">
               {/* Question Type Selector */}
@@ -250,10 +244,16 @@ export default function QuestionScreen() {
                   {questionTypes.map((type) => (
                     <Button
                       key={type.value}
-                      variant={activeQuestion.type === type.value ? "default" : "outline"}
+                      variant={
+                        activeQuestion.type === type.value
+                          ? "default"
+                          : "outline"
+                      }
                       size="sm"
                       className="text-xs rounded-2xl"
-                      onClick={() => handleQuestionTypeChange(activeQuestion.id, type.value)}
+                      onClick={() =>
+                        handleQuestionTypeChange(activeQuestion.id, type.value)
+                      }
                     >
                       {type.label}
                     </Button>
@@ -264,8 +264,8 @@ export default function QuestionScreen() {
               {/* Question Component */}
               <div className="border rounded-lg p-1 bg-gray-50">
                 {renderQuestionComponent(
-                  activeQuestion.id, 
-                  activeQuestion.type, 
+                  activeQuestion.id,
+                  activeQuestion.type,
                   activeQuestion.isLocked,
                   questionNumber
                 )}
@@ -276,8 +276,9 @@ export default function QuestionScreen() {
       </div>
 
       {/* Add More Question Button */}
-      <div className="flex justify-center pt-4">
-        <Button 
+      <div className="flex justify-center items-center space-x-4 pt-4">
+        <Button onClick={navigateBack}>Back</Button>
+        <Button
           onClick={addNewQuestion}
           size="lg"
           className="bg-[#227C9D] hover:bg-[#1a5f7a]"
@@ -287,7 +288,10 @@ export default function QuestionScreen() {
       </div>
 
       {/* Preview Modal */}
-      <PreviewModal />
+      <PreviewModal
+        showPreview={showPreview}
+        onClose={() => setShowPreview(false)}
+      />
     </div>
   );
 }

@@ -291,8 +291,8 @@ export default function ApplicationTable({
   }
 
   return (
-    <>
-      <table className="w-full text-sm border-collapse">
+    <div className="bg-white rounded-tl-2xl p-4">
+      <table className="w-full text-sm border-collapse ">
         <thead className="bg-[#FBFBFD]">
           {table.getHeaderGroups().map((hg) => (
             <tr
@@ -335,6 +335,6 @@ export default function ApplicationTable({
           onPageChange={setCurrentPage}
         />
       </div>
-    </>
+    </div>
   );
 }

@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAssessmentStore } from "@/store/assessment";
 
 // Zod validation schema
 const welcomeFormSchema = z.object({
@@ -34,6 +35,10 @@ export default function WelcomePageQuestion({
   onSubmit,
 }: WelcomePageQuestionProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const setWelcomeScreen = useAssessmentStore(
+    (state) => state.setWelcomeScreen
+  );
+  const welcomeScreen = useAssessmentStore((state) => state.welcomeScreen);
 
   const {
     register,
@@ -43,11 +48,20 @@ export default function WelcomePageQuestion({
   } = useForm<WelcomeFormData>({
     resolver: zodResolver(welcomeFormSchema),
     mode: "onChange",
+    defaultValues: {
+      title: welcomeScreen?.title || "",
+      description: welcomeScreen?.description || "",
+      instruction: welcomeScreen?.instruction || "",
+    },
   });
 
   const onFormSubmit = async (data: WelcomeFormData) => {
     setIsSubmitting(true);
     try {
+      // Save to Zustand store
+      setWelcomeScreen(data);
+
+      // Call the optional onSubmit callback
       onSubmit?.(data);
       console.log("Form data:", data);
     } catch (error) {

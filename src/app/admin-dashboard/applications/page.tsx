@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import ApplicationTable from "./widgets/application-table";
 import { useState } from "react";
 import CreateApplication from "./widgets/create-application";
-import EditApplication from "./widgets/edit-application";
 import { useGetAllApplications } from "@/app/api/admin/applications";
 import { exportAsCSV } from "@/lib/exportAsCSV";
 import { toast } from "sonner";
+import ApplicationsList from "./widgets/applications-list";
 
 export default function ApplicationsPage() {
   const [activeScreen, setActiveScreen] = useState("create");
@@ -57,7 +57,7 @@ export default function ApplicationsPage() {
       case "create":
         return <CreateApplication />;
       case "edit":
-        return <EditApplication />;
+        return <ApplicationsList />;
       default:
         return <CreateApplication />;
     }
@@ -123,7 +123,7 @@ export default function ApplicationsPage() {
           }
           onClick={() => setActiveScreen("edit")}
         >
-          Edit Current Application
+          Edit Applications
         </Button>
         <Button
           variant="ghost"
@@ -144,9 +144,7 @@ export default function ApplicationsPage() {
           </Button>
         )}
       </div>
-      <div className="overflow-x-auto bg-white rounded-tl-2xl p-4">
-        {renderScreen()}
-      </div>
+      <div className="overflow-x-auto ">{renderScreen()}</div>
     </div>
   );
 }

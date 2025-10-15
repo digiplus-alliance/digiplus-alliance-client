@@ -11,12 +11,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAssessmentStore } from "@/store/assessment";
 
 type ShortTextData = {
   question_no: number;
   question: string;
   descriptions: string;
   answer_placeholder: string;
+  min_characters?: number;
   max_characters?: number;
   required_score: number;
   module: string;
@@ -27,28 +29,40 @@ type ShortTextData = {
 interface ShortTextProps {
   questionNo?: number;
   onSave?: (data: ShortTextData) => void;
+  initialData?: ShortTextData;
 }
 
-const moduleOptions = [
-  "Digital Literacy",
-  "Business Strategy", 
-  "Financial Management",
-  "Marketing & Sales",
-  "Technology Integration",
-  "Leadership & Management",
-];
-
-export default function ShortText({ 
-  questionNo = 1, 
-  onSave 
+export default function ShortText({
+  questionNo = 1,
+  onSave,
+  initialData,
 }: ShortTextProps) {
-  const [question, setQuestion] = useState("");
-  const [description, setDescription] = useState("");
-  const [answerPlaceholder, setAnswerPlaceholder] = useState("");
-  const [maxCharacters, setMaxCharacters] = useState<number>(200);
-  const [requiredScore, setRequiredScore] = useState<number>(0);
-  const [selectedModule, setSelectedModule] = useState("");
-  const [requiredOption, setRequiredOption] = useState(false);
+  const modules = useAssessmentStore((state) => state.modules);
+  const formType = useAssessmentStore((state) => state.formType);
+  const moduleOptions = modules.map((mod) => mod.title);
+
+  const [question, setQuestion] = useState(initialData?.question || "");
+  const [description, setDescription] = useState(
+    initialData?.descriptions || ""
+  );
+  const [answerPlaceholder, setAnswerPlaceholder] = useState(
+    initialData?.answer_placeholder || ""
+  );
+  const [maxCharacters, setMaxCharacters] = useState<number>(
+    initialData?.max_characters || 200
+  );
+  const [minCharacters, setMinCharacters] = useState<number>(
+    initialData?.min_characters || 10
+  );
+  const [requiredScore, setRequiredScore] = useState<number>(
+    initialData?.required_score || 0
+  );
+  const [selectedModule, setSelectedModule] = useState(
+    initialData?.module || ""
+  );
+  const [requiredOption, setRequiredOption] = useState(
+    initialData?.required_option || false
+  );
 
   const handleSave = () => {
     const data: ShortTextData = {
@@ -60,7 +74,7 @@ export default function ShortText({
       required_score: requiredScore,
       module: selectedModule,
       required_option: requiredOption,
-      type: "short_text"
+      type: "short_text",
     };
 
     if (onSave) {
@@ -85,9 +99,7 @@ export default function ShortText({
       {/* Left Panel */}
       <div className="flex-1 p-6 border-[#D6D4D4] rounded-lg border">
         <div className="w-full flex flex-row text-left justify-start items-center">
-          <div className="text-2xl pb-6 text-gray-500">
-            {questionNo}.
-          </div>
+          <div className="text-2xl pb-6 text-gray-500">{questionNo}.</div>
           <textarea
             rows={2}
             placeholder="Ask your question here"
@@ -96,7 +108,7 @@ export default function ShortText({
             className="w-full text-[#7A7A7A] text-left border-none shadow-none resize-none focus:ring-0 focus:outline-none px-4 flex items-center"
           />
         </div>
-        
+
         <div className="w-full text-center space-y-2">
           <textarea
             rows={2}
@@ -114,7 +126,9 @@ export default function ShortText({
               Answer Field Preview:
             </label>
             <Input
-              placeholder={answerPlaceholder || "User will type their answer here..."}
+              placeholder={
+                answerPlaceholder || "User will type their answer here..."
+              }
               disabled
               className="w-full bg-white border border-gray-300"
               maxLength={maxCharacters}
@@ -138,19 +152,39 @@ export default function ShortText({
           </div>
 
           {/* Character Limit Configuration */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Character Limit:
-            </label>
-            <Input
-              type="number"
-              min="1"
-              max="1000"
-              placeholder="200"
-              value={maxCharacters || ""}
-              onChange={(e) => setMaxCharacters(parseInt(e.target.value) || 200)}
-              className="w-32"
-            />
+          <div className="flex gap-4">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Minimum Character:
+              </label>
+              <Input
+                type="number"
+                min="1"
+                max="10"
+                placeholder="10"
+                value={minCharacters || ""}
+                onChange={(e) =>
+                  setMinCharacters(parseInt(e.target.value) || 10)
+                }
+                className="w-32"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Maximum Character:
+              </label>
+              <Input
+                type="number"
+                min="1"
+                max="1000"
+                placeholder="50"
+                value={maxCharacters || ""}
+                onChange={(e) =>
+                  setMaxCharacters(parseInt(e.target.value) || 100)
+                }
+                className="w-32"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -158,19 +192,23 @@ export default function ShortText({
       {/* Right Panel */}
       <div className="w-72 border-[#D6D4D4] rounded-lg p-6 border flex flex-col justify-between">
         <div className="space-y-4 text-gray-600 text-sm">
-          <div className="flex justify-between items-center">
-            <span>Required Score</span>
-            <Input
-              type="number"
-              min="0"
-              max="99"
-              value={requiredScore || ""}
-              onChange={(e) => setRequiredScore(parseInt(e.target.value) || 0)}
-              className="w-16 h-8 text-right"
-              placeholder="0"
-            />
-          </div>
-          
+          {formType === "assessment" && (
+            <div className="flex justify-between items-center">
+              <span>Required Score</span>
+              <Input
+                type="number"
+                min="0"
+                max="99"
+                value={requiredScore || ""}
+                onChange={(e) =>
+                  setRequiredScore(parseInt(e.target.value) || 0)
+                }
+                className="w-16 h-8 text-right"
+                placeholder="0"
+              />
+            </div>
+          )}
+
           <div className="flex justify-between items-center">
             <span>Module</span>
             <Select value={selectedModule} onValueChange={setSelectedModule}>
@@ -189,15 +227,17 @@ export default function ShortText({
 
           <div className="flex justify-between items-center">
             <span>Required Option</span>
-            <Checkbox 
+            <Checkbox
               checked={requiredOption}
-              onCheckedChange={(checked) => setRequiredOption(checked as boolean)}
+              onCheckedChange={(checked) =>
+                setRequiredOption(checked as boolean)
+              }
             />
           </div>
         </div>
 
         <div className="flex gap-3 mt-6">
-          <Button 
+          <Button
             onClick={handleSave}
             disabled={!isFormValid()}
             className="flex-1 disabled:bg-gray-300 disabled:cursor-not-allowed"

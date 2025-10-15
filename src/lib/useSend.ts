@@ -11,11 +11,10 @@ type AllowedMethodType = 'post' | 'put' | 'delete' | 'get' | 'PATCH';
 
 type QueryResponse<T> = {
   success: boolean;
-
   message: string;
 } & T;
 
-interface IUseSendOptions<RequestBodyType, TData = unknown, TContext = unknown> {
+interface IUseSendOptions<RequestBodyType = any, TData = any, TContext = unknown> {
   url: string;
   baseUrl?: string;
   method: AllowedMethodType;
@@ -39,7 +38,7 @@ interface IUseSendOptions<RequestBodyType, TData = unknown, TContext = unknown> 
   ) => void;
 }
 
-const useSend = <RequestBodyType, TData = unknown, TContext = unknown>({
+const useSend = <RequestBodyType = any, TData = any, TContext = unknown>({
   url,
   baseUrl,
   method,
