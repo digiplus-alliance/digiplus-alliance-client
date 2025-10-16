@@ -40,23 +40,27 @@ export default function QuestionScreen({
 
   const [activeQuestions, setActiveQuestions] = useState<ActiveQuestion[]>([]);
   const [showPreview, setShowPreview] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Load questions from store on mount
+  // Load questions from store on mount ONLY (not on every question change)
   useEffect(() => {
-    if (questions.length > 0) {
-      const loadedQuestions = questions.map((q) => ({
-        id: q.id,
-        type: q.type,
-        isLocked: applicationId ? true : false,
-      }));
-      setActiveQuestions(loadedQuestions);
-    } else {
-      // If no questions in store, start with one empty question
-      setActiveQuestions([
-        { id: generateId(), type: "multiple_choice", isLocked: false },
-      ]);
+    if (!isInitialized) {
+      if (questions.length > 0) {
+        const loadedQuestions = questions.map((q) => ({
+          id: q.id,
+          type: q.type,
+          isLocked: applicationId ? true : false,
+        }));
+        setActiveQuestions(loadedQuestions);
+      } else {
+        // If no questions in store, start with one empty question
+        setActiveQuestions([
+          { id: generateId(), type: "multiple_choice", isLocked: false },
+        ]);
+      }
+      setIsInitialized(true);
     }
-  }, [questions.length, applicationId]);
+  }, [questions, applicationId, isInitialized]);
 
   const handleClearAllQuestions = () => {
     clearQuestions();
@@ -79,6 +83,7 @@ export default function QuestionScreen({
   ];
 
   const handleQuestionSave = (questionId: string, questionData: any) => {
+    console.log("Saving question:", questionId, questionData);
     // Check if question already exists in store
     const existingQuestion = questions.find((q) => q.id === questionId);
 
@@ -100,6 +105,7 @@ export default function QuestionScreen({
     setActiveQuestions((prev) =>
       prev.map((q) => (q.id === questionId ? { ...q, isLocked: true } : q))
     );
+    // console.log("Question locked:", questionId);
   };
 
   const handleQuestionTypeChange = (

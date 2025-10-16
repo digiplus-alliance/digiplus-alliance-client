@@ -15,6 +15,7 @@ export interface QuestionOption {
   id: string;
   text: string;
   value?: string;
+  points?: number;
 }
 
 // Comprehensive Question interface covering all possible question types
@@ -22,6 +23,7 @@ export interface Question {
   type?: string;
   question?: string;
   description?: string;
+  instruction?: string;
   placeholder?: string;
   options?: QuestionOption[];
   is_required?: boolean;
