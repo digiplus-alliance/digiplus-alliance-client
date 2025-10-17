@@ -7,6 +7,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Trash2, Edit2, Check, X } from "lucide-react";
+import { useFormStore, type Module } from "@/store/form-store";
 
 // Zod validation schema
 const welcomeFormSchema = z.object({
@@ -23,13 +24,6 @@ const welcomeFormSchema = z.object({
 
 type WelcomeFormData = z.infer<typeof welcomeFormSchema>;
 
-interface Module {
-  id: string;
-  title: string;
-  description?: string;
-  step: number;
-}
-
 interface WelcomePageQuestionProps {
   onSubmit?: (data: WelcomeFormData) => void;
   navigateBack: () => void;
@@ -42,7 +36,10 @@ export default function AddModule({
   navigateNext,
 }: WelcomePageQuestionProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [modules, setModules] = useState<Module[]>([]);
+  
+  // Get modules from store
+  const { modules, addModule, updateModule, removeModule } = useFormStore();
+  
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
@@ -68,8 +65,8 @@ export default function AddModule({
         step: modules.length + 1,
       };
 
-      // Add module to array
-      setModules((prev) => [...prev, newModule]);
+      // Add module to store
+      addModule(newModule);
 
       // Reset form
       reset();
@@ -90,13 +87,10 @@ export default function AddModule({
   };
 
   const handleSaveEdit = (moduleId: string) => {
-    setModules((prev) =>
-      prev.map((module) =>
-        module.id === moduleId
-          ? { ...module, title: editTitle, description: editDescription }
-          : module
-      )
-    );
+    updateModule(moduleId, { 
+      title: editTitle, 
+      description: editDescription 
+    });
     setEditingId(null);
     setEditTitle("");
     setEditDescription("");
@@ -109,11 +103,7 @@ export default function AddModule({
   };
 
   const handleDeleteModule = (moduleId: string) => {
-    setModules((prev) => {
-      const filtered = prev.filter((module) => module.id !== moduleId);
-      // Update step numbers after deletion
-      return filtered.map((module, index) => ({ ...module, step: index + 1 }));
-    });
+    removeModule(moduleId);
   };
 
   const handleSaveModules = () => {

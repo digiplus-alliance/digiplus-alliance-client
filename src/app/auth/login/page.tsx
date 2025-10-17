@@ -63,9 +63,6 @@ export default function LoginPage() {
       if (data.accessToken) {
         authStore.setAccessToken(data.accessToken);
       }
-
-      console.log("User data stored in Zustand:", data.user);
-      console.log("Access token stored in Zustand:", data.accessToken);
       
       // Determine redirect destination
       const user = data.user as User;

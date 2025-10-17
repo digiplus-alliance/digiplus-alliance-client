@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   useReactTable,
   getCoreRowModel,
@@ -21,6 +22,9 @@ import {
   getApplicationStatusStyles,
   getAssessmentStatusStyles,
 } from "@/lib/getStatusStyles";
+import { useGetAllApplications } from "@/app/api/admin/applications";
+import { useUpdatePaymentStatus } from "@/app/api/admin/applications/update-payment-status";
+import { useUpdateApplicationStatus } from "@/app/api/admin/applications/update-application-status";
 
 // Extended type for table data that matches current structure
 type TableUser = {
@@ -33,134 +37,48 @@ type TableUser = {
   timestamp: string;
   status: string;
 };
+const users: TableUser[] = [];
 
-const users: TableUser[] = [
-  {
-    id: "AP/2030222",
-    name: "Oyebode Anjoke",
-    email: "anjoke@gmail.com",
-    service: "Company Name",
-    training: "DigiPlus Training",
-    timestamp: "2023-10-01 10:00 AM",
-    paymentStatus: "Not Paid",
-    status: "Submitted",
-  },
-  {
-    id: "PY/093456U",
-    name: "Chukwu Emeka",
-    email: "emeka@example.com",
-    service: "Emeka Foods",
-    training: "Ecosystem Building",
-    timestamp: "2023-10-02 11:30 AM",
-    paymentStatus: "Paid",
-    status: "Being Processed",
-  },
-  {
-    id: "MM/1320CSAD",
-    name: "Amina Bello",
-    email: "amina@example.com",
-    service: "Bello Traders",
-    training: "Advanced Sales Training",
-    timestamp: "2023-10-03 02:15 PM",
-    paymentStatus: "Not Paid",
-    status: "Approved",
-  },
-  {
-    id: "UP/89ASD98",
-    name: "Grace Ife",
-    email: "grace@example.com",
-    service: "Ife Logistics",
-    training: "Logistics Management",
-    timestamp: "2023-10-04 09:45 AM",
-    paymentStatus: "Paid",
-    status: "Rejected",
-  },
-  {
-    id: "LO/12309AS0",
-    name: "Tunde Bakare",
-    email: "tunde@example.com",
-    service: "Bakare Services",
-    training: "Business Management",
-    timestamp: "2023-10-05 01:20 PM",
-    paymentStatus: "Not Paid",
-    status: "Completed",
-  },
-  {
-    id: "ZZ/999999",
-    name: "Extra User",
-    email: "extra@example.com",
-    service: "Extra LLC",
-    training: "Extra Training",
-    timestamp: "2023-10-06 03:30 PM",
-    paymentStatus: "Not Paid",
-    status: "Submitted",
-  },
-  {
-    id: "AP/2030222",
-    name: "Oyebode Anjoke",
-    email: "anjoke@gmail.com",
-    service: "Company Name",
-    training: "DigiPlus Training",
-    timestamp: "2023-10-01 10:00 AM",
-    paymentStatus: "Not Paid",
-    status: "Submitted",
-  },
-  {
-    id: "PY/093456U",
-    name: "Chukwu Emeka",
-    email: "emeka@example.com",
-    service: "Emeka Foods",
-    training: "Ecosystem Building",
-    timestamp: "2023-10-02 11:30 AM",
-    paymentStatus: "Paid",
-    status: "Being Processed",
-  },
-  {
-    id: "MM/1320CSAD",
-    name: "Amina Bello",
-    email: "amina@example.com",
-    timestamp: "2023-10-03 02:15 PM",
-    status: "Not Started",
-    service: "Bello Traders",
-    paymentStatus: "Not Paid",
-    training: "Advanced Sales Training",
-  },
-  {
-    id: "UP/89ASD98",
-    name: "Grace Ife",
-    email: "grace@example.com",
-    service: "Ife Logistics",
-    training: "Logistics Management",
-    timestamp: "2023-10-04 09:45 AM",
-    paymentStatus: "Paid",
-    status: "Rejected",
-  },
-  {
-    id: "LO/12309AS0",
-    name: "Tunde Bakare",
-    email: "tunde@example.com",
-    service: "Bakare Services",
-    training: "Business Management",
-    timestamp: "2023-10-05 01:20 PM",
-    paymentStatus: "Not Paid",
-    status: "Completed",
-  },
-  {
-    id: "ZZ/999999",
-    name: "Extra User",
-    email: "extra@example.com",
-    service: "Extra LLC",
-    training: "Extra Training",
-    paymentStatus: "Not Paid",
-    timestamp: "2023-10-06 03:30 PM",
-    status: "Submitted",
-  },
-];
+interface ApplicationTableProps {
+  serviceTypeFilter?: string;
+}
 
-export default function ApplicationTable() {
+export default function ApplicationTable({
+  serviceTypeFilter,
+}: ApplicationTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
+  const {
+    data: applications,
+    isLoading,
+    error,
+  } = useGetAllApplications({
+    service_type: serviceTypeFilter || undefined,
+  });
   const [tableData, setTableData] = useState<TableUser[]>(users);
   const pageSize = 10;
+  const [applicationId, setApplicationId] = useState<string>("");
+  const { mutate, isPending: isUpdating } =
+    useUpdatePaymentStatus(applicationId);
+  const { mutate: updateStatus, isPending: isUpdatingStatus } =
+    useUpdateApplicationStatus(applicationId);
+
+  // map API applications to table data when available
+  useEffect(() => {
+    if (applications) {
+      const mapped = applications.map((app) => ({
+        id: app._id,
+        name: app.name,
+        email: app.email,
+        service: app.service,
+        training: app.service_type ?? "",
+        paymentStatus: app.payment_status ?? "",
+        timestamp: app.timestamp,
+        status: app.status,
+      }));
+      setTableData(mapped);
+      setCurrentPage(1);
+    }
+  }, [applications]);
 
   const statusOptions = [
     "Submitted",
@@ -178,6 +96,8 @@ export default function ApplicationTable() {
         user.id === userId ? { ...user, status: newStatus } : user
       )
     );
+    setApplicationId(userId);
+    updateStatus({ status: newStatus });
   };
 
   const handlePaymentStatusChange = (userId: string, newStatus: string) => {
@@ -186,6 +106,8 @@ export default function ApplicationTable() {
         user.id === userId ? { ...user, paymentStatus: newStatus } : user
       )
     );
+    setApplicationId(userId);
+    mutate({ paymentStatus: newStatus });
   };
 
   const totalPages = Math.ceil(tableData.length / pageSize);
@@ -234,6 +156,7 @@ export default function ApplicationTable() {
             <DropdownMenu>
               <DropdownMenuTrigger
                 className={`w-full text-left px-3 py-1 rounded-full text-xs font-medium border ${styleClasses} cursor-pointer flex items-center justify-between`}
+                disabled={isUpdatingStatus}
               >
                 <span className="truncate">{currentStatus}</span>
                 <ChevronDown size={12} className="text-[#706C6C] ml-2" />
@@ -281,6 +204,7 @@ export default function ApplicationTable() {
             <DropdownMenu>
               <DropdownMenuTrigger
                 className={`w-full text-left px-3 py-1 rounded-full text-xs font-medium border ${styleClasses} cursor-pointer flex items-center justify-between`}
+                disabled={isUpdating}
               >
                 <span className="truncate">{paymentStatus}</span>
                 <ChevronDown size={12} className="text-[#706C6C] ml-2" />
@@ -302,37 +226,6 @@ export default function ApplicationTable() {
         );
       },
     },
-    // {
-    //   accessorKey: "more",
-    //   header: "More",
-    //   cell: (info: any) => {
-    //     const row = info.row.original as any;
-    //     return (
-    //       <div className="flex items-center gap-2">
-    //         <button
-    //           onClick={() => handleViewUser(row)}
-    //           className="p-1 hover:bg-gray-100 rounded"
-    //           title="View user info"
-    //         >
-    //           <CiUser
-    //             className="text-[#A3A3A3] group-hover:text-[#06516C] transition-colors"
-    //             size={20}
-    //           />
-    //         </button>
-    //         <button
-    //           onClick={() => handleDeleteUser(row)}
-    //           className="p-1 hover:bg-gray-100 rounded"
-    //           title="Delete user"
-    //         >
-    //           <Trash2
-    //             size={16}
-    //             className="text-[#A3A3A3] group-hover:text-red-500 transition-colors"
-    //           />
-    //         </button>
-    //       </div>
-    //     );
-    //   },
-    // },
   ];
 
   const table = useReactTable({
@@ -341,9 +234,65 @@ export default function ApplicationTable() {
     getCoreRowModel: getCoreRowModel(),
   });
 
+  // Error state
+  if (error) {
+    return (
+      <div className="p-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <h3 className="text-red-800 font-semibold mb-2">
+            Failed to load applications
+          </h3>
+          <p className="text-sm text-red-600">
+            {error instanceof Error ? error.message : String(error)}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Loading state - show skeleton table
+  if (isLoading) {
+    return (
+      <>
+        <table className="w-full text-sm border-collapse">
+          <thead className="bg-[#FBFBFD]">
+            <tr className="text-left text-[#B8B8B8] text-sm font-inter">
+              <th className="px-4 py-2">Name/Email</th>
+              <th className="px-4 py-2">Service/Training Type</th>
+              <th className="px-4 py-2">Status</th>
+              <th className="px-4 py-2">Timestamp</th>
+              <th className="px-4 py-2">Payment Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <tr key={i} className="border-t">
+                <td className="px-4 py-3">
+                  <Skeleton className="h-4 w-40" />
+                </td>
+                <td className="px-4 py-3">
+                  <Skeleton className="h-4 w-32" />
+                </td>
+                <td className="px-4 py-3">
+                  <Skeleton className="h-4 w-20" />
+                </td>
+                <td className="px-4 py-3">
+                  <Skeleton className="h-4 w-24" />
+                </td>
+                <td className="px-4 py-3">
+                  <Skeleton className="h-4 w-20" />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </>
+    );
+  }
+
   return (
-    <>
-      <table className="w-full text-sm border-collapse">
+    <div className="bg-white rounded-tl-2xl p-4">
+      <table className="w-full text-sm border-collapse ">
         <thead className="bg-[#FBFBFD]">
           {table.getHeaderGroups().map((hg) => (
             <tr
@@ -386,20 +335,6 @@ export default function ApplicationTable() {
           onPageChange={setCurrentPage}
         />
       </div>
-
-      {/* User Info Modal */}
-      {/* <UserInfoModal
-        userInfoModalOpen={userInfoModalOpen}
-        setUserInfoModalOpen={setUserInfoModalOpen}
-        selectedUser={selectedUser as AdminUser | null}
-      /> */}
-
-      {/* Delete Confirmation Modal */}
-      {/* <DeactivateUserModal
-        deleteModalOpen={deleteModalOpen}
-        setDeleteModalOpen={setDeleteModalOpen}
-        confirmDeleteUser={confirmDeleteUser}
-      /> */}
-    </>
+    </div>
   );
 }

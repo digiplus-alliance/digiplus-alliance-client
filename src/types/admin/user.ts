@@ -3,13 +3,14 @@ export type AdminUser = {
   name: string;
   email: string;
   timestamp: string;
-  business: string;
-  applications: string;
-  avatar: string;
+  business_name: string;
+  applications_count: number;
+  last_login: string;
+  profile_picture: string;
   phone: string;
   website: string;
   role: string;
-  assessment_status: "active" | "inactive" | "pending";
+  assessments_count: number;
   created_at: string;
   updated_at: string;
 };

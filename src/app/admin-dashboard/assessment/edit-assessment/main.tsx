@@ -1,10 +1,39 @@
-import { Button } from "@/components/ui/button";
+"use client";
 
-export default function EditAssessment({toggleComponent}: { toggleComponent: (component: "current" | "edit" | "list") => void }) {
+import { useState } from "react";
+import AssessmentTable from "../widgets/assessment-table";
+import EditAssessmentForm from "../widgets/edit-assessment-form";
+
+interface EditAssessmentProps {
+  toggleComponent: (component: "current" | "edit" | "list") => void;
+}
+
+export default function EditAssessment({
+  toggleComponent,
+}: EditAssessmentProps) {
+  const [view, setView] = useState<"table" | "edit">("table");
+  const [selectedAssessmentId, setSelectedAssessmentId] = useState<string>("");
+
+  const handleEdit = (id: string) => {
+    setSelectedAssessmentId(id);
+    setView("edit");
+  };
+
+  const handleBackToTable = () => {
+    setView("table");
+    setSelectedAssessmentId("");
+  };
+
   return (
-    <div >
-      <h1>Edit Assessment Component</h1>
-      <Button onClick={() => toggleComponent("edit")}>Edit Assessment</Button>
+    <div>
+      {view === "table" ? (
+        <AssessmentTable onEdit={handleEdit} />
+      ) : (
+        <EditAssessmentForm
+          assessmentId={selectedAssessmentId}
+          onBack={handleBackToTable}
+        />
+      )}
     </div>
   );
 }

@@ -75,7 +75,7 @@ export default function SidebarLayout({
                           href={url}
                           className={cn(
                             'p-2 h-auto !rounded-4xl flex items-center gap-1 hover:bg-[#F1F8F8]',
-                            pathname.startsWith(url) && 'bg-[#EBFBFF]'
+                            pathname.startsWith(url) && 'bg-[#EBFBFF]' || pathname === '/admin-dashboard' && item.url === '/' && 'bg-[#EBFBFF]'
                           )}
                         >
                           {item.iconLogo && (

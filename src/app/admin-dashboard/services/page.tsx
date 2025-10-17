@@ -1,41 +1,57 @@
-'use client'
-
-import { useCreateService, CreateServicePayload } from "@/app/api/admin/services/create-service";
-import UpdateServiceForm from "./update-service";
+"use client";
+import { useState } from "react";
+import CreateService from "./widgets/create-services";
+import AllServices from "./widgets/all-services";
+import { Button } from "@/components/ui/button";
 
 export default function ServicesPage() {
-  const { mutate: createService, isPending, error } = useCreateService();
+  const [activeComponent, setActiveComponent] = useState<"create" | "all">(
+    "create"
+  );
 
-  const handleSubmit = (formData: CreateServicePayload) => {
-    createService({
-      name: "Web Development Training 2",
-      service_type: "Digital Skills & Training",
-      image: "https://example.com/image.jpg",
-      price: 1500,
-      subtitle: "Professional web development services",
-      description: "We provide comprehensive web development services including frontend, backend, and database design."
-    });
+  const renderComponent = () => {
+    switch (activeComponent) {
+      case "create":
+        return <CreateService />;
+      case "all":
+        return <AllServices />;
+      default:
+        return null;
+    }
   };
 
   return (
-    <div>
-      <form onSubmit={(e) => {
-      e.preventDefault();
-      handleSubmit({
-        name: "Web Development",
-        service_type: "Digital Skills & Training",
-        image: "https://example.com/image.jpg",
-        price: 1500,
-        subtitle: "Professional web development services",
-        description: "We provide comprehensive web development services including frontend, backend, and database design."
-      });
-    }}>
-      <button type="submit" disabled={isPending}>
-        {isPending ? "Creating..." : "Create Service"}
-      </button>
-    </form>
-
-    <UpdateServiceForm serviceId="68d813620b0ae7e088467348" />
+    <div className="p-6 space-y-4 font-secondary md:bg-[#EBEBEB] rounded-tl-2xl">
+      <div>
+        <h1 className="text-2xl text-primary font-bold">
+          {activeComponent === "create" ? "Create Service" : "All Services"}
+        </h1>
+      </div>
+      <div className="flex gap-4 my-2">
+        <Button
+          variant="ghost"
+          className={`text-[#227C9D] ${
+            activeComponent === "create"
+              ? "bg-white rounded-t-lg rounded-b-none"
+              : ""
+          }`}
+          onClick={() => setActiveComponent("create")}
+        >
+          Create Service
+        </Button>
+        <Button
+          variant="ghost"
+          className={`text-[#227C9D] ${
+            activeComponent === "all"
+              ? "bg-white rounded-t-lg rounded-b-none"
+              : ""
+          }`}
+          onClick={() => setActiveComponent("all")}
+        >
+          All Services
+        </Button>
+      </div>
+      {renderComponent()}
     </div>
   );
 }

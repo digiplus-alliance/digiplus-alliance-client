@@ -1,4 +1,22 @@
-import { create } from 'zustand';
+import { create } from "zustand";
+
+// Form type
+export type FormType = "assessment" | "application";
+
+// Welcome screen data interface
+export interface WelcomeScreenData {
+  title: string;
+  description?: string;
+  instruction?: string;
+}
+
+// Module interface
+export interface Module {
+  id: string;
+  title: string;
+  description?: string;
+  step: number;
+}
 
 // Base question interface
 interface BaseQuestion {
@@ -9,6 +27,29 @@ interface BaseQuestion {
   required_score: number;
   module: string;
   required_option: boolean;
+  // Optional properties that may apply to various question types
+  grid_columns?: Array<{
+    id: string;
+    text: string;
+    value: string;
+    points?: number;
+  }>;
+  grid_rows?: Array<{
+    id: string;
+    text: string;
+    weight?: number;
+  }>;
+  min_selections?: number;
+  acceptedFileTypes?: string[];
+  recommendations?: Array<{
+    id: string;
+    service_id: string;
+    service_name: string;
+    description: string;
+    min_points: number;
+    max_points: number;
+    levels: string[];
+  }>;
 }
 
 // Question type specific interfaces
@@ -19,22 +60,24 @@ interface MultipleChoiceQuestion extends BaseQuestion {
     optiondesc: string;
     point_value: number;
   }>;
-  max_selections: number;
 }
 
 interface CheckboxQuestion extends BaseQuestion {
-  type: "checkbox_question";
+  type: "checkbox";
   options: Array<{
     option: string;
     optiondesc: string;
     point_value: number;
   }>;
+  max_selections: number;
 }
 
 interface ShortTextQuestion extends BaseQuestion {
   type: "short_text";
   answer_placeholder: string;
   max_characters?: number;
+  min_characters?: number;
+  completion_points?: number;
 }
 
 interface LongTextQuestion extends BaseQuestion {
@@ -43,10 +86,15 @@ interface LongTextQuestion extends BaseQuestion {
   min_characters?: number;
   max_characters?: number;
   rows?: number;
+  completion_points?: number;
+  keyword_scoring?: Array<{
+    keyword: string;
+    points: number;
+  }>;
 }
 
 interface DropdownQuestion extends BaseQuestion {
-  type: "dropdown_question";
+  type: "dropdown";
   options: Array<{
     option: string;
     optiondesc: string;
@@ -55,26 +103,87 @@ interface DropdownQuestion extends BaseQuestion {
   dropdown_placeholder: string;
 }
 
-// Union type for all question types
-export type Question = 
-  | MultipleChoiceQuestion 
-  | CheckboxQuestion 
-  | ShortTextQuestion 
-  | LongTextQuestion 
-  | DropdownQuestion;
+interface MultipleChoiceGridQuestion extends BaseQuestion {
+  type: "multiple_choice_grid";
+  grid_columns: Array<{
+    id: string;
+    text: string;
+    value: string;
+    points?: number;
+  }>;
+  grid_rows: Array<{
+    id: string;
+    text: string;
+    weight?: number;
+  }>;
+}
 
-export type QuestionType = Question['type'];
+interface FileUploadQuestion extends BaseQuestion {
+  type: "file_upload";
+  acceptedFileTypes: string[];
+  max_file_size?: number; // in MB
+  max_files?: number;
+  upload_instruction?: string;
+}
+
+interface ServiceRecommendationsQuestion extends BaseQuestion {
+  type: "service_recommendations";
+  recommendations: Array<{
+    id: string;
+    service_id: string;
+    service_name: string;
+    description: string;
+    min_points: number;
+    max_points: number;
+    levels: string[];
+  }>;
+}
+
+// Union type for all question types
+export type Question =
+  | MultipleChoiceQuestion
+  | CheckboxQuestion
+  | ShortTextQuestion
+  | LongTextQuestion
+  | DropdownQuestion
+  | MultipleChoiceGridQuestion
+  | FileUploadQuestion
+  | ServiceRecommendationsQuestion;
+
+export type QuestionType = Question["type"];
+
+// Service Recommendation type (separate from questions)
+export type ServiceRecommendation = {
+  service_id: string;
+  service_name: string;
+  description: string;
+  min_points: number;
+  max_points: number;
+  levels: string[];
+};
 
 // Assessment store interface
 interface AssessmentStore {
+  formType: FormType;
+  welcomeScreen: WelcomeScreenData | null;
+  modules: Module[];
   questions: Question[];
+  serviceRecommendations: ServiceRecommendation[];
   currentQuestionIndex: number;
-  
+
   // Actions
+  setFormType: (type: FormType) => void;
+  setWelcomeScreen: (data: WelcomeScreenData) => void;
+  addModule: (module: Module) => void;
+  updateModule: (id: string, updates: Partial<Module>) => void;
+  removeModule: (id: string) => void;
+  setModules: (modules: Module[]) => void;
   addQuestion: (question: Question) => void;
   updateQuestion: (id: string, question: Question) => void;
   removeQuestion: (id: string) => void;
   clearQuestions: () => void;
+  setServiceRecommendations: (recommendations: ServiceRecommendation[]) => void;
+  clearAll: () => void;
   setCurrentQuestionIndex: (index: number) => void;
   getNextQuestionNumber: () => number;
   getQuestionById: (id: string) => Question | undefined;
@@ -82,31 +191,94 @@ interface AssessmentStore {
 
 // Create the store
 export const useAssessmentStore = create<AssessmentStore>((set, get) => ({
+  formType: "assessment", 
+  welcomeScreen: null,
+  modules: [],
   questions: [],
+  serviceRecommendations: [],
   currentQuestionIndex: 0,
 
-  addQuestion: (question: Question) => set((state) => ({
-    questions: [...state.questions, question]
-  })),
+  setFormType: (type: FormType) =>
+    set({
+      formType: type,
+    }),
 
-  updateQuestion: (id: string, updatedQuestion: Question) => set((state) => ({
-    questions: state.questions.map(q => 
-      q.id === id ? updatedQuestion : q
-    )
-  })),
+  setWelcomeScreen: (data: WelcomeScreenData) =>
+    set({
+      welcomeScreen: data,
+    }),
 
-  removeQuestion: (id: string) => set((state) => ({
-    questions: state.questions.filter(q => q.id !== id)
-  })),
+  addModule: (module: Module) =>
+    set((state) => ({
+      modules: [...state.modules, module],
+    })),
 
-  clearQuestions: () => set({
-    questions: [],
-    currentQuestionIndex: 0
-  }),
+  updateModule: (id: string, updates: Partial<Module>) =>
+    set((state) => ({
+      modules: state.modules.map((m) =>
+        m.id === id ? { ...m, ...updates } : m
+      ),
+    })),
 
-  setCurrentQuestionIndex: (index: number) => set({
-    currentQuestionIndex: index
-  }),
+  removeModule: (id: string) =>
+    set((state) => {
+      const filtered = state.modules.filter((m) => m.id !== id);
+      // Update step numbers after deletion
+      return {
+        modules: filtered.map((module, index) => ({
+          ...module,
+          step: index + 1,
+        })),
+      };
+    }),
+
+  setModules: (modules: Module[]) =>
+    set({
+      modules,
+    }),
+
+  addQuestion: (question: Question) =>
+    set((state) => ({
+      questions: [...state.questions, question],
+    })),
+
+  updateQuestion: (id: string, updatedQuestion: Question) =>
+    set((state) => ({
+      questions: state.questions.map((q) =>
+        q.id === id ? updatedQuestion : q
+      ),
+    })),
+
+  removeQuestion: (id: string) =>
+    set((state) => ({
+      questions: state.questions.filter((q) => q.id !== id),
+    })),
+
+  clearQuestions: () =>
+    set({
+      questions: [],
+      currentQuestionIndex: 0,
+    }),
+
+  setServiceRecommendations: (recommendations: ServiceRecommendation[]) =>
+    set({
+      serviceRecommendations: recommendations,
+    }),
+
+  clearAll: () =>
+    set({
+      formType: "assessment", // reset to default
+      welcomeScreen: null,
+      modules: [],
+      questions: [],
+      serviceRecommendations: [],
+      currentQuestionIndex: 0,
+    }),
+
+  setCurrentQuestionIndex: (index: number) =>
+    set({
+      currentQuestionIndex: index,
+    }),
 
   getNextQuestionNumber: () => {
     const { questions } = get();
@@ -115,6 +287,6 @@ export const useAssessmentStore = create<AssessmentStore>((set, get) => ({
 
   getQuestionById: (id: string) => {
     const { questions } = get();
-    return questions.find(q => q.id === id);
-  }
+    return questions.find((q) => q.id === id);
+  },
 }));
