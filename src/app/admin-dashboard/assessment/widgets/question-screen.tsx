@@ -36,8 +36,14 @@ export default function QuestionScreen({
   navigateBack?: () => void;
   applicationId?: string;
 }) {
-  const { formType, questions, addQuestion, removeQuestion, clearQuestions } =
-    useFormStore();
+  const {
+    formType,
+    questions,
+    addQuestion,
+    removeQuestion,
+    clearQuestions,
+    setServiceRecommendations,
+  } = useFormStore();
 
   const [activeQuestions, setActiveQuestions] = useState<ActiveQuestion[]>([]);
   const [showPreview, setShowPreview] = useState(false);
@@ -62,6 +68,16 @@ export default function QuestionScreen({
       setIsInitialized(true);
     }
   }, [questions, applicationId, isInitialized]);
+
+  // Reset activeQuestions when store is cleared (e.g., after successful submission)
+  useEffect(() => {
+    if (isInitialized && questions.length === 0 && activeQuestions.length > 0) {
+      // Store was cleared, reset to initial state
+      setActiveQuestions([
+        { id: generateId(), type: "multiple_choice", isLocked: false },
+      ]);
+    }
+  }, [questions.length, isInitialized, activeQuestions.length]);
 
   const handleClearAllQuestions = () => {
     clearQuestions();
@@ -98,6 +114,17 @@ export default function QuestionScreen({
 
   const handleQuestionSave = (questionId: string, questionData: any) => {
     // console.log("Saving question:", questionId, questionData);
+
+    // Handle service_recommendations separately (not stored in questions array)
+    if (questionData.type === "service_recommendations") {
+      // Service recommendations are handled by the component itself via setServiceRecommendations
+      // Just lock the question
+      setActiveQuestions((prev) =>
+        prev.map((q) => (q.id === questionId ? { ...q, isLocked: true } : q))
+      );
+      return;
+    }
+
     // Check if question already exists in store
     const existingQuestion = questions.find((q) => q.id === questionId);
 
@@ -148,8 +175,18 @@ export default function QuestionScreen({
   };
 
   const removeActiveQuestion = (questionId: string) => {
-    // Remove from both active questions and store
-    removeQuestion(questionId);
+    // Check if it's a service_recommendations type
+    const questionToRemove = activeQuestions.find((q) => q.id === questionId);
+
+    if (questionToRemove?.type === "service_recommendations") {
+      // Clear service recommendations from store
+      setServiceRecommendations([]);
+    } else {
+      // Remove from questions store
+      removeQuestion(questionId);
+    }
+
+    // Remove from active questions
     setActiveQuestions((prev) => prev.filter((q) => q.id !== questionId));
   };
 
@@ -167,6 +204,7 @@ export default function QuestionScreen({
       onSave: (data: any) => handleQuestionSave(questionId, data),
       initialData: existingQuestion, // Pass existing data to prefill
       formType: formType, // Pass the form type from store
+      isLocked: isLocked, // Pass the locked state
     };
 
     if (isLocked) {

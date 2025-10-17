@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { setupTokenRefresh, stopTokenRefresh } from '@/lib/tokenRefresh';
 
 export type User = {
   _id: string;
@@ -52,11 +53,19 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       accessToken: null,
       setUser: (user) => set({ user }),
-      setAccessToken: (token) => set({ accessToken: token }),
+      setAccessToken: (token) => {
+        set({ accessToken: token });
+        // Setup automatic token refresh when token is set
+        if (typeof window !== 'undefined') {
+          setupTokenRefresh(token);
+        }
+      },
       clearUser: () => set({ user: null }),
       clearAuth: () => {
         set({ user: null, accessToken: null });
+        // Stop token refresh when clearing auth
         if (typeof window !== 'undefined') {
+          stopTokenRefresh();
           localStorage.removeItem('auth-storage');
         }
       },

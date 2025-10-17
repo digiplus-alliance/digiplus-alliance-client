@@ -27,13 +27,22 @@ type ServiceRecommendation = {
 
 interface ServiceRecommendationProps {
   questionNo?: number;
+  isLocked?: boolean;
+  onSave?: (data: any) => void;
+  initialData?: any;
 }
 
 export default function ServiceRecommendation({
   questionNo = 1,
+  isLocked = false,
+  onSave,
+  initialData,
 }: ServiceRecommendationProps) {
   const { serviceRecommendations, setServiceRecommendations } = useFormStore();
   const { data: services, isLoading: servicesLoading } = useGetAllServices();
+  
+  // Check if there's already a saved recommendation in the store
+  const hasSavedRecommendation = serviceRecommendations.length > 0;
 
   const [recommendations, setRecommendations] = useState<ServiceRecommendation[]>(
     serviceRecommendations.length > 0
@@ -142,7 +151,16 @@ export default function ServiceRecommendation({
   const handleSave = () => {
     // Save recommendations to the store
     setServiceRecommendations(recommendations);
-    console.log("Service Recommendations saved:", recommendations);
+    
+    // Call onSave to trigger the lock overlay
+    if (onSave) {
+      onSave({
+        type: "service_recommendations",
+        recommendations: recommendations,
+      });
+    } else {
+      console.log("Service Recommendations saved:", recommendations);
+    }
   };
 
   const isFormValid = () => {
@@ -188,7 +206,7 @@ export default function ServiceRecommendation({
                     <h4 className="font-semibold text-gray-700">
                       Recommendation {index + 1}
                     </h4>
-                    {recommendations.length > 1 && (
+                    {recommendations.length > 1 && !isLocked && (
                       <Button
                         type="button"
                         variant="outline"
@@ -211,6 +229,7 @@ export default function ServiceRecommendation({
                       onValueChange={(value) =>
                         updateRecommendation(index, "service_id", value)
                       }
+                      disabled={isLocked}
                     >
                       <SelectTrigger className="bg-yellow-50 border-gray-300">
                         <SelectValue placeholder="Choose a service" />
@@ -243,6 +262,7 @@ export default function ServiceRecommendation({
                           )
                         }
                         className="bg-yellow-50 border-gray-300"
+                        disabled={isLocked}
                       />
                     </div>
                     <div className="space-y-2">
@@ -261,6 +281,7 @@ export default function ServiceRecommendation({
                           )
                         }
                         className="bg-yellow-50 border-gray-300"
+                        disabled={isLocked}
                       />
                     </div>
                   </div>
@@ -283,6 +304,7 @@ export default function ServiceRecommendation({
                               ) || false
                             }
                             onCheckedChange={() => toggleLevel(index, level)}
+                            disabled={isLocked}
                           />
                           <span className="text-sm">{level}</span>
                         </label>
@@ -309,15 +331,17 @@ export default function ServiceRecommendation({
                 </div>
               ))}
 
-              <Button
-                type="button"
-                variant="outline"
-                onClick={addRecommendation}
-                className="w-full text-[#227C9D] border-[#0E5F7D] bg-transparent hover:bg-[#EBFBFF]"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Another Recommendation
-              </Button>
+              {!isLocked && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={addRecommendation}
+                  className="w-full text-[#227C9D] border-[#0E5F7D] bg-transparent hover:bg-[#EBFBFF]"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Another Recommendation
+                </Button>
+              )}
             </>
           )}
         </div>
@@ -349,7 +373,7 @@ export default function ServiceRecommendation({
         <Button
           onClick={handleSave}
           className="w-full mt-6 bg-[#227C9D] hover:bg-[#1a5f7a] flex items-center justify-center gap-2"
-          disabled={!isFormValid()}
+          disabled={!isFormValid() || isLocked}
         >
           <Save className="h-4 w-4" />
           Save Recommendations

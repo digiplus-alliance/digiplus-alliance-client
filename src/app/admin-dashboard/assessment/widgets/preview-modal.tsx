@@ -551,7 +551,7 @@ export default function PreviewModal({
           onClose();
           clearQuestions();
           clearAll();
-          router.push("/admin-dashboard/assessments");
+          router.push("/admin-dashboard/assessment");
         },
       });
     }
