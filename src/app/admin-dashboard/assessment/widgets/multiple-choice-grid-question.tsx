@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -16,12 +17,14 @@ import { useFormStore } from "@/store/form-store";
 type GridColumn = {
   id: string;
   text: string;
-  value: string;
+  value?: string;
+  points?: number;
 };
 
 type GridRow = {
   id: string;
   text: string;
+  weight?: number;
 };
 
 type MultipleChoiceGridData = {
@@ -67,19 +70,19 @@ export default function MultipleChoiceGridQuestion({
   // Grid columns (header options)
   const [columns, setColumns] = useState<GridColumn[]>(
     initialData?.grid_columns || [
-      { id: "col-1", text: "Strongly Disagree", value: "strongly_disagree" },
-      { id: "col-2", text: "Disagree", value: "disagree" },
-      { id: "col-3", text: "Neutral", value: "neutral" },
-      { id: "col-4", text: "Agree", value: "agree" },
-      { id: "col-5", text: "Strongly Agree", value: "strongly_agree" },
+      { id: "col-1", text: "Strongly Disagree", value: "strongly_disagree", points: 1 },
+      { id: "col-2", text: "Disagree", value: "disagree", points: 2 },
+      { id: "col-3", text: "Neutral", value: "neutral", points: 3 },
+      { id: "col-4", text: "Agree", value: "agree", points: 4 },
+      { id: "col-5", text: "Strongly Agree", value: "strongly_agree", points: 5 },
     ]
   );
 
   // Grid rows (questions/statements)
   const [rows, setRows] = useState<GridRow[]>(
     initialData?.grid_rows || [
-      { id: "row-1", text: "Statement 1" },
-      { id: "row-2", text: "Statement 2" },
+      { id: "row-1", text: "Statement 1", weight: 1 },
+      { id: "row-2", text: "Statement 2", weight: 1 },
     ]
   );
 
@@ -91,6 +94,7 @@ export default function MultipleChoiceGridQuestion({
         id: newId,
         text: `Option ${columns.length + 1}`,
         value: `option_${columns.length + 1}`,
+        ...(formType === "assessment" && { points: 0 }),
       },
     ]);
   };
@@ -101,14 +105,14 @@ export default function MultipleChoiceGridQuestion({
     }
   };
 
-  const updateColumn = (id: string, field: keyof GridColumn, value: string) => {
+  const updateColumn = (id: string, field: keyof GridColumn, value: string | number) => {
     setColumns((prev) =>
       prev.map((col) =>
         col.id === id
           ? {
               ...col,
               [field]: value,
-              ...(field === "text" && {
+              ...(field === "text" && typeof value === "string" && {
                 value: value.toLowerCase().replace(/\s+/g, "_"),
               }),
             }
@@ -124,6 +128,7 @@ export default function MultipleChoiceGridQuestion({
       {
         id: newId,
         text: `Statement ${rows.length + 1}`,
+        ...(formType === "assessment" && { weight: 1 }),
       },
     ]);
   };
@@ -134,9 +139,9 @@ export default function MultipleChoiceGridQuestion({
     }
   };
 
-  const updateRow = (id: string, text: string) => {
+  const updateRow = (id: string, field: keyof GridRow, value: string | number) => {
     setRows((prev) =>
-      prev.map((row) => (row.id === id ? { ...row, text } : row))
+      prev.map((row) => (row.id === id ? { ...row, [field]: value } : row))
     );
   };
 
@@ -224,6 +229,22 @@ export default function MultipleChoiceGridQuestion({
                 onChange={(e) => updateColumn(col.id, "text", e.target.value)}
                 className="flex-1 bg-yellow-50 border-none focus-visible:ring-0"
               />
+              {formType === "assessment" && (
+                <div className="flex items-center gap-2">
+                  <Label className="text-xs text-gray-600 whitespace-nowrap">
+                    Points:
+                  </Label>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    value={col.points ?? ""}
+                    onChange={(e) =>
+                      updateColumn(col.id, "points", parseInt(e.target.value) || 0)
+                    }
+                    className="w-20 bg-yellow-50 border-gray-300 focus-visible:ring-0"
+                  />
+                </div>
+              )}
               {columns.length > 2 && (
                 <Button
                   type="button"
@@ -263,9 +284,25 @@ export default function MultipleChoiceGridQuestion({
               <Input
                 placeholder="Row statement/question"
                 value={row.text}
-                onChange={(e) => updateRow(row.id, e.target.value)}
+                onChange={(e) => updateRow(row.id, "text", e.target.value)}
                 className="flex-1 bg-blue-50 border-none focus-visible:ring-0"
               />
+              {formType === "assessment" && (
+                <div className="flex items-center gap-2">
+                  <Label className="text-xs text-gray-600 whitespace-nowrap">
+                    Weight:
+                  </Label>
+                  <Input
+                    type="number"
+                    placeholder="1"
+                    value={row.weight ?? ""}
+                    onChange={(e) =>
+                      updateRow(row.id, "weight", parseInt(e.target.value) || 1)
+                    }
+                    className="w-20 bg-blue-50 border-gray-300 focus-visible:ring-0"
+                  />
+                </div>
+              )}
               {rows.length > 1 && (
                 <Button
                   type="button"
@@ -333,7 +370,7 @@ export default function MultipleChoiceGridQuestion({
       {/* Right Panel */}
       <div className="w-72 border-[#D6D4D4] rounded-lg p-6 border flex flex-col justify-between">
         <div className="space-y-4 text-gray-600 text-sm">
-          {formType === "assessment" && (
+          {/* {formType === "assessment" && (
             <div className="flex justify-between items-center">
               <span>Required Score</span>
               <Input
@@ -348,7 +385,7 @@ export default function MultipleChoiceGridQuestion({
                 placeholder="0"
               />
             </div>
-          )}
+          )} */}
 
           <div className="space-y-2">
             <label className="block text-sm font-medium">Module</label>

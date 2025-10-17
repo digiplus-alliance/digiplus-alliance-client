@@ -198,7 +198,7 @@ export default function MultipleChoice({
       {/* Right Panel */}
       <div className="w-72 border-[#D6D4D4] rounded-lg p-6 border flex flex-col justify-between">
         <div className="space-y-4 text-gray-600 text-sm">
-          {formType === "assessment" && (
+          {/* {formType === "assessment" && (
             <div className="flex justify-between items-center">
               <span>Required Score</span>
               <Input
@@ -211,7 +211,7 @@ export default function MultipleChoice({
                 placeholder="0"
               />
             </div>
-          )}
+          )} */}
 
           <div className="flex justify-between items-center">
             <span>Module</span>

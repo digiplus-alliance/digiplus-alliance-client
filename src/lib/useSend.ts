@@ -72,9 +72,6 @@ const useSend = <RequestBodyType = any, TData = any, TContext = unknown>({
 
   return useMutation<QueryResponse<TData>, unknown, RequestBodyType, TContext>({
     mutationFn: async (variables: RequestBodyType): Promise<QueryResponse<TData>> => {
-      console.log('useSend called with:', { url, method, hasAuth, config });
-      console.log('variables:', variables);
-
       // Handle FormData differently - don't stringify it
       const body = variables instanceof FormData ? variables : JSON.stringify(variables);
 

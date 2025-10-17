@@ -16,6 +16,7 @@ import PreviewModal from "./preview-modal";
 import { Lock, Edit2, Trash2, Eye } from "lucide-react";
 import MultipleChoiceGridQuestion from "./multiple-choice-grid-question";
 import FileUploadQuestion from "./file-upload-question";
+import ServiceRecommendation from "./service-recommendation";
 
 // Simple ID generator
 const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -69,7 +70,7 @@ export default function QuestionScreen({
     ]);
   };
 
-  const questionTypes: {
+  const baseQuestionTypes: {
     label: string;
     value: QuestionType;
   }[] = [
@@ -82,8 +83,21 @@ export default function QuestionScreen({
     { label: "File Upload", value: "file_upload" },
   ];
 
+  const assessmentOnlyTypes: {
+    label: string;
+    value: QuestionType;
+  }[] = [
+    { label: "Service Recommendations", value: "service_recommendations" },
+  ];
+
+  // Conditionally include service_recommendations for assessments
+  const questionTypes =
+    formType === "assessment"
+      ? [...baseQuestionTypes, ...assessmentOnlyTypes]
+      : baseQuestionTypes;
+
   const handleQuestionSave = (questionId: string, questionData: any) => {
-    console.log("Saving question:", questionId, questionData);
+    // console.log("Saving question:", questionId, questionData);
     // Check if question already exists in store
     const existingQuestion = questions.find((q) => q.id === questionId);
 
@@ -207,6 +221,8 @@ export default function QuestionScreen({
         return <MultipleChoiceGridQuestion {...props} />;
       case "file_upload":
         return <FileUploadQuestion {...props} />;
+      case "service_recommendations":
+        return <ServiceRecommendation {...props} />;
       default:
         return <MultipleChoice {...props} />;
     }

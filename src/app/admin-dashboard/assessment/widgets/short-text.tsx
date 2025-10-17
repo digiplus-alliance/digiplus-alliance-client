@@ -20,7 +20,7 @@ type ShortTextData = {
   answer_placeholder: string;
   min_characters?: number;
   max_characters?: number;
-  required_score: number;
+  completion_points: number;
   module: string;
   required_option: boolean;
   type: "short_text";
@@ -53,8 +53,8 @@ export default function ShortText({
   const [minCharacters, setMinCharacters] = useState<number>(
     initialData?.min_characters || 10
   );
-  const [requiredScore, setRequiredScore] = useState<number>(
-    initialData?.required_score || 0
+  const [completionPoints, setCompletionPoints] = useState<number>(
+    initialData?.completion_points || 0
   );
   const [selectedModule, setSelectedModule] = useState(
     initialData?.module || ""
@@ -71,7 +71,7 @@ export default function ShortText({
       answer_placeholder: answerPlaceholder,
       min_characters: minCharacters,
       max_characters: maxCharacters,
-      required_score: requiredScore,
+      completion_points: completionPoints,
       module: selectedModule,
       required_option: requiredOption,
       type: "short_text",
@@ -89,7 +89,7 @@ export default function ShortText({
       question.trim() !== "" &&
       answerPlaceholder.trim() !== "" &&
       maxCharacters > 0 &&
-      requiredScore >= 0 &&
+      completionPoints >= 0 &&
       selectedModule !== ""
     );
   };
@@ -194,14 +194,14 @@ export default function ShortText({
         <div className="space-y-4 text-gray-600 text-sm">
           {formType === "assessment" && (
             <div className="flex justify-between items-center">
-              <span>Required Score</span>
+              <span>Completion Point</span>
               <Input
                 type="number"
                 min="0"
                 max="99"
-                value={requiredScore || ""}
+                value={completionPoints || ""}
                 onChange={(e) =>
-                  setRequiredScore(parseInt(e.target.value) || 0)
+                  setCompletionPoints(parseInt(e.target.value) || 0)
                 }
                 className="w-16 h-8 text-right"
                 placeholder="0"

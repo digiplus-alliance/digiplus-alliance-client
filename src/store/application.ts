@@ -39,6 +39,15 @@ interface BaseQuestion {
   }>;
   min_selections?: number;
   acceptedFileTypes?: string[];
+  recommendations?: Array<{
+    id: string;
+    service_id: string;
+    service_name: string;
+    description: string;
+    min_points: number;
+    max_points: number;
+    levels: string[];
+  }>;
 }
 
 // Question type specific interfaces
@@ -107,6 +116,19 @@ interface FileUploadQuestion extends BaseQuestion {
   upload_instruction?: string;
 }
 
+interface ServiceRecommendationsQuestion extends BaseQuestion {
+  type: "service_recommendations";
+  recommendations: Array<{
+    id: string;
+    service_id: string;
+    service_name: string;
+    description: string;
+    min_points: number;
+    max_points: number;
+    levels: string[];
+  }>;
+}
+
 // Union type for all question types
 export type Question =
   | MultipleChoiceQuestion
@@ -115,9 +137,20 @@ export type Question =
   | LongTextQuestion
   | DropdownQuestion
   | MultipleChoiceGridQuestion
-  | FileUploadQuestion;
+  | FileUploadQuestion
+  | ServiceRecommendationsQuestion;
 
 export type QuestionType = Question["type"];
+
+// Service Recommendation type (separate from questions)
+export type ServiceRecommendation = {
+  service_id: string;
+  service_name: string;
+  description: string;
+  min_points: number;
+  max_points: number;
+  levels: string[];
+};
 
 // Application store interface
 interface ApplicationStore {
@@ -125,6 +158,7 @@ interface ApplicationStore {
   welcomeScreen: WelcomeScreenData | null;
   modules: Module[];
   questions: Question[];
+  serviceRecommendations: ServiceRecommendation[];
   currentQuestionIndex: number;
 
   // Actions
@@ -138,6 +172,7 @@ interface ApplicationStore {
   updateQuestion: (id: string, question: Question) => void;
   removeQuestion: (id: string) => void;
   clearQuestions: () => void;
+  setServiceRecommendations: (recommendations: ServiceRecommendation[]) => void;
   clearAll: () => void;
   setCurrentQuestionIndex: (index: number) => void;
   getNextQuestionNumber: () => number;
@@ -150,6 +185,7 @@ export const useApplicationStore = create<ApplicationStore>((set, get) => ({
   welcomeScreen: null,
   modules: [],
   questions: [],
+  serviceRecommendations: [],
   currentQuestionIndex: 0,
 
   setFormType: (type: FormType) =>
@@ -214,12 +250,18 @@ export const useApplicationStore = create<ApplicationStore>((set, get) => ({
       currentQuestionIndex: 0,
     }),
 
+  setServiceRecommendations: (recommendations: ServiceRecommendation[]) =>
+    set({
+      serviceRecommendations: recommendations,
+    }),
+
   clearAll: () =>
     set({
       formType: "application", // reset to default
       welcomeScreen: null,
       modules: [],
       questions: [],
+      serviceRecommendations: [],
       currentQuestionIndex: 0,
     }),
 

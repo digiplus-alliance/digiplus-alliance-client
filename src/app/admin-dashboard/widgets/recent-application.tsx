@@ -57,7 +57,7 @@ export default function RecentApplication() {
         </div>
 
         <div className="space-y-3 mt-8">
-          {Array.from({ length: 2 }).map((_, i) => (
+          {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
               className="flex justify-between items-center p-4  border rounded-md space-x-4"
@@ -101,7 +101,7 @@ export default function RecentApplication() {
           <div className="text-center text-sm text-gray-500">No Applications at the moment</div>
         ) : (
           <>
-            {applications.slice(0, 2).map((application) => (
+            {applications.slice(0, 3).map((application) => (
               <div
                 key={application._id}
                 className="flex flex-col md:flex-row space-y-4 md:space-y-0 justify-between items-center p-4  border rounded-md space-x-4"
@@ -117,7 +117,7 @@ export default function RecentApplication() {
                     />
                   ) : (
                     <div className="w-10 h-10 rounded-lg bg-[#EBFBFF] flex items-center justify-center text-sm font-semibold text-[#227C9D]">
-                      {application.name ? application.name.slice(0, 2).toUpperCase() : "NA"}
+                      {application.name ? application.name.slice(0, 3).toUpperCase() : "NA"}
                     </div>
                   )}
                   <div className="flex flex-col gap-1">

@@ -33,6 +33,7 @@ const questionTypes: {
   { label: "Dropdown", value: "dropdown" },
   { label: "Multiple Choice Grid", value: "multiple_choice_grid" },
   { label: "File Upload", value: "file_upload" },
+  { label: "Service Recommendations", value: "service_recommendations" },
 ];
 
 export default function PreviewModal({
@@ -45,6 +46,7 @@ export default function PreviewModal({
     welcomeScreen,
     modules,
     questions,
+    serviceRecommendations,
     clearQuestions,
     clearAll,
   } = useFormStore();
@@ -284,6 +286,47 @@ export default function PreviewModal({
           </div>
         );
 
+      case "service_recommendations":
+        return (
+          <div className="space-y-4">
+            <h3 className="font-semibold text-lg">{question.question}</h3>
+            {question.descriptions && (
+              <p className="text-gray-600">{question.descriptions}</p>
+            )}
+            <div className="space-y-3 mt-4">
+              {question.recommendations?.map((rec, idx) => (
+                <div
+                  key={rec.id}
+                  className="border border-[#FFA500] bg-[#FFF8EB] p-4 rounded-lg"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <h4 className="font-semibold text-gray-800">
+                      {rec.service_name}
+                    </h4>
+                    <Badge variant="outline" className="text-xs">
+                      {rec.min_points} - {rec.max_points} points
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-2">
+                    {rec.description}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {rec.levels?.map((level) => (
+                      <Badge
+                        key={level}
+                        variant="secondary"
+                        className="text-xs bg-[#227C9D] text-white"
+                      >
+                        {level}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
       default:
         return null;
     }
@@ -296,7 +339,7 @@ export default function PreviewModal({
         welcome_description: welcomeScreen?.description,
         welcome_instruction: welcomeScreen?.instruction,
         modules: modules.map((mod) => ({
-          temp_id: `mod-${(mod.step)}`,
+          temp_id: `mod-${mod.step}`,
           title: mod.title,
           description: mod.description,
           order: mod.step,
@@ -317,7 +360,7 @@ export default function PreviewModal({
                 ? q.type === "dropdown"
                   ? q.options?.map((opt, idx) => ({
                       id: `opt-${idx + 1}`,
-                      text: opt?.option,
+                      text: opt?.optiondesc,
                     }))
                   : q.options?.map((opt, idx) => ({
                       id: `opt-${idx + 1}`,
@@ -330,6 +373,8 @@ export default function PreviewModal({
                 ? q.grid_columns.map((col) => ({
                     id: col?.id,
                     text: col?.text,
+                    ...("points" in col &&
+                      col?.points !== undefined && { points: col.points }),
                   }))
                 : undefined,
             grid_rows:
@@ -337,6 +382,8 @@ export default function PreviewModal({
                 ? q.grid_rows.map((row) => ({
                     id: row?.id,
                     text: row?.text,
+                    ...("weight" in row &&
+                      row?.weight !== undefined && { weight: row.weight }),
                   }))
                 : undefined,
             min_selections: q?.min_selections,
@@ -387,90 +434,126 @@ export default function PreviewModal({
         instruction:
           welcomeScreen?.instruction || "Please complete all sections honestly",
         modules: modules.map((mod) => ({
-          temp_id: `mod-${(mod.title).toLowerCase().replace(/\s+/g, "_")}`,
+          temp_id: `mod-${mod.title.toLowerCase().replace(/\s+/g, "_")}`,
           title: mod.title,
           description: mod.description,
           order: mod.step,
         })),
-        questions: questions.map((q) => {
-          const apiQuestion: APIQuestion = {
-            type: q?.type,
-            question: q?.question,
-            description: q?.descriptions,
-            instruction: q?.descriptions,
-            placeholder:
-              q.type === "short_text" || q.type === "long_text"
-                ? q.answer_placeholder
-                : q.type === "dropdown"
-                ? q.dropdown_placeholder
-                : undefined,
-            options:
-              "options" in q && q.options
-                ? q.type === "dropdown"
-                  ? q.options?.map((opt, idx) => ({
-                      id: `opt-${idx + 1}`,
-                      text: opt?.option,
+        questions: questions
+          .filter((q) => q.type !== "service_recommendations") // Exclude service_recommendations from questions
+          .map((q) => {
+            const apiQuestion: APIQuestion = {
+              type: q?.type,
+              question: q?.question,
+              description: q?.descriptions,
+              instruction: q?.descriptions,
+              placeholder:
+                q.type === "short_text" || q.type === "long_text"
+                  ? q.answer_placeholder
+                  : q.type === "dropdown"
+                  ? q.dropdown_placeholder
+                  : undefined,
+              options:
+                "options" in q && q.options
+                  ? q.type === "dropdown"
+                    ? q.options?.map((opt, idx) => ({
+                        id: `opt-${idx + 1}`,
+                        text: opt?.optiondesc,
+                        points: opt?.point_value || 0,
+                      }))
+                    : q.options?.map((opt, idx) => ({
+                        id: `opt-${idx + 1}`,
+                        text: opt?.option,
+                        points: opt?.point_value || 0,
+                      }))
+                  : undefined,
+              keyword_scoring:
+                "keyword_scoring" in q &&
+                Array.isArray(q.keyword_scoring) &&
+                q.keyword_scoring.length > 0
+                  ? q.keyword_scoring.map((kw: any) => ({
+                      keyword: kw?.keyword,
+                      points: kw?.points || 0,
                     }))
-                  : q.options?.map((opt, idx) => ({
-                      id: `opt-${idx + 1}`,
-                      text: opt?.option,
-                      points: opt?.point_value || 0,
+                  : undefined,
+              grid_columns:
+                "grid_columns" in q && q.grid_columns
+                  ? q.grid_columns.map((col) => ({
+                      id: col?.id,
+                      text: col?.text,
+                      ...("points" in col &&
+                        col?.points !== undefined && { points: col.points }),
                     }))
-                : undefined,
-            grid_columns:
-              "grid_columns" in q && q.grid_columns
-                ? q.grid_columns.map((col) => ({
-                    id: col?.id,
-                    text: col?.text,
-                  }))
-                : undefined,
-            grid_rows:
-              "grid_rows" in q && q.grid_rows
-                ? q.grid_rows.map((row) => ({
-                    id: row?.id,
-                    text: row?.text,
-                  }))
-                : undefined,
-            min_selections: q?.min_selections,
-            max_selections:
-              q.type === "checkbox" ? q.max_selections : undefined,
-            min_characters:
-              q.type === "long_text" || q.type === "short_text"
-                ? q.min_characters
-                : undefined,
-            max_characters:
-              q.type === "short_text" || q.type === "long_text"
-                ? q.max_characters
-                : undefined,
-            is_required: q?.required_option,
-            step: q?.module
-              ? modules.find((m) => m.title === q?.module)?.step
-              : 1,
-            module_ref: `mod-${(q?.module).toLowerCase().replace(/\s+/g, "_")}`,
-            acceptedFileTypes: q?.acceptedFileTypes,
-            max_file_size:
-              q.type === "file_upload" ? q.max_file_size : undefined,
-            max_files: q.type === "file_upload" ? q.max_files : undefined,
-            upload_instruction:
-              q.type === "file_upload" ? q.upload_instruction : undefined,
-            isActive: true,
-          };
-          return cleanObject(apiQuestion);
-        }),
+                  : undefined,
+              grid_rows:
+                "grid_rows" in q && q.grid_rows
+                  ? q.grid_rows.map((row) => ({
+                      id: row?.id,
+                      text: row?.text,
+                      ...("weight" in row &&
+                        row?.weight !== undefined && { weight: row.weight }),
+                    }))
+                  : undefined,
+              min_selections: q?.min_selections,
+              max_selections:
+                q.type === "checkbox" ? q.max_selections : undefined,
+              min_characters:
+                q.type === "long_text" || q.type === "short_text"
+                  ? q.min_characters
+                  : undefined,
+              max_characters:
+                q.type === "short_text" || q.type === "long_text"
+                  ? q.max_characters
+                  : undefined,
+              completion_points:
+                q.type === "short_text" || q.type === "long_text"
+                  ? "completion_points" in q
+                    ? q.completion_points || 0
+                    : 0
+                  : undefined,
+              is_required: q?.required_option,
+              step: q?.module
+                ? modules.find((m) => m.title === q?.module)?.step
+                : 1,
+              module_ref: `mod-${(q?.module)
+                .toLowerCase()
+                .replace(/\s+/g, "_")}`,
+              acceptedFileTypes: q?.acceptedFileTypes,
+              max_file_size:
+                q.type === "file_upload" ? q.max_file_size : undefined,
+              max_files: q.type === "file_upload" ? q.max_files : undefined,
+              upload_instruction:
+                q.type === "file_upload" ? q.upload_instruction : undefined,
+              isActive: true,
+            };
+            return cleanObject(apiQuestion);
+          }),
+        // Add service_recommendations as a separate top-level field
+        service_recommendations:
+          serviceRecommendations.length > 0
+            ? serviceRecommendations.map((rec) => ({
+                service_id: rec.service_id,
+                service_name: rec.service_name,
+                description: rec.description,
+                min_points: rec.min_points,
+                max_points: rec.max_points,
+                levels: rec.levels,
+              }))
+            : undefined,
       };
 
-      {payload && console.log("Assessment Payload:", payload?.modules[0].temp_id, payload?.questions[0].module_ref)}
+      // {payload && console.log("Assessment Payload:", payload?.modules[0].temp_id, payload?.questions[0].module_ref)}
+
+      console.log("Assessment Payload:", payload);
 
       createAssessment(payload, {
         onSuccess: () => {
-          // onClose();
-          // clearQuestions();
-          // clearAll();
-          // router.push("/admin-dashboard/assessments");
+          onClose();
+          clearQuestions();
+          clearAll();
+          router.push("/admin-dashboard/assessments");
         },
       });
-
-      
     }
   };
 
@@ -523,8 +606,10 @@ export default function PreviewModal({
                         <strong>Module:</strong> {question.module}
                       </p>
                       <p>
-                        <strong>Required Score:</strong>{" "}
-                        {question.required_score}
+                        <strong>Completion Points:</strong>{" "}
+                        {"completion_points" in question
+                          ? question.completion_points
+                          : "N/A"}
                       </p>
                     </div>
                   </div>

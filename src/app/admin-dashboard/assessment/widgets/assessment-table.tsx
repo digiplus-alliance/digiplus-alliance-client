@@ -19,6 +19,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useGetAllAssessments } from "@/app/api/admin/assessment/get-all-assessment";
 import { format } from "date-fns";
+import { useUpdatePublishStatus } from "@/app/api/admin/assessment/toggle-publish-status";
+import { useDeleteAssessment } from "@/app/api/admin/assessment/delete-assessment";
+import DeactivateUserModal from "../../users/widgets/delete-modal";
 
 // Type for table data
 type AssessmentTableData = {
@@ -40,12 +43,16 @@ interface AssessmentTableProps {
 export default function AssessmentTable({ onEdit }: AssessmentTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [tableData, setTableData] = useState<AssessmentTableData[]>([]);
-  
-  const {
-    data: assessments,
-    isLoading,
-    error,
-  } = useGetAllAssessments();
+  const [selectedAssessmentId, setSelectedAssessmentId] = useState<string>("");
+  const [open, setOpen] = useState(false);
+
+  const { data: assessments, isLoading, error } = useGetAllAssessments();
+
+  const { mutate: togglePublish, isPending: isToggling } =
+    useUpdatePublishStatus(selectedAssessmentId);
+
+  const { mutate: deleteAssessment, isPending: isDeleting } =
+    useDeleteAssessment(selectedAssessmentId);
 
   const pageSize = 10;
 
@@ -72,15 +79,32 @@ export default function AssessmentTable({ onEdit }: AssessmentTableProps) {
     onEdit(id);
   };
 
-  const handlePublishToggle = (id: string, currentStatus: boolean) => {
-    console.log(`${currentStatus ? "Unpublish" : "Publish"} assessment ID:`, id);
-    // TODO: API call to toggle publish status
+  const handlePublishToggle = async (id: string, currentStatus: boolean) => {
+    setSelectedAssessmentId(id);
+    try {
+      togglePublish({ is_published: !currentStatus });
+    } catch (error) {
+      console.error("Failed to toggle publish status:", error);
+    }
   };
 
   const handleDelete = (id: string) => {
-    console.log("Delete assessment ID:", id);
-    // TODO: API call to delete assessment
+    setSelectedAssessmentId(id);
+    setOpen(true);
   };
+
+  const confirmDelete = () => {
+    deleteAssessment(undefined, {
+      onSuccess: () => {
+        setOpen(false);
+      },
+      onError: (error) => {
+        console.error("Failed to delete assessment:", error);
+      },
+    });
+  };
+
+  const disabled = isToggling || isDeleting;
 
   const totalPages = Math.ceil(tableData.length / pageSize);
 
@@ -115,9 +139,7 @@ export default function AssessmentTable({ onEdit }: AssessmentTableProps) {
             <p className="font-medium text-[#000000] text-sm">
               {row.totalQuestions} Questions
             </p>
-            <p className="text-xs text-[#B8B8B8]">
-              {row.totalModules} Modules
-            </p>
+            <p className="text-xs text-[#B8B8B8]">{row.totalModules} Modules</p>
           </div>
         );
       },
@@ -150,7 +172,7 @@ export default function AssessmentTable({ onEdit }: AssessmentTableProps) {
                   : "bg-gray-100 text-gray-800 border border-gray-200"
               }`}
             >
-              {row.isPublished ? "Published" : "Draft"}
+              {row.isPublished ? "Published" : "Unpublished"}
             </span>
           </div>
         );
@@ -178,7 +200,10 @@ export default function AssessmentTable({ onEdit }: AssessmentTableProps) {
         return (
           <div className="relative inline-block">
             <DropdownMenu>
-              <DropdownMenuTrigger className="p-2 hover:bg-gray-100 rounded-md cursor-pointer">
+              <DropdownMenuTrigger
+                className="p-2 hover:bg-gray-100 rounded-md cursor-pointer"
+                disabled={disabled}
+              >
                 <MoreVertical size={16} className="text-[#706C6C]" />
               </DropdownMenuTrigger>
 
@@ -332,6 +357,16 @@ export default function AssessmentTable({ onEdit }: AssessmentTableProps) {
           onPageChange={setCurrentPage}
         />
       </div>
+
+      <DeactivateUserModal
+        deleteModalOpen={open}
+        setDeleteModalOpen={setOpen}
+        confirmDeleteUser={confirmDelete}
+        loading={isDeleting}
+        title="Delete Assessment?"
+        description="Are you sure you want to delete this assessment? This action cannot be undone."
+        confirmButtonText="Delete"
+      />
     </div>
   );
 }

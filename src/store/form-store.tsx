@@ -9,10 +9,11 @@ import type {
   Module,
   Question,
   QuestionType,
+  ServiceRecommendation,
 } from "./assessment";
 
 // Export types from assessment store (they're identical in both stores)
-export type { FormType, WelcomeScreenData, Module, Question, QuestionType };
+export type { FormType, WelcomeScreenData, Module, Question, QuestionType, ServiceRecommendation };
 
 /**
  * Context to hold the current formType
