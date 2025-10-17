@@ -2,6 +2,7 @@
 
 import * as z from 'zod';
 import useFetch from '@/lib/useFetch';
+import { useAuthStore } from '@/store/auth';
 
 // Business Profile Response Schema
 export const BusinessProfileResponseSchema = z.object({
@@ -37,8 +38,10 @@ export const BusinessProfileDataSchema = z.object({
 export type BusinessProfileData = z.infer<typeof BusinessProfileDataSchema>;
 
 export function useGetBusinessProfile() {
+  const { user } = useAuthStore();
+
   return useFetch<BusinessProfileData>({
-    url: 'profile/business',
+    url: user?.role === 'admin' ? '/profile/admin' : 'profile/business',
     hasAuth: true,
     schema: BusinessProfileDataSchema,
     queryKey: ['profile', 'business'],

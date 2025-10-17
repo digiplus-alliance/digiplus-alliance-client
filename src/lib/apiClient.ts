@@ -1,6 +1,10 @@
 import { useAuthStore } from "@/store/auth";
 
-const apiBase = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_STAGING_API_URL;
+
+const apiBase =
+  process.env.NODE_ENV === "production"
+    ? process.env.NEXT_PUBLIC_API_URL
+    : process.env.NEXT_PUBLIC_STAGING_API_URL;
 
 export async function apiClient<T>(
   endpoint: string,
@@ -51,6 +55,7 @@ export async function apiClient<T>(
   if (res.status === 401 && options?.hasAuth) {
     try {
       console.log("Attempting token refresh from API client");
+
       const refreshRes = await fetch("/api/auth/refresh", {
         method: "POST",
         credentials: "include",
@@ -58,7 +63,7 @@ export async function apiClient<T>(
 
       if (!refreshRes.ok) {
         // Clear auth state on refresh failure (session truly expired)
-        // useAuthStore.getState().clearAuth();
+        useAuthStore.getState().clearAuth();
         throw new Error("Session expired. Please login again.");
       }
 
@@ -101,10 +106,10 @@ export async function apiClient<T>(
       return retryData as T;
     } catch (err) {
       // Only clear auth state if it's an authentication error
-      // if (err instanceof Error && err.message.includes("Session expired")) {
-      //   useAuthStore.getState().clearAuth();
-      // }
-      // throw err;
+      if (err instanceof Error && err.message.includes("Session expired")) {
+        useAuthStore.getState().clearAuth();
+      }
+      throw err;
     }
   }
 
