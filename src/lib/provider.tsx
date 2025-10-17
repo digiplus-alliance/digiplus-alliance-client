@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { useTokenRefreshInitializer } from '@/hooks/useTokenRefreshInitializer';
 
 const isBrowser = typeof window !== 'undefined';
 
@@ -30,17 +29,10 @@ const asyncStoragePersister = isBrowser
     })
   : undefined;
 
-// Component to initialize token refresh
-function TokenRefreshInitializer() {
-  useTokenRefreshInitializer();
-  return null;
-}
-
 export function AppProviders({ children }: { children: ReactNode }) {
   if (!isBrowser || !asyncStoragePersister) {
     return (
       <QueryClientProvider client={queryClient}>
-        <TokenRefreshInitializer />
         {children}
         {process.env.NODE_ENV === 'development' && (
           <ReactQueryDevtools initialIsOpen={false} />
@@ -62,7 +54,6 @@ export function AppProviders({ children }: { children: ReactNode }) {
         },
       }}
     >
-      <TokenRefreshInitializer />
       {children}
       {process.env.NODE_ENV === 'development' && (
         <ReactQueryDevtools initialIsOpen={false} />
