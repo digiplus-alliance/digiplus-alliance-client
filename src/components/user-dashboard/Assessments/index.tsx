@@ -309,7 +309,7 @@ export default function Assessment() {
         className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
         style={{ width: `${overallProgress}%` }}
       />
-      <div className="flex justify-between text-sm text-gray-600 mt-3 ">
+      <div className="flex justify-between text-sm text-gray-600 mt-3 flex-wrap pb-4 ">
         <span className="truncate pr-2">
           Assessment {currentAssessmentIndex + 1} of {totalAssessments} - Module: {currentModule.moduleName}
         </span>
@@ -365,9 +365,12 @@ export default function Assessment() {
     // and instead rely on a shared set of controls.
     // For this example, I'll keep them as they are, but ideally, you'd refactor them.
     return (
-      <Card className={cn('', !showAssessment && 'bg-transparent border-none shadow-none drop-shadow-none ')}>
+      <Card className={cn('px-0', !showAssessment && 'bg-transparent border-none shadow-none drop-shadow-none ')}>
         <CardContent
-          className={cn('p-6 md:p-8', !showAssessment && 'bg-transparent border-none shadow-none drop-shadow-none ')}
+          className={cn(
+            ' p-4 px-3 sm:p-6 md:p-8',
+            !showAssessment && 'bg-transparent border-none shadow-none drop-shadow-none '
+          )}
         >
           {showAssessment && (
             <>
@@ -583,8 +586,8 @@ export default function Assessment() {
   };
 
   return (
-    <div className="min-h-screen bg-muted/30 p-6">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-muted/30 p-6 px-0 ">
+      <div className=" w-full  sm:max-w-5xl mx-auto space-y-4">
         {/* <AssessmentHeader /> */}
         {showAssessment && <ProgressBar />}
         {renderCurrentStep()}

@@ -1,41 +1,45 @@
-export const exportToCSV = (data: any[], filename: string, headers?: string[]) => {
-  if (!data || data.length === 0) {
-    console.warn('No data to export');
-    return;
-  }
+import * as XLSX from 'xlsx';
 
-  // Get headers from the first object if not provided
-  const csvHeaders = headers || Object.keys(data[0]);
+interface SubmissionDetail {
+  [key: string]: any;
+}
 
-  // Create CSV content
-  const csvContent = [
-    csvHeaders.join(','), // Header row
-    ...data.map((row) =>
-      csvHeaders
-        .map((header) => {
-          let cell = row[header] || '';
+interface MonthlyBreakdown {
+  month: string;
+  year: number;
+  score: number;
+  submissions: number;
+  submission_details: SubmissionDetail[];
+}
 
-          // Handle nested objects and arrays
-          if (typeof cell === 'object') {
-            cell = JSON.stringify(cell);
-          }
+interface YearlyData {
+  year: number;
+  summary: {
+    total_submissions: number;
+    overall_average_score: number;
+    months_active: number;
+  };
+  monthly_breakdown: MonthlyBreakdown[];
+}
 
-          // Escape commas and quotes in cell content
-          if (typeof cell === 'string') {
-            cell = cell.replace(/"/g, '""'); // Escape quotes
-            if (cell.includes(',') || cell.includes('"') || cell.includes('\n')) {
-              cell = `"${cell}"`;
-            }
-          }
+/**
+ * Formats header text: converts snake_case to Title Case
+ */
+function formatHeader(header: string): string {
+  return header
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
 
-          return cell;
-        })
-        .join(',')
-    ),
-  ].join('\n');
-
-  // Create and download the file
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+/**
+ * Triggers download of an Excel file
+ */
+function downloadExcel(filename: string, workbook: XLSX.WorkBook): void {
+  const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  const blob = new Blob([excelBuffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
   const link = document.createElement('a');
 
   if (link.download !== undefined) {
@@ -46,5 +50,90 @@ export const exportToCSV = (data: any[], filename: string, headers?: string[]) =
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   }
-};
+}
+
+/**
+ * Exports yearly data as an Excel file with three separate sheets
+ */
+export function exportYearlyDataToExcel(data: YearlyData): void {
+  const year = data.year;
+  const workbook = XLSX.utils.book_new();
+
+  // 1. Create Summary Sheet
+  const summaryHeaders = ['year', 'total_submissions', 'overall_average_score', 'months_active'];
+  const summaryData = [
+    {
+      [formatHeader('year')]: data.year,
+      [formatHeader('total_submissions')]: data.summary.total_submissions,
+      [formatHeader('overall_average_score')]: data.summary.overall_average_score,
+      [formatHeader('months_active')]: data.summary.months_active,
+    },
+  ];
+
+  const summarySheet = XLSX.utils.json_to_sheet(summaryData);
+  XLSX.utils.book_append_sheet(workbook, summarySheet, 'Summary');
+
+  // 2. Create Monthly Breakdown Sheet
+  const monthlyData = data.monthly_breakdown.map((month) => ({
+    [formatHeader('year')]: month.year,
+    [formatHeader('month')]: month.month,
+    [formatHeader('score')]: month.score,
+    [formatHeader('submissions')]: month.submissions,
+  }));
+
+  const monthlySheet = XLSX.utils.json_to_sheet(monthlyData);
+  XLSX.utils.book_append_sheet(workbook, monthlySheet, 'Monthly Breakdown');
+
+  // 3. Create Submission Details Sheet
+  const allSubmissionDetails: any[] = [];
+
+  data.monthly_breakdown.forEach((month) => {
+    if (month.submission_details && month.submission_details.length > 0) {
+      month.submission_details.forEach((detail) => {
+        // Create a copy without completed_at
+        const { completed_at, ...detailWithoutCompletedAt } = detail;
+
+        // Format all keys
+        const formattedDetail: any = {
+          [formatHeader('year')]: month.year,
+          [formatHeader('month')]: month.month,
+        };
+
+        Object.keys(detailWithoutCompletedAt).forEach((key) => {
+          formattedDetail[formatHeader(key)] = detailWithoutCompletedAt[key];
+        });
+
+        allSubmissionDetails.push(formattedDetail);
+      });
+    }
+  });
+
+  if (allSubmissionDetails.length > 0) {
+    const detailsSheet = XLSX.utils.json_to_sheet(allSubmissionDetails);
+    XLSX.utils.book_append_sheet(workbook, detailsSheet, 'Submission Details');
+  } else {
+    // Create empty sheet if no submission details
+    const emptySheet = XLSX.utils.json_to_sheet([]);
+    XLSX.utils.book_append_sheet(workbook, emptySheet, 'Submission Details');
+  }
+
+  // Download the Excel file
+  downloadExcel(`yearly_data_${year}.xlsx`, workbook);
+}
+
+// Usage example:
+// import { exportYearlyDataToExcel } from '@/utils/excelExport';
+//
+// const yearlyData = {
+//   year: 2025,
+//   summary: {
+//     total_submissions: 2,
+//     overall_average_score: 46,
+//     months_active: 1
+//   },
+//   monthly_breakdown: [...]
+// };
+//
+// exportYearlyDataToExcel(yearlyData);
