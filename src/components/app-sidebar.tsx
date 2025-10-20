@@ -75,7 +75,7 @@ export default function SidebarLayout({
                           href={url}
                           className={cn(
                             'p-2 h-auto !rounded-4xl flex items-center gap-1 hover:bg-[#F1F8F8]',
-                            pathname.startsWith(url) && 'bg-[#EBFBFF]'
+                            pathname.startsWith(url) && 'bg-[#EBFBFF]' || pathname === '/admin-dashboard' && item.url === '/' && 'bg-[#EBFBFF]'
                           )}
                         >
                           {item.iconLogo && (
@@ -135,7 +135,7 @@ export default function SidebarLayout({
                                 'p-2 h-auto !rounded-4xl flex items-center justify-start  font-normal gap-[7px] hover:bg-[#F1F8F8] border-none text-start bg-transparent shadow-none drop-shadow-none cursor-pointer',
                                 openNotification && 'bg-[#F1F8F8]'
                               )}
-                              onClick={() => setOpenNotification(!openNotification)}
+                              onClick={() => setOpenNotification(openNotification)}
                             >
                               {item.iconLogo && (
                                 <Image

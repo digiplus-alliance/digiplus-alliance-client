@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const apiUrl = process.env.NEXT_PUBLIC_STAGING_API_URL;
-// const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+const apiUrl = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_API_URL : process.env.NEXT_PUBLIC_STAGING_API_URL;
 
 export async function POST(req: NextRequest) {
+  console.log("Refreshing access token");
   try {
-    // Get the refreshToken from cookies
-    const refreshToken = req.cookies.get("refreshToken")?.value;
+    // Get the accessToken from cookies
+    const accessToken = req.cookies.get("accessToken")?.value;
+    console.log("Access Token from cookie:", accessToken);
 
-    if (!refreshToken) {
+    if (!accessToken  ) {
       return new NextResponse(
-        JSON.stringify({ message: "No refresh token found" }),
+        JSON.stringify({ message: "No access token found" }),
         { status: 401 }
       );
     }
@@ -21,19 +22,15 @@ export async function POST(req: NextRequest) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ refreshToken }),
+      body: JSON.stringify({ accessToken }),
     });
 
     const responseData = await response.json().catch(() => ({}));
 
     if (response.ok) {
-      const {
-        accessToken,
-        refreshToken: newRefreshToken,
-        message,
-      } = responseData;
+      const { accessToken } = responseData;
 
-      const res = new NextResponse(JSON.stringify({ message, accessToken }), {
+      const res = new NextResponse(JSON.stringify({ accessToken }), {
         status: 200,
       });
 
@@ -51,19 +48,19 @@ export async function POST(req: NextRequest) {
       });
 
       // Set new refreshToken cookie if provided
-      if (newRefreshToken) {
-        res.cookies.set({
-          name: "refreshToken",
-          value: newRefreshToken ?? "",
-          secure:
-            process.env.NODE_ENV === "production" ||
-            (process.env.NODE_ENV as string) === "staging",
-          httpOnly: true,
-          maxAge: newRefreshToken?.expires,
-          path: "/",
-          sameSite: "strict",
-        });
-      }
+      // if (newRefreshToken) {
+      //   res.cookies.set({
+      //     name: "refreshToken",
+      //     value: newRefreshToken ?? "",
+      //     secure:
+      //       process.env.NODE_ENV === "production" ||
+      //       (process.env.NODE_ENV as string) === "staging",
+      //     httpOnly: true,
+      //     maxAge: newRefreshToken?.expires,
+      //     path: "/",
+      //     sameSite: "strict",
+      //   });
+      // }
 
       return res;
     }

@@ -16,9 +16,9 @@ const user = {
 };
 
 export default function ProfileModal() {
-  const  { isLoading, isError, data } = useGetAdminProfile();
+  // const  { isLoading, isError, data } = useGetAdminProfile();
 
-  console.log("Profile data:", data);
+  // console.log("Profile data:", data);
 
 
   return (

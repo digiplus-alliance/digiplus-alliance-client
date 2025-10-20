@@ -68,6 +68,7 @@ const useFetch = <TData = unknown>({
       return (schema as z.ZodSchema<TData>).parse(target);
     } catch (e) {
       console.error("Zod parsing error:", e);
+      console.error("Data being parsed:", { data, target: hasDataField(data) ? data.data : data });
       return undefined;
     }
   };
@@ -83,9 +84,24 @@ const useFetch = <TData = unknown>({
       });
     },
     select: (response: QueryResponse<TData>): TData => {
+      // Handle case where response is already an array (empty array case)
+      if (Array.isArray(response)) {
+        // Validate the array directly with the schema if it's a union type
+        if (schema) {
+          try {
+            return (schema as z.ZodSchema<TData>).parse(response);
+          } catch (e) {
+            console.error("Array validation failed:", e);
+            return [] as TData;
+          }
+        }
+        return response as TData;
+      }
+      
       const parsed = parseResponseData(response);
       if (!parsed) {
-        throw new Error("Response validation failed");
+        // Return empty array as fallback for array types
+        return [] as TData;
       }
       return parsed;
     },

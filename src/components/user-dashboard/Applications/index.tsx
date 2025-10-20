@@ -7,7 +7,7 @@ import { Button } from '../../ui/button';
 import { ApplicationsTable } from './ApplicationsTable';
 import PageHeader from '@/components/PageHeader';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import Link from 'next/link';
 import StatsCards from '@/app/admin-dashboard/widgets/stats-card';
@@ -161,8 +161,8 @@ const Applications = () => {
                 </Select>
 
                 {/* Date Range Filter */}
-                <Popover>
-                  <PopoverTrigger asChild>
+                <Dialog>
+                  <DialogTrigger asChild>
                     <Button
                       variant="outline"
                       size="sm"
@@ -181,24 +181,45 @@ const Applications = () => {
                       )}
                       <Calendar className="w-4 h-4 ml-2" />
                     </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <CalendarComponent
-                      initialFocus
-                      mode="range"
-                      defaultMonth={dateRange.from}
-                      selected={{ from: dateRange.from, to: dateRange.to }}
-                      onSelect={(range) => {
-                        if (range) {
-                          handleDateRangeChange(range.from, range.to);
-                        } else {
-                          handleDateRangeChange(undefined, undefined);
-                        }
-                      }}
-                      numberOfMonths={2}
-                    />
-                  </PopoverContent>
-                </Popover>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-fit p-4 sm:p-6">
+                    <DialogHeader>
+                      <DialogTitle className="text-center sm:text-left">Select Date Range</DialogTitle>
+                    </DialogHeader>
+                    <div className="flex justify-center">
+                      <CalendarComponent
+                        initialFocus
+                        mode="range"
+                        defaultMonth={dateRange.from}
+                        selected={{ from: dateRange.from, to: dateRange.to }}
+                        onSelect={(range) => {
+                          if (range) {
+                            handleDateRangeChange(range.from, range.to);
+                          } else {
+                            handleDateRangeChange(undefined, undefined);
+                          }
+                        }}
+                        numberOfMonths={1}
+                        className="sm:hidden"
+                      />
+                      <CalendarComponent
+                        initialFocus
+                        mode="range"
+                        defaultMonth={dateRange.from}
+                        selected={{ from: dateRange.from, to: dateRange.to }}
+                        onSelect={(range) => {
+                          if (range) {
+                            handleDateRangeChange(range.from, range.to);
+                          } else {
+                            handleDateRangeChange(undefined, undefined);
+                          }
+                        }}
+                        numberOfMonths={2}
+                        className="hidden sm:block"
+                      />
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
           </CardHeader>
