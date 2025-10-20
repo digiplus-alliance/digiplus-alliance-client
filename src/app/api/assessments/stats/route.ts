@@ -1,28 +1,35 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+const apiUrl = process.env.NEXT_PUBLIC_STAGING_API_URL;
+// const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export async function GET(req: NextRequest) {
   try {
-    const cookieHeader = req.headers.get('cookie') || '';
+    const cookieHeader = req.headers.get("cookie") || "";
 
     const { searchParams } = new URL(req.url);
-    const id = searchParams.get('id');
-    const year = searchParams.get('year');
+    const id = searchParams.get("id");
+    const year = searchParams.get("year");
 
     if (!id || !year) {
-      return new NextResponse(JSON.stringify({ message: 'Missing required parameters' }), { status: 400 });
+      return new NextResponse(
+        JSON.stringify({ message: "Missing required parameters" }),
+        { status: 400 }
+      );
     }
 
     const headers: Record<string, string> = {
       Cookie: cookieHeader,
-      Authorization: 'Bearer ' + req.cookies.get('accessToken')?.value,
+      Authorization: "Bearer " + req.cookies.get("accessToken")?.value,
     };
 
-    const response = await fetch(`${apiUrl}api/assessments/stats/${id}?year=${year}`, {
-      method: 'GET',
-      headers,
-    });
+    const response = await fetch(
+      `${apiUrl}api/assessments/stats/${id}?year=${year}`,
+      {
+        method: "GET",
+        headers,
+      }
+    );
 
     const responseData = await response.json().catch(() => ({}));
 
@@ -31,7 +38,7 @@ export async function GET(req: NextRequest) {
     if (!response.ok) {
       return new NextResponse(
         JSON.stringify({
-          message: responseData?.message || 'assessments stats failed',
+          message: responseData?.message || "assessments stats failed",
         }),
         { status: response.status }
       );
@@ -40,11 +47,14 @@ export async function GET(req: NextRequest) {
     return new NextResponse(JSON.stringify(responseData), {
       status: 200,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'assessment stats fetching failed';
+    const message =
+      error instanceof Error
+        ? error.message
+        : "assessment stats fetching failed";
     return new NextResponse(JSON.stringify({ message }), { status: 500 });
   }
 }

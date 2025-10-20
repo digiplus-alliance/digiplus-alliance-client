@@ -18,9 +18,12 @@ export async function POST(req: NextRequest) {
       const { accessToken, refreshToken, message, user } = responseData;
 
       // Return message, user, and accessToken in the response body
-      const res = new NextResponse(JSON.stringify({ message, user, accessToken }), {
-        status: 200,
-      });
+      const res = new NextResponse(
+        JSON.stringify({ message, user, accessToken }),
+        {
+          status: 200,
+        }
+      );
 
       // Set accessToken cookie on the response
       res.cookies.set({

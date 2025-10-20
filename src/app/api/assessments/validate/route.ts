@@ -1,18 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+const apiUrl = process.env.NEXT_PUBLIC_STAGING_API_URL;
+// const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export async function POST(req: NextRequest) {
   const payload = await req.json();
   try {
-    const cookieHeader = req.headers.get('cookie') || '';
+    const cookieHeader = req.headers.get("cookie") || "";
 
     const response = await fetch(`${apiUrl}validation/validate-batch`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Cookie: cookieHeader,
-        Authorization: 'Bearer ' + req.cookies.get('accessToken')?.value,
+        Authorization: "Bearer " + req.cookies.get("accessToken")?.value,
       },
       body: JSON.stringify(payload),
     });
@@ -29,12 +30,13 @@ export async function POST(req: NextRequest) {
     // Non-OK response
     return new NextResponse(
       JSON.stringify({
-        message: (responseData && responseData.message) || 'Validation failed',
+        message: (responseData && responseData.message) || "Validation failed",
       }),
       { status: response.status }
     );
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Validation failed';
+    const message =
+      error instanceof Error ? error.message : "Validation failed";
     return new NextResponse(JSON.stringify({ message }), { status: 500 });
   }
 }
