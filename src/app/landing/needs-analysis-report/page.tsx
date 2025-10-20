@@ -61,6 +61,7 @@ export default function NeedsAssessmentLanding() {
         </div>
       </section>
 
+      {/* ✅ UPDATED Available Resources section for equal height & button alignment */}
       <section className="py-12 md:py-20">
         <div className="container mx-auto px-4 sm:px-6 md:px-10">
           <div className="max-w-5xl mx-auto">
@@ -68,8 +69,10 @@ export default function NeedsAssessmentLanding() {
               Available Resources
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="bg-white border-2 border-[#0E5F7D] rounded-xl p-8 hover:shadow-2xl transition-shadow duration-300">
+            {/* Added 'items-stretch' so both cards have equal height */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+              {/* === Card 1 === */}
+              <div className="flex flex-col bg-white border-2 border-[#0E5F7D] rounded-xl p-8 hover:shadow-2xl transition-shadow duration-300">
                 <div className="flex justify-center mb-6">
                   <div className="w-16 h-16 bg-[#EBFBFF] rounded-full flex items-center justify-center">
                     <FileText className="w-8 h-8 text-[#0E5F7D]" />
@@ -80,24 +83,34 @@ export default function NeedsAssessmentLanding() {
                   Full Needs Analysis Report
                 </h3>
 
-                <p className="text-[#5E5B5B] text-center mb-6 leading-relaxed">
+                <p className="text-[#5E5B5B] text-center mb-6 leading-relaxed flex-grow">
                   Access the complete assessment report with detailed findings,
                   analysis, and recommendations for MSME digital transformation.
                 </p>
 
-                <div className="flex justify-center">
+                {/* ✅ Buttons now same width and aligned bottom on large screens */}
+                <div className="mt-auto flex flex-col sm:flex-row justify-center gap-4">
                   <a
-                    href="https://docsend.com/view/3yem9dcmv8dzbw2j"
+                    href="https://workdrive.zohoexternal.com/external/7d9b50d51a8b84dc8e3e7f36f248ec5834b451b4c3efbed83611256a2ecca2e3"
                     target="_blank"
-                    className="inline-flex items-center justify-center gap-2 bg-[#FF5C5C] text-black px-6 py-3 text-sm rounded-lg font-medium hover:bg-[#e54c4c] transition-colors duration-200 shadow-lg"
+                    className="inline-flex items-center justify-center gap-2 bg-[#FF5C5C] text-black px-6 py-3 w-full sm:w-auto text-sm rounded-lg font-medium hover:bg-[#e54c4c] transition-colors duration-200 shadow-lg text-center"
                   >
                     <FileText className="w-4 h-4" />
-                    View Report
+                    PDF Version
+                  </a>
+                  <a
+                    href="https://workdrive.zohoexternal.com/external/528c2d5a887f4a04c18492dc1258a51d7015f70c1ff9114011f7068ae486d5bd"
+                    target="_blank"
+                    className="inline-flex items-center justify-center gap-2 bg-[#FF5C5C] text-black px-6 py-3 w-full sm:w-auto text-sm rounded-lg font-medium hover:bg-[#e54c4c] transition-colors duration-200 shadow-lg text-center"
+                  >
+                    <FileText className="w-4 h-4" />
+                    Slide Deck
                   </a>
                 </div>
               </div>
 
-              <div className="bg-white border-2 border-[#0E5F7D] rounded-xl p-8 hover:shadow-2xl transition-shadow duration-300">
+              {/* === Card 2 === */}
+              <div className="flex flex-col bg-white border-2 border-[#0E5F7D] rounded-xl p-8 hover:shadow-2xl transition-shadow duration-300">
                 <div className="flex justify-center mb-6">
                   <div className="w-16 h-16 bg-[#EBFBFF] rounded-full flex items-center justify-center">
                     <FileText className="w-8 h-8 text-[#0E5F7D]" />
@@ -108,16 +121,16 @@ export default function NeedsAssessmentLanding() {
                   Needs Analysis Factsheet
                 </h3>
 
-                <p className="text-[#5E5B5B] text-center mb-6 leading-relaxed">
+                <p className="text-[#5E5B5B] text-center mb-6 leading-relaxed flex-grow">
                   A concise overview of key statistics, insights, and highlights
-                  from the needs assessment
+                  from the needs assessment.
                 </p>
 
-                <div className="flex justify-center">
+                <div className="mt-auto flex justify-center">
                   <a
-                    href="https://docsend.com/view/mmjjm462nznqfimu"
+                    href="https://workdrive.zohoexternal.com/external/2cdd23e90c2104795d73dca310af856e10e3d68824def9aa9251509489cc0f8a"
                     target="_blank"
-                    className="inline-flex items-center justify-center gap-2 bg-[#FF5C5C] text-black px-6 py-3 text-sm rounded-lg font-medium hover:bg-[#e54c4c] transition-colors duration-200 shadow-lg"
+                    className="inline-flex items-center justify-center gap-2 bg-[#FF5C5C] text-black px-6 py-3 w-full sm:w-auto text-sm rounded-lg font-medium hover:bg-[#e54c4c] transition-colors duration-200 shadow-lg text-center"
                   >
                     <FileText className="w-4 h-4" />
                     View Factsheet
