@@ -117,11 +117,11 @@ const ApplicationForm = () => {
         </div>
 
         {/* Right Side - Form */}
-        <div className="w-full">
-          <Card className="bg-white border border-gray-200 rounded-[24px]">
-            <CardContent className="px-10 py-6">
+        <div className="w-full max-w-[620px]">
+          <Card className="bg-white border border-gray-200 rounded-[24px] min-w-full max-w-[520px]">
+            <CardContent className="px-10 py-6 w-full">
               {
-                <div className="space-y-6">
+                <div className="space-y-6 w-full">
                   {welcomeData.welcome_title && (
                     <>
                       <h3 className="text-xl font-normal text-[#5E5B5B] text-center">{welcomeData.welcome_title}</h3>
