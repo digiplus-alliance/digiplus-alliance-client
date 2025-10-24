@@ -402,7 +402,7 @@ export default function PreviewModal({
               ? modules.find((m) => m.title === q?.module)?.step
               : 1,
             module_ref: q?.module,
-            acceptedFileTypes: q?.acceptedFileTypes,
+            accepted_file_types: q?.acceptedFileTypes,
             max_file_size:
               q.type === "file_upload" ? q.max_file_size : undefined,
             max_files: q.type === "file_upload" ? q.max_files : undefined,

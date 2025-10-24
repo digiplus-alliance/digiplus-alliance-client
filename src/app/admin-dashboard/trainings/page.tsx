@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import TrainingManagementTable from "./widgets/training-management-table";
 import UploadFileDialog from "./widgets/upload-timetable-modal";
 import { useState } from "react";
+import { useGetAllTrainingUsers } from "@/app/api/admin/trainings/getUsers";
 
 export default function TrainingsPage() {
   const [open, setOpen] = useState(false);
@@ -14,6 +15,10 @@ export default function TrainingsPage() {
   const handleFilterChange = (value: string) => {
     console.log("Selected filter:", value);
   };
+
+  const { data: trainingUsers, isPending, error } = useGetAllTrainingUsers();
+
+  console.log("Training Users:", trainingUsers);
 
   return (
     <div className="p-6 space-y-6 font-secondary md:bg-[#EBEBEB] rounded-tl-2xl">
