@@ -15,158 +15,82 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getAssessmentStatusStyles } from "@/lib/getStatusStyles";
+import {
+  useGetAllTrainingUsers,
+  AllTrainingApplicationsResponse,
+} from "@/app/api/admin/trainings/getUsers";
 
 type TableUser = {
-  id: string;
+  application_id: string;
   name: string;
   email: string;
-  submissionTime: string;
-  paid: string;
-  timeTable: string;
-  startDate: string;
+  service_type: string;
+  service: string;
+  submission_time: string;
+  payment_amount: number;
+  timetable_url: string | null;
+  start_date: string | null;
   status: string;
 };
 
-const users: TableUser[] = [
-  {
-    id: "AP/2030222",
-    name: "Oyebode Anjoke",
-    email: "anjoke@gmail.com",
-    submissionTime: "16 June 2021 ・ 1.20 pm",
-    paid: "N100,000",
-    timeTable: "Mon, Wed, Fri",
-    startDate: "2021-06-21",
-    status: "Submitted",
-  },
-  {
-    id: "PY/093456U",
-    name: "Chukwu Emeka",
-    email: "emeka@example.com",
-    submissionTime: "17 June 2021 ・ 11.30 am",
-    paid: "N150,000",
-    timeTable: "Tue, Thu, Sat",
-    startDate: "2021-06-22",
-    status: "Being Processed",
-  },
-  {
-    id: "MM/1320CSAD",
-    name: "Amina Bello",
-    email: "amina@example.com",
-    submissionTime: "18 June 2021 ・ 2.15 pm",
-    paid: "N200,000",
-    timeTable: "Mon, Wed, Fri",
-    startDate: "2021-06-23",
-    status: "Not Started",
-  },
-  {
-    id: "UP/89ASD98",
-    name: "Grace Ife",
-    email: "grace@example.com",
-    submissionTime: "19 June 2021 ・ 9.45 am",
-    paid: "N120,000",
-    timeTable: "Tue, Thu, Sat",
-    startDate: "2021-06-24",
-    status: "Rejected",
-  },
-  {
-    id: "LO/12309AS0",
-    name: "Tunde Bakare",
-    email: "tunde@example.com",
-    submissionTime: "20 June 2021 ・ 3.30 pm",
-    paid: "N180,000",
-    timeTable: "Mon, Wed, Fri",
-    startDate: "2021-06-25",
-    status: "Completed",
-  },
-  {
-    id: "ZZ/999999",
-    name: "Extra User",
-    email: "extra@example.com",
-    submissionTime: "06 October 2021 ・ 3.30 pm",
-    paid: "N100,000",
-    timeTable: "Mon, Wed, Fri",
-    startDate: "2021-10-07",
-    status: "Submitted",
-  },
-  {
-    id: "AP/2030222",
-    name: "Oyebode Anjoke",
-    email: "anjoke@gmail.com",
-    submissionTime: "2023-10-01 10:00 AM",
-    paid: "N100,000",
-    timeTable: "Mon, Wed, Fri",
-    startDate: "2023-10-06",
-    status: "Submitted",
-  },
-  {
-    id: "PY/093456U",
-    name: "Chukwu Emeka",
-    email: "emeka@example.com",
-    submissionTime: "2023-10-02 11:30 AM",
-    paid: "N150,000",
-    timeTable: "Tue, Thu, Sat",
-    startDate: "2023-10-07",
-    status: "Being Processed",
-  },
-  {
-    id: "MM/1320CSAD",
-    name: "Amina Bello",
-    email: "amina@example.com",
-    submissionTime: "2023-10-03 02:15 PM",
-    paid: "N200,000",
-    timeTable: "Mon, Wed, Fri",
-    startDate: "2023-10-08",
-    status: "Not Started",
-  },
-  {
-    id: "UP/89ASD98",
-    name: "Grace Ife",
-    email: "grace@example.com",
-    submissionTime: "2023-10-04 09:45 AM",
-    paid: "N120,000",
-    timeTable: "Tue, Thu, Sat",
-    startDate: "2023-10-09",
-    status: "Rejected",
-  },
-  {
-    id: "LO/12309AS0",
-    name: "Tunde Bakare",
-    email: "tunde@example.com",
-    submissionTime: "2023-10-05 01:20 PM",
-    paid: "N180,000",
-    timeTable: "Mon, Wed, Fri",
-    startDate: "2023-10-10",
-    status: "Completed",
-  },
-  {
-    id: "ZZ/999999",
-    name: "Extra User",
-    email: "extra@example.com",
-    submissionTime: "2023-10-06 03:30 PM",
-    paid: "N100,000",
-    timeTable: "Mon, Wed, Fri",
-    startDate: "2023-10-07",
-    status: "Submitted",
-  },
-];
+const users: TableUser[] = [];
 
-export default function TrainingManagementTable() {
+interface TrainingManagementTableProps {
+  searchQuery?: string;
+  serviceFilter?: string;
+}
+
+export default function TrainingManagementTable({
+  searchQuery = "",
+  serviceFilter = "",
+}: TrainingManagementTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 5;
 
-  const totalPages = Math.ceil(users.length / pageSize);
+  // Pass training name filter to the hook for server-side filtering
+  const {
+    data: trainingUsers,
+    isPending,
+    error,
+  } = useGetAllTrainingUsers({
+    trainingName: serviceFilter.trim() || undefined,
+  });
+
+  // Use actual data from hook or empty array
+  const displayData = (trainingUsers as TableUser[]) || [];
+
+  // Apply client-side search filtering only
+  const filteredData = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return displayData;
+    }
+
+    const query = searchQuery.toLowerCase();
+    return displayData.filter((user) => {
+      return (
+        user.name.toLowerCase().includes(query) ||
+        user.email.toLowerCase().includes(query) ||
+        user.application_id.toLowerCase().includes(query)
+      );
+    });
+  }, [displayData, searchQuery]);
+
+  const totalPages = Math.ceil(filteredData.length / pageSize);
 
   const pageData = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
-    return users.slice(start, start + pageSize);
-  }, [currentPage]);
+    return filteredData.slice(start, start + pageSize);
+  }, [currentPage, filteredData]);
   const columns: ColumnDef<TableUser>[] = [
     {
-      accessorKey: "id",
+      accessorKey: "application_id",
       header: "Application ID",
       cell: (info: CellContext<TableUser, unknown>) => (
-        <span className="text-[#06516C]">{info.getValue() as string}</span>
+        <span className="text-[#06516C]">
+          {(info.getValue() as string).slice(0, 6).toUpperCase()}
+        </span>
       ),
     },
     {
@@ -183,6 +107,24 @@ export default function TrainingManagementTable() {
       },
     },
     {
+      accessorKey: "service_type",
+      header: "Service Type",
+      cell: (info: CellContext<TableUser, unknown>) => (
+        <span className="text-[#171616] text-sm">
+          {info.getValue() as string}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "service",
+      header: "Service",
+      cell: (info: CellContext<TableUser, unknown>) => (
+        <span className="text-[#171616] text-sm">
+          {info.getValue() as string}
+        </span>
+      ),
+    },
+    {
       id: "timestamp",
       header: "Submission Time",
       cell: (info: CellContext<TableUser, unknown>) => {
@@ -190,56 +132,56 @@ export default function TrainingManagementTable() {
         return (
           <div>
             <p className="font-normal text-[#171616] text-xs">
-              {row.submissionTime}
+              {row.submission_time}
             </p>
           </div>
         );
       },
     },
     {
-      accessorKey: "paid",
+      accessorKey: "payment_amount",
       header: "Paid",
       cell: (info: any) => {
         const row = info.row.original as any;
         return (
           <div>
             <p className="font-normal text-[#000000] text-sm text-center">
-              {row.paid}
+              ₦{row.payment_amount?.toLocaleString()}
             </p>
           </div>
         );
       },
     },
     {
-      accessorKey: "timeTable",
+      accessorKey: "timetable_url",
       header: "Time Table",
       cell: (info: any) => {
         const row = info.row.original as any;
         return (
           <div>
             <p className="font-normal text-[#171616] text-sm text-center">
-              {row.timeTable}
+              {row.timetable_url ? "Available" : "N/A"}
             </p>
           </div>
         );
       },
     },
     {
-      accessorKey: "startDate",
+      accessorKey: "start_date",
       header: "Start Date",
       cell: (info: any) => {
         const row = info.row.original as any;
         return (
           <div>
             <p className="font-normal text-[#171616] text-sm text-center">
-              {row.startDate}
+              {row.start_date || "N/A"}
             </p>
           </div>
         );
       },
     },
     {
-      accessorKey: "assessmentStatus",
+      accessorKey: "status",
       header: "Status",
       cell: (info: any) => {
         const row = info.row.original as any;
@@ -264,6 +206,111 @@ export default function TrainingManagementTable() {
     getCoreRowModel: getCoreRowModel(),
   });
 
+  // Render loading skeleton
+  if (isPending) {
+    return (
+      <>
+        <Table>
+          <TableHeader className="bg-[#FBFBFD]">
+            <TableRow className="text-left text-[#B8B8B8] text-sm font-inter hover:bg-[#FBFBFD]">
+              {columns.map((col, index) => (
+                <TableHead
+                  key={index}
+                  className="px-4 py-2 text-[#B8B8B8] font-bold"
+                >
+                  <Skeleton className="h-4 w-24" />
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: pageSize }).map((_, rowIndex) => (
+              <TableRow
+                key={rowIndex}
+                className="group border-t hover:bg-[#EBFBFF] hover:border-b-[#227C9D] hover:border-b-1"
+              >
+                {columns.map((_, cellIndex) => (
+                  <TableCell key={cellIndex} className="px-4 py-2 align-top">
+                    <Skeleton className="h-4 w-full" />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        <div className="mt-4 flex flex-col md:flex-row md:justify-between md:items-center gap-2 px-4">
+          <Skeleton className="h-10 w-32" />
+          <Skeleton className="h-10 w-48" />
+        </div>
+      </>
+    );
+  }
+
+  // Render error state
+  if (error) {
+    return (
+      <div className="w-full p-8 bg-red-50 border border-red-200 rounded-lg">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-red-800 mb-2">
+            Failed to Load Training Applications
+          </h3>
+          <p className="text-red-700 mb-4">
+            {error instanceof Error
+              ? error.message
+              : "An error occurred while fetching the data."}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Render empty state
+  if (displayData.length === 0) {
+    return (
+      <div className="w-full p-8 bg-gray-50 border border-gray-200 rounded-lg text-center">
+        <h3 className="text-lg font-semibold text-gray-800 mb-2">
+          No Training Applications
+        </h3>
+        <p className="text-gray-600">
+          There are no training applications at the moment.
+        </p>
+      </div>
+    );
+  }
+
+  // Render no search results state
+  if (
+    filteredData.length === 0 &&
+    (searchQuery.trim() || serviceFilter.trim())
+  ) {
+    const filterDetails = [];
+    if (searchQuery.trim()) {
+      filterDetails.push(`search: "${searchQuery}"`);
+    }
+    if (serviceFilter.trim()) {
+      filterDetails.push(`training: "${serviceFilter}"`);
+    }
+    const filterText = filterDetails.join(" and ");
+
+    return (
+      <div className="w-full p-8 bg-blue-50 border border-blue-200 rounded-lg text-center">
+        <h3 className="text-lg font-semibold text-blue-800 mb-2">
+          No Results Found
+        </h3>
+        <p className="text-blue-700">
+          No training applications match your filters ({filterText}). Try
+          adjusting your search terms or filters.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <>
       <Table>
@@ -274,7 +321,10 @@ export default function TrainingManagementTable() {
               className="text-left text-[#B8B8B8] text-sm font-inter hover:bg-[#FBFBFD]"
             >
               {hg.headers.map((header) => (
-                <TableHead key={header.id} className="px-4 py-2 text-[#B8B8B8] font-bold">
+                <TableHead
+                  key={header.id}
+                  className="px-4 py-2 text-[#B8B8B8] font-bold"
+                >
                   {flexRender(
                     header.column.columnDef.header,
                     header.getContext()
