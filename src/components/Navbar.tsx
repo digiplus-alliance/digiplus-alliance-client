@@ -23,6 +23,7 @@ const navItems = [
   { label: "Services", href: "/landing/services" },
   { label: "About", href: "/landing/about" },
   { label: "Blog", href: "/landing/blog" },
+  { label: "Needs Analysis Report", href: "/landing/needs-analysis-report" },
 ];
 
 export function Navbar() {
@@ -68,10 +69,17 @@ export function Navbar() {
 
         {/* Desktop Buttons */}
         <div className="hidden md:flex items-center space-x-3">
-          <Button className="font-normal" onClick={() => router.push("/auth/login")}>
+          <Button
+            className="font-normal"
+            onClick={() => router.push("/auth/login")}
+          >
             Sign In
           </Button>
-          <Button variant="outline" className="text-[#3D3A3A] font-normal" onClick={() => router.push("/landing/contact")}>
+          <Button
+            variant="outline"
+            className="text-[#3D3A3A] font-normal"
+            onClick={() => router.push("/landing/contact")}
+          >
             Contact Us
           </Button>
         </div>
@@ -108,7 +116,12 @@ export function Navbar() {
               </div>
 
               <div className="mt-6 px-10 flex flex-col space-y-3">
-                <Button className="font-normal" onClick={() => router.push("/auth/login")}>Sign In</Button>
+                <Button
+                  className="font-normal"
+                  onClick={() => router.push("/auth/login")}
+                >
+                  Sign In
+                </Button>
                 <Button
                   variant="outline"
                   className="text-[#3D3A3A] font-normal"
