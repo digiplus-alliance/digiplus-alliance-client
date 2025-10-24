@@ -30,6 +30,7 @@ export const AssessmentQuestionSchema = z.object({
   _id: z.string(),
   assessment_id: z.string(),
   module_id: z.string(),
+  module_ref: z.string().optional(),
   type: z.enum([
     'welcome_screen',
     'module_title',
@@ -69,6 +70,7 @@ export const AssessmentQuestionSchema = z.object({
   max_selections: z.number().optional(),
   max_points: z.number().optional(),
   scoring_categories: z.array(z.string()).optional(),
+  data_key: z.string().optional(),
 });
 
 // Assessment Module Schema
@@ -85,6 +87,7 @@ export const AssessmentModuleSchema = z.object({
   updatedAt: z.string(),
   __v: z.number(),
   max_points: z.number().optional(),
+  temp_id: z.string().optional(),
 });
 
 // Assessment Schema

@@ -73,7 +73,8 @@ export async function POST(req: NextRequest) {
       { status: response.status }
     );
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Token refresh failed";
+    const message =
+      error instanceof Error ? error.message : "Token refresh failed";
     return new NextResponse(JSON.stringify({ message }), { status: 500 });
   }
 }
