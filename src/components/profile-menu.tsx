@@ -51,7 +51,7 @@ export default function ProfileMenu({ className }: { className?: string }) {
     <div className={cn('flex relative items-center', className)}>
       <Avatar className="flex">
         <AvatarImage src={user?.profile_picture || businessProfile?.logo_url || avatarUrl} alt={name} />
-        <AvatarFallback className="text-[#176E8E] bg-[#EBFBFF] text-base font-normal font-inter">
+        <AvatarFallback className="text-[#176E8E] bg-[#EBFBFF] text-base font-normal font-inter ">
           {initials}
         </AvatarFallback>
       </Avatar>
@@ -59,7 +59,7 @@ export default function ProfileMenu({ className }: { className?: string }) {
         <DropdownMenuTrigger className="group shrink-0 font-secondary ">
           <>
             <span className="px-2 py-2 flex text-xs items-center gap-4 justify-between">
-              <span className="flex flex-col text-start">
+              <span className="flex flex-col text-start max-sm:hidden">
                 <span className="text-sm text-[#171616] font-inter">{userName}</span>
               </span>
               <ChevronDown className="text-black size-4 shrink-0 group-data-[state=open]:rotate-180 transition-transform ease-in" />

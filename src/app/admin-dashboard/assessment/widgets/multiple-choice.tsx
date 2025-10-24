@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useFormStore } from "@/store/form-store";
 
 type Option = {
   option: string;
@@ -23,7 +24,6 @@ type MultipleChoiceData = {
   question: string;
   descriptions: string;
   options: Option[];
-  max_selections: number;
   required_score: number;
   module: string;
   required_option: boolean;
@@ -33,32 +33,28 @@ type MultipleChoiceData = {
 interface MultipleChoiceProps {
   questionNo?: number;
   onSave?: (data: MultipleChoiceData) => void;
+  initialData?: MultipleChoiceData;
 }
-
-const moduleOptions = [
-  "Digital Literacy",
-  "Business Strategy", 
-  "Financial Management",
-  "Marketing & Sales",
-  "Technology Integration",
-  "Leadership & Management",
-];
 
 export default function MultipleChoice({ 
   questionNo = 1, 
-  onSave 
+  onSave,
+  initialData
 }: MultipleChoiceProps) {
-  const [question, setQuestion] = useState("");
-  const [description, setDescription] = useState("");
-  const [requiredScore, setRequiredScore] = useState<number>(0);
-  const [selectedModule, setSelectedModule] = useState("");
-  const [requiredOption, setRequiredOption] = useState(false);
-  const [maxSelections, setMaxSelections] = useState<number>(1);
+  const { modules, formType } = useFormStore();
+  const moduleOptions = modules.map((mod) => mod.title);
   
-  const [options, setOptions] = useState<Option[]>([
-    { option: "A", optiondesc: "", point_value: 0 },
-    { option: "B", optiondesc: "", point_value: 0 },
-  ]);
+  const [question, setQuestion] = useState(initialData?.question || "");
+  const [description, setDescription] = useState(initialData?.descriptions || "");
+  const [requiredScore, setRequiredScore] = useState<number>(initialData?.required_score || 0);
+  const [selectedModule, setSelectedModule] = useState(initialData?.module || "");
+  const [requiredOption, setRequiredOption] = useState(initialData?.required_option || false);
+  const [options, setOptions] = useState<Option[]>(
+    initialData?.options || [
+      { option: "A", optiondesc: "", point_value: 0 },
+      { option: "B", optiondesc: "", point_value: 0 },
+    ]
+  );
 
   const getNextOptionLetter = (currentLength: number) => {
     return String.fromCharCode(65 + currentLength); // A=65, B=66, C=67, etc.
@@ -100,7 +96,6 @@ export default function MultipleChoice({
       question,
       descriptions: description,
       options,
-      max_selections: maxSelections,
       required_score: requiredScore,
       module: selectedModule,
       required_option: requiredOption,
@@ -118,8 +113,6 @@ export default function MultipleChoice({
     return (
       question.trim() !== "" &&
       options.every(opt => opt.optiondesc.trim() !== "" && opt.point_value >= 0) &&
-      maxSelections >= 1 &&
-      maxSelections <= options.length &&
       requiredScore >= 0 &&
       selectedModule !== ""
     );
@@ -168,13 +161,15 @@ export default function MultipleChoice({
                 onChange={(e) => updateOption(index, "optiondesc", e.target.value)}
                 className="flex-1 bg-blue-50 border-none focus-visible:ring-0"
               />
-              <Input
-                type="number"
-                placeholder="Points"
-                value={opt.point_value || ""}
-                onChange={(e) => updateOption(index, "point_value", parseInt(e.target.value) || 0)}
-                className="w-20 bg-[#EBFBFF] border border-[#0E5F7D]"
-              />
+              {formType === "assessment" && (
+                <Input
+                  type="number"
+                  placeholder="Points"
+                  value={opt.point_value || ""}
+                  onChange={(e) => updateOption(index, "point_value", parseInt(e.target.value) || 0)}
+                  className="w-20 bg-[#EBFBFF] border border-[#0E5F7D]"
+                />
+              )}
               {options.length > 2 && (
                 <Button
                   type="button"
@@ -203,35 +198,21 @@ export default function MultipleChoice({
       {/* Right Panel */}
       <div className="w-72 border-[#D6D4D4] rounded-lg p-6 border flex flex-col justify-between">
         <div className="space-y-4 text-gray-600 text-sm">
-          <div className="flex justify-between items-center">
-            <span>Required Score</span>
-            <Input
-              type="number"
-              min="0"
-              max="99"
-              value={requiredScore || ""}
-              onChange={(e) => setRequiredScore(parseInt(e.target.value) || 0)}
-              className="w-16 h-8 text-right"
-              placeholder="0"
-            />
-          </div>
+          {/* {formType === "assessment" && (
+            <div className="flex justify-between items-center">
+              <span>Required Score</span>
+              <Input
+                type="number"
+                min="0"
+                max="99"
+                value={requiredScore || ""}
+                onChange={(e) => setRequiredScore(parseInt(e.target.value) || 0)}
+                className="w-16 h-8 text-right"
+                placeholder="0"
+              />
+            </div>
+          )} */}
 
-          <div className="flex justify-between items-center">
-            <span>Max Selections</span>
-            <Input
-              type="number"
-              min="1"
-              max={options.length}
-              value={maxSelections || ""}
-              onChange={(e) => {
-                const value = parseInt(e.target.value) || 1;
-                setMaxSelections(Math.max(1, Math.min(value, options.length)));
-              }}
-              className="w-16 h-8 text-right"
-              placeholder="1"
-            />
-          </div>
-          
           <div className="flex justify-between items-center">
             <span>Module</span>
             <Select value={selectedModule} onValueChange={setSelectedModule}>

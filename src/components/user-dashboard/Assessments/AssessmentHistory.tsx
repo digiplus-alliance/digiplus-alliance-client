@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { Card, CardHeader, CardTitle } from '../../ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 
@@ -214,7 +214,7 @@ export function AssessmentHistoryTable() {
         </div>
       </div>
       <div className="col-span-1 mt-8 sm:mt-6">
-        <Card className="bg-transparent border border-[#FFFFFF] rounded-[18px] mt-4">
+        <Card className="bg-transparent border border-[#FFFFFF] rounded-[18px] mt-4 ">
           <CardHeader>
             <div className="flex items-center justify-between w-full">
               <CardTitle className="text-base sm:text-lg font-semibold text-[#706C6C] border-b border-[#FFFFFF] w-full pb-3 sm:pb-4">
@@ -222,7 +222,7 @@ export function AssessmentHistoryTable() {
               </CardTitle>
             </div>
             {/* Filters Section - Responsive */}
-            <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:gap-4 sm:space-y-0 mt-4 bg-[#FBFBFD] rounded-lg p-3 sm:p-5 justify-between">
+            <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:gap-4 sm:space-y-0 mt-4 bg-[#FBFBFD] rounded-lg p-3 sm:p-5 justify-between overflow-auto w-full ">
               {/* Filter Controls */}
               <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4 sm:space-y-0">
                 <Select
@@ -251,8 +251,8 @@ export function AssessmentHistoryTable() {
                 </Select>
 
                 {/* Date Range Filter */}
-                <Popover>
-                  <PopoverTrigger asChild>
+                <Dialog>
+                  <DialogTrigger asChild>
                     <Button
                       variant="outline"
                       size="sm"
@@ -271,31 +271,52 @@ export function AssessmentHistoryTable() {
                       )}
                       <Calendar className="w-4 h-4 ml-2" />
                     </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <CalendarComponent
-                      initialFocus
-                      mode="range"
-                      defaultMonth={dateRange.from}
-                      selected={{ from: dateRange.from, to: dateRange.to }}
-                      onSelect={(range) => {
-                        if (range) {
-                          handleDateRangeChange(range.from, range.to);
-                        } else {
-                          handleDateRangeChange(undefined, undefined);
-                        }
-                      }}
-                      numberOfMonths={2}
-                    />
-                  </PopoverContent>
-                </Popover>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-fit p-4 sm:p-6">
+                    <DialogHeader>
+                      <DialogTitle className="text-center sm:text-left">Select Date Range</DialogTitle>
+                    </DialogHeader>
+                    <div className="flex justify-center">
+                      <CalendarComponent
+                        initialFocus
+                        mode="range"
+                        defaultMonth={dateRange.from}
+                        selected={{ from: dateRange.from, to: dateRange.to }}
+                        onSelect={(range) => {
+                          if (range) {
+                            handleDateRangeChange(range.from, range.to);
+                          } else {
+                            handleDateRangeChange(undefined, undefined);
+                          }
+                        }}
+                        numberOfMonths={1}
+                        className="sm:hidden"
+                      />
+                      <CalendarComponent
+                        initialFocus
+                        mode="range"
+                        defaultMonth={dateRange.from}
+                        selected={{ from: dateRange.from, to: dateRange.to }}
+                        onSelect={(range) => {
+                          if (range) {
+                            handleDateRangeChange(range.from, range.to);
+                          } else {
+                            handleDateRangeChange(undefined, undefined);
+                          }
+                        }}
+                        numberOfMonths={2}
+                        className="hidden sm:block"
+                      />
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
 
             <>
               {/* Desktop Table View */}
-              <div className="block mt-4">
-                <Table>
+              <div className="block mt-4 overflow-x-auto">
+                <Table className="w-full min-w-[600px]">
                   <TableHeader className="bg-[#FBFBFD] text-[#B8B8B8] rounded-xl">
                     <TableRow>
                       <TableHead className="text-xs xl:text-sm">Date</TableHead>

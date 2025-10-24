@@ -1,9 +1,7 @@
 import { useAuthStore } from "@/store/auth";
 
-const apiBase =
-  process.env.NODE_ENV === "production"
-    ? process.env.NEXT_PUBLIC_API_URL
-    : process.env.NEXT_PUBLIC_STAGING_API_URL;
+const apiBase = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_STAGING_API_URL;
+
 
 export async function apiClient<T>(
   endpoint: string,
@@ -53,7 +51,6 @@ export async function apiClient<T>(
   // Handle unauthorized → try refresh
   if (res.status === 401 && options?.hasAuth) {
     try {
-      // Attempt refresh via Next.js API (server sets new cookies)
       const refreshRes = await fetch("/api/auth/refresh", {
         method: "POST",
         credentials: "include",

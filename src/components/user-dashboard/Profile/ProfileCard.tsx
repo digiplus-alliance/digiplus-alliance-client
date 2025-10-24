@@ -153,7 +153,7 @@ const ProfileCard = () => {
                   <ChevronRight color="#B8B8B8" />
                 </button>
               </div>
-              <div className="flex items-center justify-between gap-2 text-sm w-full max-w-[70%]">
+              <div className="flex items-center justify-between gap-2 text-sm w-full max-w-[85%]  sm:max-w-[70%]">
                 <div className=" flex flex-col items-start gap-0.5 w-full max-w-[98%]">
                   <p className="text-muted-foreground">Policies</p>
                   <button

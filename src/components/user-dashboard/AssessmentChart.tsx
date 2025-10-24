@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/store/auth';
 import { toast } from 'sonner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useGetAssessmentHistorySubmissions } from '@/app/api/user/useGetAssessmentHistory';
+import { exportYearlyDataToExcel } from '@/utils/exportCSV';
 
 const YEARS = [
   { label: '2025', value: 2025 },
@@ -26,7 +28,17 @@ export function AssessmentChart() {
       score: number;
     }[]
   >([]);
+  const [yearlyData, setYearlyData] = useState<any[]>([]);
   const { user } = useAuthStore();
+  // const {
+  //   data: assessments,
+  //   isLoading,
+  //   error,
+  // } = useGetAssessmentHistorySubmissions() as {
+  //   data: any;
+  //   isLoading: boolean;
+  //   error: any;
+  // };
 
   const fetchStats = async () => {
     try {
@@ -36,13 +48,18 @@ export function AssessmentChart() {
       console.log(response);
       if (response.ok) {
         console.log(data.data);
-        setChartData(data.data);
+        setChartData(data.data.monthly_breakdown);
+        setYearlyData(data.data);
       }
     } catch (error: any) {
       toast.error(error.message || 'An error occurred fetching chart');
     } finally {
       setFetching(false);
     }
+  };
+
+  const exportAssessmentToCSV = async () => {
+    exportYearlyDataToExcel(yearlyData as any);
   };
 
   useEffect(() => {
@@ -67,13 +84,13 @@ export function AssessmentChart() {
       <CardHeader className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 p-4 sm:p-6 flex-wrap gap-y-2">
         <CardTitle className="text-base sm:text-lg font-normal text-[#A3A3A3]">Assessment Scores</CardTitle>
 
-        <div className=" flex items-center gap-2 justify-end  w-full">
+        <div className=" flex items-center gap-2 justify-end flex- w-full">
           <Select
             onValueChange={(value) => {
               setYear(parseInt(value));
             }}
           >
-            <SelectTrigger className="w-full sm:w-[180px] bg-white border-[#DDDDDD] text-sm sm:text-base">
+            <SelectTrigger className="w-min  bg-white border-[#DDDDDD] text-sm sm:text-base">
               <SelectValue placeholder={new Date().getFullYear()} className="text-[#706C6C]" />
             </SelectTrigger>
             <SelectContent>
@@ -89,11 +106,12 @@ export function AssessmentChart() {
           <Button
             variant="default"
             size="sm"
-            className="w-full sm:w-auto bg-transparent hover:bg-transparent hover:underline hover:text-[#0E5F7D] underline-offset-4 shadow-none drop-shadow-none text-[#0E5F7D] text-sm"
+            onClick={exportAssessmentToCSV}
+            className="w-auto bg-transparent hover:bg-transparent  cursor-pointer hover:text-[#0E5F7D] underline-offset-4 shadow-none drop-shadow-none text-[#0E5F7D] text-sm"
           >
             <Download className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" color="#0E5F7D" />
-            <span className="hidden sm:inline">Download Reports →</span>
-            <span className="sm:hidden">Download →</span>
+            <span className="hidden sm:inline">Download Reports</span>
+            <span className="sm:hidden">Download</span>
           </Button>
         </div>
       </CardHeader>
