@@ -1,5 +1,3 @@
-
-
 import AssessmentListTable from "./widgets/assessment-list-table";
 
 export default function ListAssessment() {

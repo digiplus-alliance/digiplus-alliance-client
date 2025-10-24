@@ -85,7 +85,7 @@ export default function AssessmentPage() {
             }`}
             onClick={() => setActiveComponent("edit")}
           >
-            Edit Current Assessment
+            Edit Assessments
           </Button>
           <Button
             variant="ghost"

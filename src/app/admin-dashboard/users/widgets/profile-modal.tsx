@@ -31,13 +31,27 @@ export default function UserInfoModal({
         {selectedUser && (
           <div className="flex flex-col items-center space-y-4 text-center">
             {/* Avatar */}
-            <div className="w-20 h-20 rounded-full overflow-hidden">
-              <Image
-                src={selectedUser.avatar || "/about/team-placeholder-four.png"}
-                alt={selectedUser.name}
-                width={80}
-                height={80}
-              />
+            <div className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center">
+              {selectedUser.profile_picture ? (
+                <Image
+                  src={selectedUser.profile_picture}
+                  alt={selectedUser.name}
+                  width={80}
+                  height={80}
+                  className="object-cover"
+                />
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-[#EBFBFF] flex items-center justify-center text-2xl font-semibold text-[#227C9D]">
+                  {selectedUser.name
+                    ? selectedUser.name
+                        .split(" ")
+                        .slice(0, 2)
+                        .map((word) => word[0])
+                        .join("")
+                        .toUpperCase()
+                    : "NA"}
+                </div>
+              )}
             </div>
 
             {/* Name + Role */}
@@ -46,13 +60,13 @@ export default function UserInfoModal({
                 {selectedUser.name}
               </h2>
               <p className="text-sm text-gray-500">
-                {selectedUser.role}, {selectedUser.business}
+                {selectedUser.role}, {selectedUser.business_name}
               </p>
             </div>
 
             {/* Status */}
             <span className="px-6 py-1 w-[20rem] rounded-full text-xs font-medium bg-[#EBFFFC] text-[#076C61]">
-              Online
+              Last login: {selectedUser.last_login || "No recent login"}
             </span>
 
             <hr className="w-full border-gray-200" />
@@ -86,7 +100,7 @@ export default function UserInfoModal({
               <div className="flex flex-col space-y-2">
                 <p className="text-sm text-[#706C6C] text-start">Assessment</p>
                 <div className="px-6 py-1 w-[15rem] rounded-full text-xs font-medium bg-[#EBFFFC] text-[#076C61] items-center flex justify-center">
-                  Submitted
+                  {selectedUser.assessments_count}
                 </div>
               </div>
               <div className="flex flex-col space-y-2">
@@ -94,7 +108,7 @@ export default function UserInfoModal({
                   Applications
                 </p>
                 <div className="px-6 py-1 w-[15rem] rounded-full text-xs font-medium bg-[#EBFFFC] text-[#076C61] items-center flex justify-center">
-                  Submitted
+                  {selectedUser.applications_count}
                 </div>
               </div>
             </div>

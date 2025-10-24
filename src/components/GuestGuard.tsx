@@ -36,7 +36,7 @@ export function GuestGuard({ children, redirectTo }: GuestGuardProps) {
         
         // If user is unverified and not on verification page, redirect to verification
         if (!user.is_verified && !currentPath.includes('/auth/verification')) {
-          console.log(`GuestGuard: Redirecting unverified user to verification page`);
+          // console.log(`GuestGuard: Redirecting unverified user to verification page`);
           router.replace('/auth/verification');
           return;
         }
@@ -46,7 +46,7 @@ export function GuestGuard({ children, redirectTo }: GuestGuardProps) {
           const defaultRedirect = getDefaultDashboard(user.role);
           const destination = redirectTo || defaultRedirect;
           
-          console.log(`GuestGuard: Redirecting verified user (${user.role}) from auth page to ${destination}`);
+          // console.log(`GuestGuard: Redirecting verified user (${user.role}) from auth page to ${destination}`);
           router.replace(destination);
           return;
         }

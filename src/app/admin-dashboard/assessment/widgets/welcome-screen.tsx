@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useFormStore } from "@/store/form-store";
 
 // Zod validation schema
 const welcomeFormSchema = z.object({
@@ -34,6 +35,7 @@ export default function WelcomePageQuestion({
   onSubmit,
 }: WelcomePageQuestionProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { setWelcomeScreen, welcomeScreen } = useFormStore();
 
   const {
     register,
@@ -43,11 +45,31 @@ export default function WelcomePageQuestion({
   } = useForm<WelcomeFormData>({
     resolver: zodResolver(welcomeFormSchema),
     mode: "onChange",
+    defaultValues: {
+      title: welcomeScreen?.title || "",
+      description: welcomeScreen?.description || "",
+      instruction: welcomeScreen?.instruction || "",
+    },
   });
+
+  // Reset form when welcomeScreen data changes (for edit mode)
+  useEffect(() => {
+    if (welcomeScreen) {
+      reset({
+        title: welcomeScreen.title || "",
+        description: welcomeScreen.description || "",
+        instruction: welcomeScreen.instruction || "",
+      });
+    }
+  }, [welcomeScreen, reset]);
 
   const onFormSubmit = async (data: WelcomeFormData) => {
     setIsSubmitting(true);
     try {
+      // Save to Zustand store
+      setWelcomeScreen(data);
+
+      // Call the optional onSubmit callback
       onSubmit?.(data);
       console.log("Form data:", data);
     } catch (error) {

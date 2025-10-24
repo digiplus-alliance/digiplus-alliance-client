@@ -1,19 +1,16 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Textarea } from '@/components/ui/textarea';
 import PageHeader from '@/components/PageHeader';
 import ApplicationSuccessModal from './ApplicationSuccessModal';
-import { useGetServiceTypes } from '@/app/api/services/useGetServiceTypes';
 import { useCreateApplication } from '@/app/api/user/useCreateApplication';
 import { toast } from 'sonner';
 import { useGetServices } from '@/app/api/services/useGetServices';
+import UserApplicationForm from './UserApplicationForm';
+import { useAuthStore } from '@/store/auth';
 
 const ApplicationForm = () => {
   const router = useRouter();
@@ -27,7 +24,17 @@ const ApplicationForm = () => {
   });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const { data, isLoading } = useGetServices();
-  const { mutate: createApplication, isPending } = useCreateApplication();
+  const { selectedService, setSelectedService } = useAuthStore();
+
+  const [welcomeData, setWelcomeData] = useState<{
+    welcome_description: string;
+    welcome_instruction: string;
+    welcome_title: string;
+  }>({
+    welcome_description: '',
+    welcome_instruction: '',
+    welcome_title: '',
+  });
 
   const [serviceTypes, setServiceTypes] = useState<string[]>([]);
 
@@ -42,41 +49,43 @@ const ApplicationForm = () => {
       ...prev,
       [field]: value,
     }));
+
+    setSelectedService(value);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const payload = {
-      responses: {
-        company_name: formData.company_name,
-        first_name: formData.fullName.split(' ')[0],
-        last_name: formData.fullName.split(' ')[1],
-        email: formData.email,
-        phone_number: formData.phone_number,
-        reason_for_applying: formData.reason_for_applying,
-      },
-      service: formData.service,
-    };
+  // const handleSubmit = (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   const payload = {
+  //     responses: {
+  //       company_name: formData.company_name,
+  //       first_name: formData.fullName.split(' ')[0],
+  //       last_name: formData.fullName.split(' ')[1],
+  //       email: formData.email,
+  //       phone_number: formData.phone_number,
+  //       reason_for_applying: formData.reason_for_applying,
+  //     },
+  //     service: formData.service,
+  //   };
 
-    createApplication(payload, {
-      onSuccess: () => {
-        setShowSuccessModal(true);
-        toast.success('Application submitted successfully');
-        setFormData({
-          service: '',
-          company_name: '',
-          fullName: '',
-          email: '',
-          phone_number: '',
-          reason_for_applying: '',
-        });
-      },
-      onError: (error) => {
-        console.error('Application submission failed:', error);
-        toast.error('Application submission failed');
-      },
-    });
-  };
+  //   createApplication(payload, {
+  //     onSuccess: () => {
+  //       setShowSuccessModal(true);
+  //       toast.success('Application submitted successfully');
+  //       setFormData({
+  //         service: '',
+  //         company_name: '',
+  //         fullName: '',
+  //         email: '',
+  //         phone_number: '',
+  //         reason_for_applying: '',
+  //       });
+  //     },
+  //     onError: (error) => {
+  //       console.error('Application submission failed:', error);
+  //       toast.error('Application submission failed');
+  //     },
+  //   });
+  // };
 
   const handleBack = () => {
     router.back();
@@ -108,34 +117,44 @@ const ApplicationForm = () => {
         </div>
 
         {/* Right Side - Form */}
-        <div className="w-full">
-          <Card className="bg-white border border-gray-200 rounded-[24px]">
-            <CardContent className="px-10 py-6">
-              <div className="space-y-6">
-                <h3 className="text-xl font-normal text-[#5E5B5B] text-center">
-                  Apply for a Digiplus Program or Service
-                </h3>
+        <div className="w-full max-w-[620px]">
+          <Card className="bg-white border border-gray-200 rounded-[24px] min-w-full max-w-[520px]">
+            <CardContent className="px-10 py-6 w-full">
+              {
+                <div className="space-y-6 w-full">
+                  {welcomeData.welcome_title && (
+                    <>
+                      <h3 className="text-xl font-normal text-[#5E5B5B] text-center">{welcomeData.welcome_title}</h3>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Service Selection */}
-                  <div className="space-y-2">
-                    <label className="text-sm  text-[#706C6C]">Service</label>
-                    <Select onValueChange={(value) => handleInputChange('service', value)}>
-                      <SelectTrigger className="w-full h-14 border-[#EBEBEB] rounded-lg py-5">
-                        <SelectValue placeholder="Select" className=" py-3" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {serviceTypes.map((serviceType) => (
-                          <SelectItem key={serviceType} value={serviceType}>
-                            {serviceType}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      <p className="text-[#706C6C] leading-relaxed text-center">{welcomeData.welcome_instruction}</p>
+                    </>
+                  )}
+
+                  <div className="space-y-6">
+                    {welcomeData.welcome_title && (
+                      <div className="space-y-2">
+                        <label className="text-sm  text-[#706C6C]">1. Service</label>
+                        <Select onValueChange={(value) => handleInputChange('service', value)}>
+                          <SelectTrigger className="w-full h-14 border-[#EBEBEB] rounded-lg py-5">
+                            <SelectValue placeholder="Select" className=" py-3" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {serviceTypes.map((serviceType) => (
+                              <SelectItem key={serviceType} value={serviceType}>
+                                {serviceType}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    <UserApplicationForm setWelcomeData={setWelcomeData} />
                   </div>
+                </div>
+              }
 
-                  {/* Company Name and Full Name */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-sm  text-[#706C6C]">Company Name</label>
                       <Input
@@ -156,7 +175,6 @@ const ApplicationForm = () => {
                     </div>
                   </div>
 
-                  {/* Email and Phone */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <label className="text-sm  text-[#706C6C]">Confirm Email</label>
@@ -180,7 +198,6 @@ const ApplicationForm = () => {
                     </div>
                   </div>
 
-                  {/* Reason for applying */}
                   <div className="space-y-2">
                     <label className="text-sm  text-[#706C6C]">Reason for applying</label>
                     <Textarea
@@ -189,17 +206,7 @@ const ApplicationForm = () => {
                       onChange={(e) => handleInputChange('reason_for_applying', e.target.value)}
                       className="min-h-[96px] border-[#EBEBEB] rounded-lg placeholder:text-[#8F8F8F] resize-none bg-white"
                     />
-                  </div>
-
-                  {/* Submit Button */}
-                  <Button
-                    type="submit"
-                    className="w-full h-12 bg-[#FF5C5C] mt-6 hover:bg-[#FF4444] text-white  rounded-lg"
-                  >
-                    {isPending ? 'Submitting...' : 'Submit'}
-                  </Button>
-                </form>
-              </div>
+                  </div> */}
             </CardContent>
           </Card>
         </div>

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+const apiUrl = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_API_URL : process.env.NEXT_PUBLIC_STAGING_API_URL;
 
 export async function POST(req: NextRequest) {
   const payload = await req.json();
@@ -18,9 +18,12 @@ export async function POST(req: NextRequest) {
       const { accessToken, refreshToken, message, user } = responseData;
 
       // Return message, user, and accessToken in the response body
-      const res = new NextResponse(JSON.stringify({ message, user, accessToken }), {
-        status: 200,
-      });
+      const res = new NextResponse(
+        JSON.stringify({ message, user, accessToken }),
+        {
+          status: 200,
+        }
+      );
 
       // Set accessToken cookie on the response
       res.cookies.set({
