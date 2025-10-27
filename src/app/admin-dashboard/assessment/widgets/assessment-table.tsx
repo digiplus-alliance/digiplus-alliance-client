@@ -10,7 +10,7 @@ import {
   CellContext,
 } from "@tanstack/react-table";
 import Pagination from "@/components/Pagination";
-import { MoreVertical } from "lucide-react";
+import { Loader2, MoreVertical } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -104,7 +104,7 @@ export default function AssessmentTable({ onEdit }: AssessmentTableProps) {
     });
   };
 
-  const disabled = isToggling || isDeleting;
+  const loading = isToggling || isDeleting;
 
   const totalPages = Math.ceil(tableData.length / pageSize);
 
@@ -202,9 +202,13 @@ export default function AssessmentTable({ onEdit }: AssessmentTableProps) {
             <DropdownMenu>
               <DropdownMenuTrigger
                 className="p-2 hover:bg-gray-100 rounded-md cursor-pointer"
-                disabled={disabled}
+                disabled={loading}
               >
-                <MoreVertical size={16} className="text-[#706C6C]" />
+                {loading && selectedAssessmentId === row.id ? (
+                  <Loader2 className="animate-spin h-4 w-4" />
+                ) : (
+                  <MoreVertical size={16} className="text-[#706C6C]" />
+                )}
               </DropdownMenuTrigger>
 
               <DropdownMenuContent className="w-40" align="end">
