@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const apiUrl = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_API_URL : process.env.NEXT_PUBLIC_STAGING_API_URL;
+const apiUrl = process.env.NODE_ENV === "production" ? process.env.API_URL : process.env.STAGING_API_URL;
 
 export async function POST(req: NextRequest) {
   const payload = await req.json();

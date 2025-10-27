@@ -1,6 +1,6 @@
 import { useAuthStore } from "@/store/auth";
 
-const apiBase = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_STAGING_API_URL;
+const apiBase = process.env.NODE_ENV === "production" ? process.env.API_URL: process.env.STAGING_API_URL;
 
 
 export async function apiClient<T>(
@@ -14,7 +14,7 @@ export async function apiClient<T>(
   const url = baseUrl === "" ? endpoint : `${baseUrl}${endpoint}`;
 
   if (!baseUrl && baseUrl !== "") {
-    throw new Error("NEXT_PUBLIC_API_URL is not set and no baseUrl provided");
+    throw new Error("API_URL is not set and no baseUrl provided");
   }
 
   const headers = new Headers();
