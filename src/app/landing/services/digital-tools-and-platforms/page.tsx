@@ -21,11 +21,11 @@ const defaultItems: OptionItem[] = [
   },
   {
     image: "/services/transformation-advisory/more-card-three.png",
-    title: "Digital Infrastructure Support",
-    body: "From DSE (Digital Skills for Entrepreneurs) to MIRE (Market & Investment Readiness), we offer hands-on programs that teach what really works in today’s market.",
+    title: "Digital Starter Kit",
+    body: "Assists in setting up digital infrastructure, including website development, domain registration, and hosting services, to establish an online presence.",
     footer: "NGN 350 000",
-    link: "/landing/services/digital-infrastructure-support",
-  },  
+    link: "/landing/services/digiplus-starter-kit",
+  },
 ];
 
 export default function DigitalToolsAndPlatforms() {
