@@ -35,16 +35,28 @@ function isValidDate(date: Date | undefined) {
 export function DatePicker({
   label = "Subscription Date",
   className = "",
+  value,
+  onChange,
 }: {
   label?: string;
   className?: string;
+  value?: Date;
+  onChange?: (date: Date | undefined) => void;
 }) {
   const [open, setOpen] = React.useState(false);
   const [date, setDate] = React.useState<Date | undefined>(
-    new Date("2025-06-01")
+    value || new Date("2025-06-01")
   );
   const [month, setMonth] = React.useState<Date | undefined>(date);
-  const [value, setValue] = React.useState(formatDate(date));
+  const [internalValue, setInternalValue] = React.useState(formatDate(date));
+
+  const handleDateChange = (newDate: Date | undefined) => {
+    setDate(newDate);
+    setInternalValue(formatDate(newDate));
+    if (onChange) {
+      onChange(newDate);
+    }
+  };
 
   return (
     <div className={`flex flex-col gap-3 ${className}`}>
@@ -54,14 +66,14 @@ export function DatePicker({
       <div className="relative flex gap-2">
         <Input
           id="date"
-          value={value}
+          value={internalValue}
           placeholder="June 01, 2025"
           className="bg-background pr-10"
           onChange={(e) => {
             const date = new Date(e.target.value);
-            setValue(e.target.value);
+            setInternalValue(e.target.value);
             if (isValidDate(date)) {
-              setDate(date);
+              handleDateChange(date);
               setMonth(date);
             }
           }}
@@ -95,9 +107,8 @@ export function DatePicker({
               captionLayout="dropdown"
               month={month}
               onMonthChange={setMonth}
-              onSelect={(date) => {
-                setDate(date);
-                setValue(formatDate(date));
+              onSelect={(selectedDate) => {
+                handleDateChange(selectedDate);
                 setOpen(false);
               }}
             />

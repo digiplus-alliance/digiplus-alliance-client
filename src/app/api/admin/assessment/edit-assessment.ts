@@ -6,6 +6,6 @@ export const useUpdateAssessment = (id: string) => {
     method: "PATCH",
     hasAuth: true,
     successMessage: "Assessment updated successfully",
-    invalidateKeys: ["assessmentList", "allAssessmentForms", `assessment-${id}`, "allAssessments"],
+    invalidateKeys: ["assessmentList", "allAssessmentForms", `assessment-${id}`, "allAssessments", "assessment", id],
   });
 };

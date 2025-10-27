@@ -41,7 +41,7 @@ export function useGetBusinessProfile() {
   const { user } = useAuthStore();
 
   return useFetch<BusinessProfileData>({
-    url: user?.role === 'admin' ? '/profile/admin' : 'profile/business',
+    url: user?.role === 'admin' ? 'profile/admin' : 'profile/business',
     hasAuth: true,
     schema: BusinessProfileDataSchema,
     queryKey: ['profile', 'business'],

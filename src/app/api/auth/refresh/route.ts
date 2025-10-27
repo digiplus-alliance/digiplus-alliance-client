@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const apiUrl = process.env.NODE_ENV === "production" ? process.env.NEXT_PUBLIC_API_URL : process.env.NEXT_PUBLIC_STAGING_API_URL;
+const apiUrl = process.env.NODE_ENV === "production" ? process.env.API_URL : process.env.STAGING_API_URL;
 
 export async function POST(req: NextRequest) {
   console.log("Refreshing access token");
   try {
     // Get the accessToken from cookies
     const accessToken = req.cookies.get("accessToken")?.value;
-    console.log("Access Token from cookie:", accessToken);
+    // console.log("Access Token from cookie:", accessToken);
 
     if (!accessToken  ) {
       return new NextResponse(

@@ -32,9 +32,11 @@ interface ActiveQuestion {
 export default function QuestionScreen({
   navigateBack,
   applicationId,
+  assessmentId,
 }: {
   navigateBack?: () => void;
   applicationId?: string;
+  assessmentId?: string;
 }) {
   const {
     formType,
@@ -56,7 +58,7 @@ export default function QuestionScreen({
         const loadedQuestions = questions.map((q) => ({
           id: q.id,
           type: q.type,
-          isLocked: applicationId ? true : false,
+          isLocked: applicationId || assessmentId ? true : false,
         }));
         setActiveQuestions(loadedQuestions);
       } else {
@@ -67,7 +69,7 @@ export default function QuestionScreen({
       }
       setIsInitialized(true);
     }
-  }, [questions, applicationId, isInitialized]);
+  }, [questions, applicationId, assessmentId, isInitialized]);
 
   // Reset activeQuestions when store is cleared (e.g., after successful submission)
   useEffect(() => {
@@ -356,6 +358,7 @@ export default function QuestionScreen({
         showPreview={showPreview}
         onClose={() => setShowPreview(false)}
         applicationId={applicationId}
+        assessmentId={assessmentId}
       />
     </div>
   );

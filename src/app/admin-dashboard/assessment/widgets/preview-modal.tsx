@@ -15,11 +15,13 @@ import { Question as APIQuestion } from "@/types/questions";
 import { Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCreateAssessment } from "@/app/api/admin/assessment/create-assessment";
+import { useUpdateAssessment } from "@/app/api/admin/assessment/edit-assessment";
 
 interface PreviewModalProps {
   showPreview: boolean;
   onClose: () => void;
   applicationId?: string;
+  assessmentId?: string;
 }
 
 const questionTypes: {
@@ -40,6 +42,7 @@ export default function PreviewModal({
   showPreview,
   onClose,
   applicationId,
+  assessmentId,
 }: PreviewModalProps) {
   const {
     formType,
@@ -58,9 +61,15 @@ export default function PreviewModal({
     : { mutate: () => {}, isPending: false };
   const { mutate: createAssessment, isPending: isCreatingAssessment } =
     useCreateAssessment();
+  const { mutate: updateAssessment, isPending: isUpdatingAssessment } =
+    assessmentId
+      ? useUpdateAssessment(assessmentId)
+      : { mutate: () => {}, isPending: false };
+
   const router = useRouter();
 
-  const isPending = isCreating || isUpdating || isCreatingAssessment;
+  const isPending =
+    isCreating || isUpdating || isCreatingAssessment || isUpdatingAssessment;
 
   const getQuestionTypeLabel = (type: QuestionType): string => {
     return (
@@ -402,7 +411,7 @@ export default function PreviewModal({
               ? modules.find((m) => m.title === q?.module)?.step
               : 1,
             module_ref: q?.module,
-            acceptedFileTypes: q?.acceptedFileTypes,
+            accepted_file_types: q?.acceptedFileTypes,
             max_file_size:
               q.type === "file_upload" ? q.max_file_size : undefined,
             max_files: q.type === "file_upload" ? q.max_files : undefined,
@@ -524,7 +533,7 @@ export default function PreviewModal({
               max_files: q.type === "file_upload" ? q.max_files : undefined,
               upload_instruction:
                 q.type === "file_upload" ? q.upload_instruction : undefined,
-              isActive: true,
+              // isActive: true,
             };
             return cleanObject(apiQuestion);
           }),
@@ -542,11 +551,12 @@ export default function PreviewModal({
             : undefined,
       };
 
-      // {payload && console.log("Assessment Payload:", payload?.modules[0].temp_id, payload?.questions[0].module_ref)}
+      // console.log("Assessment Payload:", payload);
+      const mutationFn = assessmentId ? updateAssessment : createAssessment;
+      // console.log("Using mutation function:", assessmentId ? "Update" : "Create");
+      // console.log("Payload being sent for ID:", assessmentId);
 
-      console.log("Assessment Payload:", payload);
-
-      createAssessment(payload, {
+      mutationFn(payload, {
         onSuccess: () => {
           onClose();
           clearQuestions();

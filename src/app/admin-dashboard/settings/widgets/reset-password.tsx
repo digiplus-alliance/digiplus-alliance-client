@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { PasswordInput } from "@/components/ui/password-input";
+import { useChangePassword } from "@/app/api/auth/useChangePassword";
 
 type Props = {
   onSubmit?: (data: {
@@ -30,8 +31,8 @@ export default function PasswordChange({ onSubmit, className }: Props) {
       confirmPassword: "",
     },
   });
-
-  const [isPending, setIsPending] = React.useState(false);
+  const { mutate: changePassword, isPending: isChangingPassword } =
+    useChangePassword();
 
   const submit = async (values: FormValues) => {
     if (values.newPassword !== values.confirmPassword) {
@@ -42,30 +43,17 @@ export default function PasswordChange({ onSubmit, className }: Props) {
       return;
     }
 
-    try {
-      if (onSubmit) {
-        setIsPending(true);
-        await onSubmit({
-          currentPassword: values.currentPassword,
-          newPassword: values.newPassword,
-        });
-        setIsPending(false);
-        form.reset();
-      } else {
-        // Simulate async password change
-        setIsPending(true);
-        await new Promise((res) => setTimeout(res, 800));
-        setIsPending(false);
-        form.reset();
+    changePassword(
+      {
+        oldPassword: values.currentPassword,
+        newPassword: values.newPassword,
+      },
+      {
+        onSuccess: async () => {
+          form.reset();
+        },
       }
-    } catch (error) {
-      form.setError("currentPassword", {
-        type: "manual",
-        message: "Failed to change password",
-      });
-      console.log(error);
-      setIsPending(false);
-    }
+    );
   };
 
   return (
@@ -160,7 +148,7 @@ export default function PasswordChange({ onSubmit, className }: Props) {
         </div>
 
         <Button className="w-full">
-          {isPending ? (
+          {isChangingPassword ? (
             <>
               <SpinnerIcon /> Updating ...
             </>

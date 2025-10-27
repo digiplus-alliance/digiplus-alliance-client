@@ -10,7 +10,7 @@ import {
   CellContext,
 } from "@tanstack/react-table";
 import Pagination from "@/components/Pagination";
-import { MoreVertical } from "lucide-react";
+import { Loader2, MoreVertical } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -19,6 +19,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useGetApplicationForms } from "@/app/api/admin/applications/get-all-application-forms";
 import { format } from "date-fns";
+import { useUpdatePublishStatus } from "@/app/api/admin/applications/toggle-publish-status";
+import { useDeleteApplication } from "@/app/api/admin/applications/delete-application";
+import DeactivateUserModal from "../../users/widgets/delete-modal";
 
 // Type for table data
 type ApplicationTableData = {
@@ -37,8 +40,29 @@ interface ListApplicationsProps {
 export default function ListApplications({ onEdit }: ListApplicationsProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [tableData, setTableData] = useState<ApplicationTableData[]>([]);
-
+  const [selectedApplicationId, setSelectedApplicationId] =
+    useState<string>("");
   const { data, error, isLoading } = useGetApplicationForms();
+  // console.log("Application Forms Data:", data);
+  const { mutate: togglePublish, isPending: isToggling } =
+    useUpdatePublishStatus(selectedApplicationId);
+  const { mutate: deleteApplication, isPending: isDeleting } =
+    useDeleteApplication(selectedApplicationId);
+
+  const [open, setOpen] = useState(false);
+
+  const confirmDelete = () => {
+    deleteApplication(undefined, {
+      onSuccess: () => {
+        setOpen(false);
+      },
+      onError: (error) => {
+        console.error("Failed to delete application:", error);
+      },
+    });
+  };
+
+  const loading = isLoading || isToggling || isDeleting;
 
   const pageSize = 10;
 
@@ -50,7 +74,7 @@ export default function ListApplications({ onEdit }: ListApplicationsProps) {
         title: form.welcome_title,
         description: form.welcome_description || "",
         totalSections: form.modules?.length || 0,
-        isPublished: !!form.is_published,
+        isPublished: form.isLive || false,
         createdAt: form.createdAt
           ? format(new Date(form.createdAt), "MMM dd, yyyy")
           : "N/A",
@@ -65,16 +89,14 @@ export default function ListApplications({ onEdit }: ListApplicationsProps) {
   };
 
   const handlePublishToggle = (id: string, currentStatus: boolean) => {
-    console.log(
-      `${currentStatus ? "Unpublish" : "Publish"} application ID:`,
-      id
-    );
-    // TODO: API call to toggle publish status
+    const newStatus = !currentStatus;
+    setSelectedApplicationId(id);
+    togglePublish({ isLive: newStatus });
   };
 
   const handleDelete = (id: string) => {
-    console.log("Delete application ID:", id);
-    // TODO: API call to delete application
+    setSelectedApplicationId(id);
+    setOpen(true);
   };
 
   const totalPages = Math.ceil(tableData.length / pageSize);
@@ -128,7 +150,7 @@ export default function ListApplications({ onEdit }: ListApplicationsProps) {
                   : "bg-gray-100 text-gray-800 border border-gray-200"
               }`}
             >
-              {row.isPublished ? "Published" : "Draft"}
+              {row.isPublished ? "Published" : "Unpublished"}
             </span>
           </div>
         );
@@ -157,7 +179,11 @@ export default function ListApplications({ onEdit }: ListApplicationsProps) {
           <div className="relative inline-block">
             <DropdownMenu>
               <DropdownMenuTrigger className="p-2 hover:bg-gray-100 rounded-md cursor-pointer">
-                <MoreVertical size={16} className="text-[#706C6C]" />
+                {loading && selectedApplicationId === row.id ? (
+                  <Loader2 className="animate-spin h-4 w-4" />
+                ) : (
+                  <MoreVertical size={16} className="text-[#706C6C]" />
+                )}
               </DropdownMenuTrigger>
 
               <DropdownMenuContent className="w-40" align="end">
@@ -306,6 +332,16 @@ export default function ListApplications({ onEdit }: ListApplicationsProps) {
           onPageChange={setCurrentPage}
         />
       </div>
+
+      <DeactivateUserModal
+        deleteModalOpen={open}
+        setDeleteModalOpen={setOpen}
+        confirmDeleteUser={confirmDelete}
+        loading={isDeleting}
+        title="Delete Application?"
+        description="Are you sure you want to delete this application? This action cannot be undone."
+        confirmButtonText="Delete"
+      />
     </div>
   );
 }

@@ -22,12 +22,8 @@ export default function EditApplication({
     "welcome" | "module" | "question"
   >("welcome");
 
-  const {
-    setWelcomeScreen,
-    setModules,
-    clearAll,
-    addQuestion,
-  } = useApplicationStore();
+  const { setWelcomeScreen, setModules, clearAll, addQuestion } =
+    useApplicationStore();
 
   // Load application data into store
   useEffect(() => {
@@ -77,7 +73,10 @@ export default function EditApplication({
     };
   }, []);
 
-  const mapAPIQuestionToStoreQuestion = (apiQuestion: any, questionNo: number) => {
+  const mapAPIQuestionToStoreQuestion = (
+    apiQuestion: any,
+    questionNo: number
+  ) => {
     const baseQuestion = {
       id: apiQuestion.id || `q-${questionNo}`,
       question_no: questionNo,

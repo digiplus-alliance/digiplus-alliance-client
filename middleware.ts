@@ -57,8 +57,6 @@ export function middleware(request: NextRequest) {
   // Get auth token from cookies
   const accessToken = request.cookies.get('accessToken')?.value;
 
-  console.log(`Middleware: ${pathname}, Token: ${accessToken ? 'present' : 'absent'}`);
-
   // If no token and trying to access protected route
   if (!accessToken) {
     // Allow access to public routes
