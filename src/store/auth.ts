@@ -20,6 +20,7 @@ export type User = {
   updatedAt?: string;
   __v?: number;
   onboarded?: boolean;
+  last_login?: string;
   // Legacy fields (keeping for backward compatibility)
   phone_number?: string;
   website?: string;
