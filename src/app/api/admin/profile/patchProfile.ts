@@ -30,5 +30,6 @@ export const usePatchProfile = () => {
     hasAuth: true,
     schema: patchProfileResponseSchema,
     successMessage: "Profile updated successfully",
+    invalidateKeys: ["adminProfile"],
   });
 };

@@ -5,17 +5,17 @@ import ServiceHero from "../widgets/service-hero";
 const items: OptionItem[] = [
   {
     image: "/services/transformation-advisory/more-card-one.png",
-    title: "Capacity Building & Training",
-    body: "Tap into a vibrant support network that helps MSMEs connect, collaborate, and thrive because no business should grow alone.",
+    title: "Digital Skills for Entrepreneurs - DSE",
+    body: "Offers workshops and training sessions on digital skills, including e-commerce, digital marketing, and the use of digital tools for business operations.",
     footer: "NGN 200 000",
-    link: "/landing/services/capacity-building-and-training",
+    link: "/landing/services/digital-skills-for-entrepreneurs",
   },
   {
-    image: "/services/transformation-advisory/more-card-two.png",
-    title: "Digital Infrastructure Support",
-    body: "From DSE (Digital Skills for Entrepreneurs) to MIRE (Market & Investment Readiness), we offer hands-on programs that teach what really works in today’s market.",
+    image: "/services/transformation-advisory/more-card-three.png",
+    title: "Digital Starter Kit",
+    body: "Assists in setting up digital infrastructure, including website development, domain registration, and hosting services, to establish an online presence.",
     footer: "NGN 350 000",
-    link: "/landing/services/digital-infrastructure-support",
+    link: "/landing/services/digiplus-starter-kit",
   },
   {
     image: "/services/transformation-advisory/more-card-three.png",

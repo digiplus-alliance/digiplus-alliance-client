@@ -27,15 +27,16 @@ interface UseGetAllApplicationsOptions {
 }
 
 export function useGetAllApplications(options?: UseGetAllApplicationsOptions) {
-  const queryString = options?.service_type
-    ? `?service_type=${encodeURIComponent(options.service_type)}`
-    : "";
-  const url = `admin/applications/list${queryString}`;
+  let url = `admin/applications/list`;
+
+  if (options?.service_type) {
+    url += `?service_type=${encodeURIComponent(options.service_type)}`;
+  }
 
   return useFetch<AllApplicationsResponse>({
     url,
     hasAuth: true,
     schema: AllApplicationsResponseSchema,
-    queryKey: ["applicationList"],
+    queryKey: ["applicationList", options?.service_type || ""],
   });
 }

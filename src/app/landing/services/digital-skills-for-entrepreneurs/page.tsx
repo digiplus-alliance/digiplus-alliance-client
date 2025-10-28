@@ -8,9 +8,9 @@ export default function CapacityBuildingAndTraining() {
     <main>
       <ServiceHero
         bannerText="Take the digital maturity assessment by signing up."
-        title="Capacity Building & Training"
+        title="Digital Skills for Entrepreneurs - DSE"
         description={[
-          "In today’s digital world, knowing how to use the tools is just as important as having them. Our Capacity Building & Training service equips MSME owners, employees, and aspiring entrepreneurs with practical digital skills they can immediately apply to drive business growth.",
+          "In today’s digital world, knowing how to use the tools is just as important as having them. Our Digital Skills for Entrepreneurs equips MSME owners, employees, and aspiring entrepreneurs with practical digital skills they can immediately apply to drive business growth.",
           "From e-commerce to digital marketing, participants learn the “how-to” of thriving online, not just theory.",
         ]}
         buttonText="Request Service"

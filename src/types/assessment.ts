@@ -29,7 +29,7 @@ export const GridRowSchema = z.object({
 export const AssessmentQuestionSchema = z.object({
   _id: z.string(),
   assessment_id: z.string(),
-  module_id: z.string(),
+  module_id: z.string().optional(),
   module_ref: z.string().optional(),
   type: z.enum([
     'welcome_screen',

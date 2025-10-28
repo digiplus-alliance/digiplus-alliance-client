@@ -32,9 +32,9 @@ export default function DigitalInfrastructureSupport() {
     <main>
       <ServiceHero
         bannerText="Take the digital maturity assessment by signing up."
-        title="Digital Infrastructure Support"
+        title="Digiplus Starter Kit"
         description={[
-          " Your business deserves to be seen. The Digital Infrastructure Support service helps MSMEs go from offline to online, fast and professionally. We set up everything you need to establish a strong digital presence, attract customers, and build credibility in just 4 weeks. Perfect for MSMEs starting from scratch or trying to upgrade how they show up online.",
+          " Your business deserves to be seen. The Digiplus Starter Kit helps MSMEs go from offline to online, fast and professionally. We set up everything you need to establish a strong digital presence, attract customers, and build credibility in just 4 weeks. Perfect for MSMEs starting from scratch or trying to upgrade how they show up online.",
         ]}
         buttonText="Apply Now"
         buttonLink="/contact"

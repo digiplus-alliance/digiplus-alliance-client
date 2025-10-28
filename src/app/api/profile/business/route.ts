@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const apiUrl = process.env.NEXT_PUBLIC_STAGING_API_URL;
-// const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+const apiUrl = process.env.STAGING_API_URL;
+// const apiUrl = process.env.API_URL;
 
 export async function PATCH(req: NextRequest) {
   try {
