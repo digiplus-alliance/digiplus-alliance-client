@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const apiUrl = process.env.NODE_ENV === "production" ? process.env.API_URL : process.env.STAGING_API_URL;
+// Prefer VERCEL_ENV for deployment environment (production/preview) when available
+const env = String(process.env.VERCEL_ENV || process.env.NODE_ENV || "");
+const apiUrl =
+  env === "production"
+    ? process.env.API_URL
+    : env === "preview" || env === "staging"
+    ? process.env.NEXT_PUBLIC_STAGING_API_URL
+    : process.env.NEXT_PUBLIC_API_URL;
 
 export async function POST(req: NextRequest) {
   const payload = await req.json();
@@ -29,9 +36,7 @@ export async function POST(req: NextRequest) {
       res.cookies.set({
         name: "accessToken",
         value: accessToken ?? "",
-        secure:
-          process.env.NODE_ENV === "production" ||
-          (process.env.NODE_ENV as string) === "staging",
+        secure: env === "production" || env === "preview" || env === "staging",
         httpOnly: true,
         maxAge: accessToken?.expires,
         path: "/",
@@ -42,9 +47,7 @@ export async function POST(req: NextRequest) {
       res.cookies.set({
         name: "refreshToken",
         value: refreshToken ?? "",
-        secure:
-          process.env.NODE_ENV === "production" ||
-          (process.env.NODE_ENV as string) === "staging",
+        secure: env === "production" || env === "preview" || env === "staging",
         httpOnly: true,
         maxAge: refreshToken?.expires,
         path: "/",
