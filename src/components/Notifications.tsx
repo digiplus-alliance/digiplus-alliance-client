@@ -4,9 +4,9 @@ import { CiBellOn } from "react-icons/ci";
 import { IoClose } from "react-icons/io5";
 import { LuCalendarDays } from "react-icons/lu";
 import { TbSend } from "react-icons/tb";
+import { AlertCircle } from "lucide-react";
 
 import SpinnerIcon from "@/components/icons/spinner";
-import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,72 +15,32 @@ import {
   DropdownMenuTrigger,
   DropdownMenuClose,
 } from "./ui/dropdown-menu";
+import { useGetNotifications } from "@/app/api/admin/notifications/get-notifications";
+import { Button } from "./ui/button";
 
 interface NotificationsProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
 
-export default function Notifications({ open, onOpenChange }: NotificationsProps) {
-  const [notifications] = useState<
-    {
-      id: number;
-      title: string;
-      description: string;
-      date: string;
-      time: string;
-      section: string;
-      type: "form" | "application";
-    }[]
-  >([
-    {
-      id: 1,
-      title: "Innkeeper submitted assessment form",
-      description: "Lorem Ipsum",
-      date: "Today",
-      time: "5.00 pm",
-      section: "Today",
-      type: "form",
-    },
-    {
-      id: 2,
-      title: "Mamaplus Submitted an application form",
-      description: "Lorem Ipsum",
-      date: "Today",
-      time: "11.20 am",
-      section: "Today",
-      type: "application",
-    },
-    {
-      id: 3,
-      title: "Title",
-      description: "desc",
-      date: "Mon, 12 June",
-      time: "",
-      section: "Yesterday",
-      type: "form",
-    },
-    {
-      id: 4,
-      title: "Title",
-      description: "desc",
-      date: "Mon, 11 June",
-      time: "",
-      section: "This Week",
-      type: "application",
-    },
-  ]);
+export default function Notifications({
+  open,
+  onOpenChange,
+}: NotificationsProps) {
+  const { data, error, isPending, refetch } = useGetNotifications();
 
-  const [isPending] = useState(false);
+  const notifications = data?.data?.notifications || [];
+  const unreadCount = data?.data?.unread_count || 0;
+  const isLoading = Boolean(isPending);
 
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
-      <DropdownMenuTrigger 
-        className="group shrink-0 font-secondary lg:bg-[#EBFBFF] w-fit p-1 size-8 rounded-full md:bg-[#EBFBFF] relative"
-      >
+      <DropdownMenuTrigger className="group shrink-0 font-secondary lg:bg-[#EBFBFF] w-fit p-1 size-8 rounded-full md:bg-[#EBFBFF] relative">
         <CiBellOn className="text-[#1E293B] size-full" />
-        {notifications?.length > 0 && (
-          <span className="inline-block size-1.5 absolute right-2 top-1 rounded-full bg-[#EB7A21]" />
+        {unreadCount > 0 && (
+          <span className="inline-flex items-center justify-center size-4 absolute -right-1 -top-1 rounded-full bg-[#EB7A21] text-white text-[10px] font-semibold">
+            {unreadCount > 9 ? "9+" : unreadCount}
+          </span>
         )}
       </DropdownMenuTrigger>
 
@@ -100,71 +60,106 @@ export default function Notifications({ open, onOpenChange }: NotificationsProps
 
         {/* Content */}
         <div className="overflow-y-auto grow max-h-[350px]">
-          {isPending ? (
-            <div className="text-sm text-gray-500 mt-2 flex items-center justify-center gap-4 min-h-[100px]">
-              <SpinnerIcon color="#008080" /> Loading notifications
-            </div>
-          ) : notifications.length ? (
-            <div className="divide-y">
-              {["Today", "Yesterday", "This Week"].map((section) => {
-                const sectionItems = notifications.filter(
-                  (n) => n.section === section
-                );
-                if (!sectionItems.length) return null;
+          {(() => {
+            // Loading State
+            if (isLoading) {
+              return (
+                <div className="text-sm text-gray-500 mt-2 flex items-center justify-center gap-4 min-h-[100px]">
+                  <SpinnerIcon className="text-[#008080]" />
+                  <span>Loading notifications</span>
+                </div>
+              );
+            }
 
-                return (
-                  <div key={section} className="py-2 px-4">
-                    <p className="text-sm text-gray-400 mb-3">{section}</p>
-                    <div className="space-y-3">
-                      {sectionItems.map((n) => (
-                        <DropdownMenuItem
-                          key={n.id}
-                          className={`flex items-start gap-3 rounded-lg p-3 ${
-                            n.section === "Today" && n.id === 1
-                              ? "bg-[#EBFBFF]"
-                              : ""
+            // Error State
+            if (error) {
+              return (
+                <div className="flex flex-col items-center justify-center gap-4 py-8 px-4">
+                  <AlertCircle className="h-12 w-12 text-red-500" />
+                  <div className="text-center">
+                    <p className="text-sm font-medium text-gray-900 mb-1">
+                      Failed to load notifications
+                    </p>
+                    <p className="text-xs text-gray-500 mb-4">
+                      {error instanceof Error
+                        ? error.message
+                        : "Something went wrong"}
+                    </p>
+                    <Button
+                      onClick={() => refetch()}
+                      size="sm"
+                      variant="outline"
+                      className="text-xs"
+                    >
+                      Try Again
+                    </Button>
+                  </div>
+                </div>
+              );
+            }
+
+            // Empty State
+            if (notifications.length === 0) {
+              return (
+                <div className="flex flex-col items-center justify-center py-12 px-4">
+                  <CiBellOn className="h-16 w-16 text-gray-300 mb-3" />
+                  <p className="text-center text-gray-500 text-sm font-medium mb-1">
+                    No notifications yet
+                  </p>
+                  <p className="text-center text-gray-400 text-xs">
+                    We'll notify you when something new arrives
+                  </p>
+                </div>
+              );
+            }
+
+            // Notifications List
+            return (
+              <div className="divide-y">
+                {notifications.map((notification) => (
+                  <DropdownMenuItem
+                    key={notification.id}
+                    className={`flex items-start gap-3 rounded-none p-4 cursor-pointer ${
+                      !notification.is_read ? "bg-[#EBFBFF]" : ""
+                    }`}
+                  >
+                    <span className="mt-1">
+                      {notification.type === "assessment_completed" ? (
+                        <LuCalendarDays className="text-gray-500 h-5 w-5" />
+                      ) : (
+                        <TbSend className="text-gray-500 h-5 w-5" />
+                      )}
+                    </span>
+                    <div className="flex flex-col grow min-w-0">
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <h3
+                          className={`text-sm leading-tight ${
+                            !notification.is_read
+                              ? "font-semibold text-black"
+                              : "font-medium text-gray-700"
                           }`}
                         >
-                          <span className="mt-1">
-                            {n.type === "form" ? (
-                              <LuCalendarDays className="text-gray-500" />
-                            ) : (
-                              <TbSend className="text-gray-500" />
-                            )}
-                          </span>
-                          <div className="flex flex-col grow">
-                            <div className="flex items-center justify-between">
-                              <h3
-                                className={`text-sm ${
-                                  n.id === 1 && n.section === "Today"
-                                    ? "font-semibold text-black"
-                                    : "font-medium text-gray-700"
-                                }`}
-                              >
-                                {n.title}
-                              </h3>
-                              {n.time && (
-                                <span className="text-xs text-gray-500">
-                                  {n.time}
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-xs text-gray-500">
-                              {n.description}
-                            </p>
-                          </div>
-                        </DropdownMenuItem>
-                      ))}
+                          {notification.title}
+                        </h3>
+                        <span className="text-xs text-gray-500 whitespace-nowrap shrink-0">
+                          {notification.created_time}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 mb-1 line-clamp-2">
+                        {notification.message}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {notification.created_date}
+                      </p>
+                      {!notification.is_read && (
+                        <span className="inline-block w-2 h-2 rounded-full bg-[#227C9D] mt-2" />
+                      )}
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="text-center text-gray-500 text-sm py-6">
-              No notifications yet
-            </p>
-          )}
+                  </DropdownMenuItem>
+                ))}
+              </div>
+            );
+          })()}
         </div>
       </DropdownMenuContent>
     </DropdownMenu>

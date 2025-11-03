@@ -11,7 +11,7 @@ export const AdminProfileSchema = z.object({
   __v: z.number(),
   phone_number: z.string().optional(),
   website: z.string().optional(),
-  business_name: z.string().catch(''),
+  business_name: z.string().optional(),
 }).passthrough();
 
 export type AdminProfile = z.infer<typeof AdminProfileSchema>;
