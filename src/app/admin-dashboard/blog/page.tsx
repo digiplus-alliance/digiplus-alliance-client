@@ -3,23 +3,38 @@
 import { useState } from "react";
 import MainBlogPage from "./widgets/main";
 import CreateBlog from "./widgets/create-blog";
-import { set } from "zod";
 
 export default function BlogPage() {
   const [activeTab, setActiveTab] = useState("mainpage");
+  const [selectedBlogId, setSelectedBlogId] = useState<string | null>(null);
 
   const renderComponent = () => {
     switch (activeTab) {
       case "mainpage":
         return (
           <div>
-            <MainBlogPage createBlogPost={() => setActiveTab("createblog")} />
+            <MainBlogPage
+              createBlogPost={() => {
+                setSelectedBlogId(null);
+                setActiveTab("createblog");
+              }}
+              editBlogPost={(blogId: string) => {
+                setSelectedBlogId(blogId);
+                setActiveTab("createblog");
+              }}
+            />
           </div>
         );
       case "createblog":
         return (
           <div>
-            <CreateBlog backToMainPage={() => setActiveTab("mainpage")} />
+            <CreateBlog
+              backToMainPage={() => {
+                setSelectedBlogId(null);
+                setActiveTab("mainpage");
+              }}
+              blogId={selectedBlogId}
+            />
           </div>
         );
     }

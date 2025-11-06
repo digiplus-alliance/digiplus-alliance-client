@@ -3,12 +3,18 @@ import { Button } from "@/components/ui/button";
 
 export default function CreateBlog({
   backToMainPage,
+  blogId,
 }: {
   backToMainPage: () => void;
+  blogId?: string | null;
 }) {
   const handleFilterChange = (value: string) => {
     console.log("Selected filter:", value);
   };
+  
+  // Log the blogId when component mounts or when it changes
+  console.log("Editing blog with ID:", blogId);
+  
   return (
     <div className="p-6 space-y-6 font-secondary md:bg-[#EBEBEB] rounded-tl-2xl">
       <div className="flex items-start md:items-center md:justify-between">

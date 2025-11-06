@@ -16,6 +16,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { SquarePen, Trash2 } from "lucide-react";
+import { useGetBlogPosts } from "@/app/api/admin/blog/getBlogs";
+import { useDeleteBlog } from "@/app/api/admin/blog/deleteBlog";
+import DeactivateUserModal from "../../users/widgets/delete-modal";
 
 const blogSampleData = [
   {
@@ -48,12 +51,21 @@ type BlogTableData = {
 
 interface UsersTableProps {
   searchQuery?: string;
+  editBlogPost: (blogId: string) => void;
 }
 
-export default function BlogTable({ searchQuery }: UsersTableProps) {
+export default function BlogTable({
+  searchQuery,
+  editBlogPost,
+}: UsersTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedBlog, setSelectedBlog] = useState<BlogTableData | null>(null);
+  const [open, setOpen] = useState(false);
   const [blogInfoModalOpen, setBlogInfoModalOpen] = useState(false);
+  const { data: BlogPosts, isPending, isError } = useGetBlogPosts();
+  const { mutate: deleteBlog, isPending: isDeleting } = useDeleteBlog(
+    selectedBlog ? selectedBlog.id : ""
+  );
 
   // Use blogSampleData directly
   const tableData = blogSampleData;
@@ -63,8 +75,18 @@ export default function BlogTable({ searchQuery }: UsersTableProps) {
   const pageSize = 10;
 
   const handleViewBlog = (blog: BlogTableData) => {
+    editBlogPost(blog.id);
+  };
+
+  const handleDeleteBlog = (blog: BlogTableData) => {
     setSelectedBlog(blog);
-    setBlogInfoModalOpen(true);
+    setOpen(true);
+  };
+
+  const handleDelete = () => {
+    if (selectedBlog) {
+      console.log("Deleting blog:", selectedBlog);
+    }
   };
 
   const totalPages = Math.ceil(tableData.length / pageSize);
@@ -128,7 +150,7 @@ export default function BlogTable({ searchQuery }: UsersTableProps) {
               />
             </button>
             <button
-              onClick={() => handleViewBlog(row)}
+              onClick={() => handleDeleteBlog(row)}
               className="p-1 hover:bg-gray-100 rounded"
               title="View blog info"
             >
@@ -202,6 +224,16 @@ export default function BlogTable({ searchQuery }: UsersTableProps) {
           onPageChange={setCurrentPage}
         />
       </div>
+
+      <DeactivateUserModal
+        deleteModalOpen={open}
+        setDeleteModalOpen={setOpen}
+        confirmDeleteUser={handleDelete}
+        loading={isDeleting}
+        title="Delete Blog Post?"
+        description="Are you sure you want to delete this blog post?  If you do, this blog post will not be available for users anymore."
+        confirmButtonText="Delete"
+      />
     </>
   );
 }

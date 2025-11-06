@@ -17,13 +17,7 @@ export type BlogPost = z.infer<typeof BlogPostSchema>;
 export const useGetBlogPosts = () =>
   useFetch<BlogPost[]>({
     url: "blogs",
-    schema: z.union([
-      z.object({
-        message: z.string(),
-        data: z.array(BlogPostSchema),
-        success: z.boolean(),
-      })
-    ]),
+    schema: z.array(BlogPostSchema),
     hasAuth: true,
     errorMessage: "Failed to fetch blog posts.",
     successMessage: "Blog posts loaded.",

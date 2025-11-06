@@ -7,8 +7,10 @@ import Searchbar from "@/components/Searchbar";
 
 export default function MainBlogPage({
   createBlogPost,
+  editBlogPost,
 }: {
   createBlogPost: () => void;
+  editBlogPost: (blogId: string) => void;
 }) {
   const handleFilterChange = (value: string) => {
     console.log("Selected filter:", value);
@@ -21,15 +23,6 @@ export default function MainBlogPage({
           <p className="text-[#5E5B5B]">Managing blog/news content</p>
         </div>
         <div className="md:flex md:items-center md:gap-4">
-          <FilterButton
-            placeholder="Filter Status"
-            options={[
-              { label: "By Name", value: "name" },
-              { label: "By User ID", value: "userId" },
-              { label: "By Company", value: "company" },
-            ]}
-            onChange={handleFilterChange}
-          />
           <Button onClick={() => createBlogPost()}>New Post</Button>
         </div>
       </div>
@@ -42,14 +35,14 @@ export default function MainBlogPage({
           <FilterButton
             placeholder="Filter Status"
             options={[
-              { label: "By Name", value: "name" },
-              { label: "By User ID", value: "userId" },
-              { label: "By Company", value: "company" },
+              { label: "Published", value: "published" },
+              { label: "Draft", value: "draft" },
+              { label: "Archived", value: "archived" },
             ]}
             onChange={handleFilterChange}
           />
         </div>
-        <BlogTable />
+        <BlogTable editBlogPost={editBlogPost} />
       </div>
     </div>
   );
