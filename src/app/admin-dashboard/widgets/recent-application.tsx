@@ -20,7 +20,7 @@ export default function RecentApplication() {
           </h3>
           <button
             className="text-sm text-[#8F8F8F] border border-[#227C9D] p-2 rounded-lg items-center flex"
-            onClick={() => router.push("/admin-dashboard/applications")}
+            onClick={() => router.push("/admin-dashboard/applications?view=list")}
           >
             <p className="hidden md:block">See all</p>
             <span className="inline-block ml-1">
@@ -88,7 +88,7 @@ export default function RecentApplication() {
         </h3>
         <button
           className="text-sm text-[#8F8F8F] border border-[#227C9D] p-2 rounded-lg items-center flex"
-          onClick={() => router.push("/admin-dashboard/applications")}
+          onClick={() => router.push("/admin-dashboard/applications?view=list")}
         >
           <p className="hidden md:block">See all</p>
           <span className="inline-block ml-1">
