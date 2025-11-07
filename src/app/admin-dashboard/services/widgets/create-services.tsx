@@ -61,7 +61,7 @@ const serviceTypes = [
 const pricingUnits = [
   { value: "per_hour", label: "Per Hour" },
   { value: "per_project", label: "Per Project" },
-  { value: "one_time", label: "One Time" },
+  { value: "one_time", label: "One Time Payment" },
   { value: "per_day", label: "Per Day" },
   { value: "per_month", label: "Per Month" },
 ];
