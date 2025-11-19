@@ -1,55 +1,60 @@
 import { Button } from "@/components/ui/button";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-
-// Dummy data for monthly view
-const MONTHLY_DATA = [
-  { month: "Jan", score: 45 },
-  { month: "Feb", score: 52 },
-  { month: "Mar", score: 48 },
-  { month: "Apr", score: 61 },
-  { month: "May", score: 55 },
-  { month: "Jun", score: 67 },
-  { month: "Jul", score: 70 },
-  { month: "Aug", score: 65 },
-  { month: "Sep", score: 72 },
-  { month: "Oct", score: 68 },
-  { month: "Nov", score: 75 },
-  { month: "Dec", score: 78 },
-];
-
-// Dummy data for yearly view
-const YEARLY_DATA = [
-  { year: "2020", score: 45 },
-  { year: "2021", score: 55 },
-  { year: "2022", score: 62 },
-  { year: "2023", score: 68 },
-  { year: "2024", score: 73 },
-  { year: "2025", score: 78 },
-];
+import { useGetAssessmentMonthlyStats } from "@/app/api/admin/reports/get-assessment-monthly-stats";
+import { useGetAssessmentYearlyStats } from "@/app/api/admin/reports/get-assessment-yearly-stats";
 
 export function AdminAssessmentChart() {
   const router = useRouter();
-  const [fetching, setFetching] = useState(false);
   const [viewMode, setViewMode] = useState<"monthly" | "yearly">("monthly");
+  const { data: monthlyStatsData, isLoading: isLoadingMonthly } =
+    useGetAssessmentMonthlyStats();
+  const { data: yearlyStatsData, isLoading: isLoadingYearly } =
+    useGetAssessmentYearlyStats();
+
+  // Transform monthly_breakdown data to chart format
+  const monthlyData = useMemo(() => {
+    if (!monthlyStatsData?.monthly_breakdown) return [];
+    return monthlyStatsData.monthly_breakdown.map((item) => ({
+      month: item.month,
+      score: item.average_score,
+    }));
+  }, [monthlyStatsData]);
+
+  // Transform yearly_breakdown data to chart format
+  const yearlyData = useMemo(() => {
+    if (!yearlyStatsData?.yearly_breakdown) return [];
+    return yearlyStatsData.yearly_breakdown.map((item) => ({
+      year: item.year.toString(),
+      score: item.average_score,
+    }));
+  }, [yearlyStatsData]);
+
   const [chartData, setChartData] = useState<
     {
       month?: string;
       year?: string;
       score: number;
     }[]
-  >(MONTHLY_DATA);
+  >([]);
+
+  // Update chart data when monthly/yearly data changes or view mode changes
+  useEffect(() => {
+    if (viewMode === "monthly") {
+      setChartData(monthlyData);
+    } else {
+      setChartData(yearlyData);
+    }
+  }, [viewMode, monthlyData, yearlyData]);
 
   const handleViewModeChange = (mode: "monthly" | "yearly") => {
     setViewMode(mode);
-    if (mode === "monthly") {
-      setChartData(MONTHLY_DATA);
-    } else {
-      setChartData(YEARLY_DATA);
-    }
   };
-  if (fetching) {
+
+  const isLoading = isLoadingMonthly || isLoadingYearly;
+
+  if (isLoading) {
     return (
       <div className="space-y-4">
         <div className="flex justify-center items-center py-8">
@@ -64,7 +69,8 @@ export function AdminAssessmentChart() {
     <div className="bg-white shadow-sm border border-gray-200 rounded-lg p-4 lg:col-span-2">
       <div className="flex justify-between items-center mb-3  pb-2">
         <h3 className="font-normal text-[#A3A3A3] ">Assessment Submission</h3>
-        <Button variant={"ghost"}
+        <Button
+          variant={"ghost"}
           className="text-sm text-[#0E5F7D] p-2 items-center flex"
           onClick={() => router.push("/admin-dashboard/assessment?view=list")}
         >

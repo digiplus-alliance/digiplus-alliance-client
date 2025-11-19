@@ -1,61 +1,69 @@
 import { Button } from "@/components/ui/button";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import { Download } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { exportYearlyDataToExcel } from "@/utils/exportCSV";
-
-// Dummy data for monthly view
-const MONTHLY_DATA = [
-  { month: "Jan", score: 45 },
-  { month: "Feb", score: 52 },
-  { month: "Mar", score: 48 },
-  { month: "Apr", score: 61 },
-  { month: "May", score: 55 },
-  { month: "Jun", score: 67 },
-  { month: "Jul", score: 70 },
-  { month: "Aug", score: 65 },
-  { month: "Sep", score: 72 },
-  { month: "Oct", score: 68 },
-  { month: "Nov", score: 75 },
-  { month: "Dec", score: 78 },
-];
-
-// Dummy data for yearly view
-const YEARLY_DATA = [
-  { year: "2020", score: 45 },
-  { year: "2021", score: 55 },
-  { year: "2022", score: 62 },
-  { year: "2023", score: 68 },
-  { year: "2024", score: 73 },
-  { year: "2025", score: 78 },
-];
+import { useGetUsersMonthlyStats } from "@/app/api/admin/reports/get-users-monthly-stats";
+import { useGetUsersYearlyStats } from "@/app/api/admin/reports/get-users-yearly-stats";
 
 export function UsersChart() {
-  const [fetching, setFetching] = useState(false);
   const [viewMode, setViewMode] = useState<"monthly" | "yearly">("monthly");
+  const { data: monthlyStatsData, isLoading: isLoadingMonthly } =
+    useGetUsersMonthlyStats();
+  const { data: yearlyStatsData, isLoading: isLoadingYearly } =
+    useGetUsersYearlyStats();
+
+  // Transform monthly_breakdown data to chart format
+  const monthlyData = useMemo(() => {
+    if (!monthlyStatsData?.monthly_breakdown) return [];
+    return monthlyStatsData.monthly_breakdown.map((item) => ({
+      month: item.month,
+      score: item.total_users,
+    }));
+  }, [monthlyStatsData]);
+
+  // Transform yearly_breakdown data to chart format
+  const yearlyData = useMemo(() => {
+    if (!yearlyStatsData?.yearly_breakdown) return [];
+    return yearlyStatsData.yearly_breakdown.map((item) => ({
+      year: item.year.toString(),
+      score: item.total_users,
+    }));
+  }, [yearlyStatsData]);
+
   const [chartData, setChartData] = useState<
     {
       month?: string;
       year?: string;
       score: number;
     }[]
-  >(MONTHLY_DATA);
-  const [yearlyData, setYearlyData] = useState<any[]>([]);
+  >([]);
+
+  // Update chart data when monthly/yearly data changes or view mode changes
+  useEffect(() => {
+    if (viewMode === "monthly") {
+      setChartData(monthlyData);
+    } else {
+      setChartData(yearlyData);
+    }
+  }, [viewMode, monthlyData, yearlyData]);
 
   const handleViewModeChange = (mode: "monthly" | "yearly") => {
     setViewMode(mode);
-    if (mode === "monthly") {
-      setChartData(MONTHLY_DATA);
-    } else {
-      setChartData(YEARLY_DATA);
-    }
   };
 
   const exportAssessmentToCSV = async () => {
-    exportYearlyDataToExcel(yearlyData as any);
+    // Export the appropriate data based on view mode
+    const dataToExport =
+      viewMode === "monthly"
+        ? monthlyStatsData?.monthly_breakdown
+        : yearlyStatsData?.yearly_breakdown;
+    exportYearlyDataToExcel(dataToExport as any);
   };
 
-  if (fetching) {
+  const isLoading = isLoadingMonthly || isLoadingYearly;
+
+  if (isLoading) {
     return (
       <div className="space-y-4">
         <div className="flex justify-center items-center py-8">
