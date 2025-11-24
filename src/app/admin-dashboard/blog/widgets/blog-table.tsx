@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -16,30 +16,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { SquarePen, Trash2 } from "lucide-react";
-import { useGetBlogPosts } from "@/app/api/admin/blog/getBlogs";
+import { useGetBlogPosts, BlogPost } from "@/app/api/admin/blog/getBlogs";
 import { useDeleteBlog } from "@/app/api/admin/blog/deleteBlog";
 import DeactivateUserModal from "../../users/widgets/delete-modal";
-
-const blogSampleData = [
-  {
-    id: "1",
-    blogTitle: "Introducing Our New Feature",
-    date: "2023-10-01 12:00 PM",
-    status: "Published",
-  },
-  {
-    id: "2",
-    blogTitle: "Understanding the Basics of React",
-    date: "2023-10-02 10:00 AM",
-    status: "Draft",
-  },
-  {
-    id: "3",
-    blogTitle: "A Guide to TypeScript",
-    date: "2023-10-03 02:00 PM",
-    status: "Published",
-  },
-];
 
 // Type for blog table data
 type BlogTableData = {
@@ -51,26 +30,67 @@ type BlogTableData = {
 
 interface UsersTableProps {
   searchQuery?: string;
+  statusFilter?: string;
   editBlogPost: (blogId: string) => void;
 }
 
 export default function BlogTable({
   searchQuery,
+  statusFilter = "all",
   editBlogPost,
 }: UsersTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedBlog, setSelectedBlog] = useState<BlogTableData | null>(null);
   const [open, setOpen] = useState(false);
-  const [blogInfoModalOpen, setBlogInfoModalOpen] = useState(false);
   const { data: BlogPosts, isPending, isError } = useGetBlogPosts();
   const { mutate: deleteBlog, isPending: isDeleting } = useDeleteBlog(
     selectedBlog ? selectedBlog.id : ""
   );
 
-  // Use blogSampleData directly
-  const tableData = blogSampleData;
-  const isLoading = false;
-  const error = null;
+  // Transform API data to table format
+  const tableData = useMemo(() => {
+    if (!BlogPosts) return [];
+
+    return BlogPosts.map((post: BlogPost) => ({
+      id: post._id,
+      blogTitle: post.title,
+      date: new Date(post.createdAt).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      status: post.isPublished ? "Published" : "Draft",
+    }));
+  }, [BlogPosts]);
+
+  // Filter and search data
+  const filteredData = useMemo(() => {
+    let filtered = tableData;
+
+    // Apply search filter
+    if (searchQuery && searchQuery.trim() !== "") {
+      filtered = filtered.filter((blog) =>
+        blog.blogTitle.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Apply status filter
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((blog) => blog.status === statusFilter);
+    }
+
+    return filtered;
+  }, [tableData, searchQuery, statusFilter]);
+
+  const isLoading = isPending;
+  const error = isError;
+
+  // Reset to first page when search query or status filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter]);
 
   const pageSize = 10;
 
@@ -85,16 +105,21 @@ export default function BlogTable({
 
   const handleDelete = () => {
     if (selectedBlog) {
-      console.log("Deleting blog:", selectedBlog);
+      deleteBlog(undefined, {
+        onSuccess: () => {
+          setOpen(false);
+          setSelectedBlog(null);
+        },
+      });
     }
   };
 
-  const totalPages = Math.ceil(tableData.length / pageSize);
+  const totalPages = Math.ceil(filteredData.length / pageSize);
 
   const pageData = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
-    return tableData.slice(start, start + pageSize);
-  }, [currentPage, tableData]);
+    return filteredData.slice(start, start + pageSize);
+  }, [currentPage, filteredData]);
 
   const columns: ColumnDef<BlogTableData>[] = [
     {
@@ -171,6 +196,24 @@ export default function BlogTable({
     getCoreRowModel: getCoreRowModel(),
   });
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="text-center text-sm text-gray-500 p-8">
+        Loading blog posts...
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="text-center text-sm text-red-500 p-8">
+        Failed to load blog posts. Please try again.
+      </div>
+    );
+  }
+
   // Empty state
   if (!tableData || tableData.length === 0) {
     return <div className="text-center text-sm text-gray-500 p-8">Empty</div>;
@@ -212,6 +255,16 @@ export default function BlogTable({
               ))}
             </TableRow>
           ))}
+          {table.getRowModel().rows.length === 0 && (
+            <TableRow>
+              <TableCell
+                colSpan={columns.length}
+                className="text-center py-8 text-gray-500"
+              >
+                No blogs found matching your criteria.
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
       <div className="mt-4 flex flex-col md:flex-row md:justify-between md:items-center gap-2 px-4">

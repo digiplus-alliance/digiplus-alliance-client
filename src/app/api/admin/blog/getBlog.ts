@@ -17,14 +17,15 @@ export const BlogPostSchema = z.object({
 
 export type BlogPost = z.infer<typeof BlogPostSchema>;
 
-export const useGetBlogPosts = () =>
-  useFetch<BlogPost[]>({
-    url: "blogs",
-    schema: z.array(BlogPostSchema),
+export const useGetBlogPost = (id?: string | null) =>
+  useFetch<BlogPost>({
+    url: `blogs/${id}`,
+    schema: BlogPostSchema,
     hasAuth: true,
-    errorMessage: "Failed to fetch blog posts.",
-    successMessage: "Blog posts loaded.",
+    errorMessage: "Failed to fetch blog post.",
+    successMessage: "Blog post loaded.",
     showErrorMessage: true,
     showSuccessMessage: false,
-    queryKey: ["blogs"],
+    queryKey: ["blogs", id ?? ""],
+    enabled: !!id,
   });

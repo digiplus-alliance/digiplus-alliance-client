@@ -5,12 +5,17 @@ import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
+type ImageData = {
+  url: string; // blob URL or regular URL
+  file?: File; // actual File object (only for uploaded files)
+};
+
 export default function FeatureImg({
   images,
   setImages,
 }: {
-  images: string[];
-  setImages: (images: string[]) => void;
+  images: ImageData[];
+  setImages: (images: ImageData[]) => void;
 }) {
   const [file, setFile] = useState<File | null>(null);
   const [link, setLink] = useState("");
@@ -47,7 +52,6 @@ export default function FeatureImg({
 
   const handleClearLink = () => {
     setLink("");
-    setPreviewUrl("");
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -73,18 +77,17 @@ export default function FeatureImg({
 
   const handleSave = () => {
     if (file) {
-      // Save the preview URL to images array
-      // When you upload to Cloudinary, you'll replace this with the Cloudinary URL
-      setImages([...images, previewUrl]);
+      // Save the file with its blob URL for preview
+      setImages([...images, { url: previewUrl, file: file }]);
       setFile(null);
       setPreviewUrl("");
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
     } else if (link) {
-      setImages([...images, link]);
+      // Save the link URL without a file
+      setImages([...images, { url: link }]);
       setLink("");
-      setPreviewUrl("");
     }
   };
 
@@ -94,10 +97,10 @@ export default function FeatureImg({
   };
 
   const handleClearAll = () => {
-    // Clear all saved images
-    images.forEach((img) => {
-      if (img.startsWith("blob:")) {
-        URL.revokeObjectURL(img);
+    // Clear all saved images and revoke blob URLs
+    images.forEach((imgData) => {
+      if (imgData.url.startsWith("blob:")) {
+        URL.revokeObjectURL(imgData.url);
       }
     });
     setImages([]);
@@ -164,9 +167,6 @@ export default function FeatureImg({
               setLink(newLink);
               if (newLink) {
                 setFile(null); // Clear file if link is entered
-                setPreviewUrl(newLink); // Set preview URL to the link
-              } else {
-                setPreviewUrl("");
               }
             }}
             className="mt-1 pr-10"

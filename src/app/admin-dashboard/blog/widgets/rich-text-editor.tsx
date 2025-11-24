@@ -1,6 +1,7 @@
 "use client";
 
 import { useEditor, EditorContent } from "@tiptap/react";
+import { useEffect } from "react";
 import StarterKit from "@tiptap/starter-kit";
 import TextAlign from "@tiptap/extension-text-align";
 import Highlight from "@tiptap/extension-highlight";
@@ -60,8 +61,15 @@ const TextEditor = ({ content, onChangeContent }: TextEditorProps) => {
     },
   });
 
+  // Update editor content when the content prop changes
+  useEffect(() => {
+    if (editor && content !== undefined && content !== editor.getHTML()) {
+      editor.commands.setContent(content);
+    }
+  }, [editor, content]);
+
   return (
-    <div className="border rounded-lg bg-white p-4 min-h-[300px] md:min-h-[530px]">
+    <div className="border rounded-lg bg-white p-4 min-h-[300px] md:min-h-[530px] w-full">
       <div className=" border-b pb-2">
         <MenuBar editor={editor} />
       </div>

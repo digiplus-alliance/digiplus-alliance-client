@@ -181,13 +181,13 @@ export default function MenuBar({ editor }: { editor: Editor | null }) {
           <BsQuote />
         </Toggle>
 
-        <ImageUploadButton
+        {/* <ImageUploadButton
           editor={editor}
           // text="Add Image"
           hideWhenUnavailable={true}
           showShortcut={false}
           onInserted={() => {}}
-        />
+        /> */}
 
         <Toggle
           aria-label="Toggle highlight"

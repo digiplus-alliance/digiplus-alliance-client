@@ -4,6 +4,7 @@ import FilterButton from "@/components/FilterButton";
 import { Button } from "@/components/ui/button";
 import BlogTable from "./blog-table";
 import Searchbar from "@/components/Searchbar";
+import { useState } from "react";
 
 export default function MainBlogPage({
   createBlogPost,
@@ -12,9 +13,13 @@ export default function MainBlogPage({
   createBlogPost: () => void;
   editBlogPost: (blogId: string) => void;
 }) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+
   const handleFilterChange = (value: string) => {
-    console.log("Selected filter:", value);
+    setStatusFilter(value);
   };
+
   return (
     <div className="p-6 space-y-6 font-secondary md:bg-[#EBEBEB] rounded-tl-2xl">
       <div className="flex items-start md:items-center md:justify-between">
@@ -30,19 +35,23 @@ export default function MainBlogPage({
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4 bg-white p-4 rounded-lg">
           <Searchbar
             placeholder="Search blog posts..."
-            onSearch={(query) => console.log("Searching for:", query)}
+            onSearch={(query) => setSearchQuery(query)}
           />
           <FilterButton
             placeholder="Filter Status"
             options={[
-              { label: "Published", value: "published" },
-              { label: "Draft", value: "draft" },
-              { label: "Archived", value: "archived" },
+              { label: "All", value: "all" },
+              { label: "Published", value: "Published" },
+              { label: "Draft", value: "Draft" },
             ]}
             onChange={handleFilterChange}
           />
         </div>
-        <BlogTable editBlogPost={editBlogPost} />
+        <BlogTable
+          editBlogPost={editBlogPost}
+          searchQuery={searchQuery}
+          statusFilter={statusFilter}
+        />
       </div>
     </div>
   );

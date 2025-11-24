@@ -8,6 +8,11 @@ import {
 import Image from "next/image";
 import { useState } from "react";
 
+type ImageData = {
+  url: string;
+  file?: File;
+};
+
 export default function BlogPreview({
   isOpen,
   onClose,
@@ -21,7 +26,7 @@ export default function BlogPreview({
   title: string;
   content: string;
   tags: string;
-  featuredImages: string[];
+  featuredImages: ImageData[];
 }) {
   // Parse tags (comma-separated)
   const tagArray = tags
@@ -29,8 +34,16 @@ export default function BlogPreview({
     .map((tag) => tag.trim())
     .filter((tag) => tag.length > 0);
 
+  // Separate blob URLs (uploaded files) from regular URLs (links)
+  const uploadedImages = featuredImages.filter((imgData) =>
+    imgData.url.startsWith("blob:")
+  );
+  const imageLinks = featuredImages.filter(
+    (imgData) => !imgData.url.startsWith("blob:")
+  );
+
   // Determine image layout based on count
-  const imageCount = featuredImages.length;
+  const imageCount = uploadedImages.length;
 
   const renderImages = () => {
     if (imageCount === 0) {
@@ -46,11 +59,11 @@ export default function BlogPreview({
       return (
         <div className="w-full h-96 relative rounded-lg overflow-hidden">
           <Image
-            src={featuredImages[0]}
+            src={uploadedImages[0].url}
             alt="Featured image"
             fill
             className="object-cover"
-            unoptimized={featuredImages[0].startsWith("blob:")}
+            unoptimized={uploadedImages[0].url.startsWith("blob:")}
           />
         </div>
       );
@@ -62,20 +75,20 @@ export default function BlogPreview({
         <div className="grid grid-cols-[70%_30%] gap-4">
           <div className="relative h-96 rounded-lg overflow-hidden">
             <Image
-              src={featuredImages[0]}
+              src={uploadedImages[0].url}
               alt="Featured image 1"
               fill
               className="object-cover"
-              unoptimized={featuredImages[0].startsWith("blob:")}
+              unoptimized={uploadedImages[0].url.startsWith("blob:")}
             />
           </div>
           <div className="relative h-96 rounded-lg overflow-hidden">
             <Image
-              src={featuredImages[1]}
+              src={uploadedImages[1].url}
               alt="Featured image 2"
               fill
               className="object-cover"
-              unoptimized={featuredImages[1].startsWith("blob:")}
+              unoptimized={uploadedImages[1].url.startsWith("blob:")}
             />
           </div>
         </div>
@@ -88,30 +101,30 @@ export default function BlogPreview({
         <div className="grid grid-cols-[70%_30%] gap-4">
           <div className="relative h-96 rounded-lg overflow-hidden">
             <Image
-              src={featuredImages[0]}
+              src={uploadedImages[0].url}
               alt="Featured image 1"
               fill
               className="object-cover"
-              unoptimized={featuredImages[0].startsWith("blob:")}
+              unoptimized={uploadedImages[0].url.startsWith("blob:")}
             />
           </div>
           <div className="flex flex-col gap-4">
             <div className="relative h-[calc(50%-0.5rem)] rounded-lg overflow-hidden">
               <Image
-                src={featuredImages[1]}
+                src={uploadedImages[1].url}
                 alt="Featured image 2"
                 fill
                 className="object-cover"
-                unoptimized={featuredImages[1].startsWith("blob:")}
+                unoptimized={uploadedImages[1].url.startsWith("blob:")}
               />
             </div>
             <div className="relative h-[calc(50%-0.5rem)] rounded-lg overflow-hidden">
               <Image
-                src={featuredImages[2]}
+                src={uploadedImages[2].url}
                 alt="Featured image 3"
                 fill
                 className="object-cover"
-                unoptimized={featuredImages[2].startsWith("blob:")}
+                unoptimized={uploadedImages[2].url.startsWith("blob:")}
               />
             </div>
           </div>
@@ -132,6 +145,32 @@ export default function BlogPreview({
             {/* <h3 className="text-sm font-semibold text-gray-600">Featured Image</h3> */}
             {renderImages()}
           </div>
+
+          {/* Image Links */}
+          {imageLinks.length > 0 && (
+            <div className="space-y-2 bg-gray-50 p-4 rounded-lg">
+              <h3 className="text-sm font-semibold text-gray-700">
+                Image Links
+              </h3>
+              <div className="space-y-1">
+                {imageLinks.map((imgData, index) => (
+                  <div
+                    key={index}
+                    className="text-sm text-blue-600 hover:text-blue-800 break-all"
+                  >
+                    <a
+                      href={imgData.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline"
+                    >
+                      {imgData.url}
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="flex flex-col md:flex-row md:justify-center md:items-center gap-4">
             {/* Tags */}
