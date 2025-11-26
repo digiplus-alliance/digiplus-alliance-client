@@ -13,6 +13,7 @@ export const BlogPostSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
   __v: z.number().optional(),
+  relatedBlogs: z.array(z.any()).optional(),
 });
 
 export type BlogPost = z.infer<typeof BlogPostSchema>;
@@ -21,7 +22,7 @@ export const useGetBlogPost = (id?: string | null) =>
   useFetch<BlogPost>({
     url: `blogs/${id}`,
     schema: BlogPostSchema,
-    hasAuth: true,
+    hasAuth: false,
     errorMessage: "Failed to fetch blog post.",
     successMessage: "Blog post loaded.",
     showErrorMessage: true,

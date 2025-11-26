@@ -21,7 +21,7 @@ export const useGetBlogPosts = () =>
   useFetch<BlogPost[]>({
     url: "blogs",
     schema: z.array(BlogPostSchema),
-    hasAuth: true,
+    hasAuth: false,
     errorMessage: "Failed to fetch blog posts.",
     successMessage: "Blog posts loaded.",
     showErrorMessage: true,

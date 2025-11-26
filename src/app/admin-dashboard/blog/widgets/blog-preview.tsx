@@ -1,4 +1,5 @@
 "use client";
+import BlogContentViewer from "@/components/BlogContentViewer";
 import {
   Dialog,
   DialogContent,
@@ -218,14 +219,8 @@ export default function BlogPreview({
             </div>
           )}
 
-          {/* Content */}
-          <div
-            className="prose prose-sm max-w-none  p-6"
-            dangerouslySetInnerHTML={{
-              __html:
-                content || "<p class='text-gray-500'>No content yet...</p>",
-            }}
-          />
+          {/* Content - Rendered with TipTap */}
+          {content ? <BlogContentViewer content={content} /> : <p>No content available</p>}
         </div>
       </DialogContent>
     </Dialog>
