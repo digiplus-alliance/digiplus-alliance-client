@@ -31,7 +31,7 @@ export default function Blog() {
       .filter((post) => post.isPublished) // Only show published posts
       .map((post) => ({
         id: post._id,
-        image: post.featuredImageUrls[0] || "/blog/image_one.png", // Use first image or fallback
+        image: post.featuredImageUrls[0] || "/No_Image_Available.jpg", // Use first image or fallback
         title: post.title,
         description: stripHtmlTags(post.content).substring(0, 150) + "...", // Strip HTML and extract first 150 chars
         content: post.content,
