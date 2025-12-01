@@ -27,6 +27,7 @@ export default function CreateBlog({
   const [tags, setTags] = useState("");
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [featuredImages, setFeaturedImages] = useState<ImageData[]>([]);
+  const [actionType, setActionType] = useState<"publish" | "draft" | null>(null);
   const { mutate: createBlog, isPending: isLoading } = useCreateBlog();
   const { mutate: updateBlog, isPending: isUpdating } = useUpdateBlog(blogId || undefined);
   const {
@@ -66,6 +67,7 @@ export default function CreateBlog({
   };
 
   const handlePublish = () => {
+    setActionType("publish");
     // Separate files from URLs
     const imageFiles: File[] = [];
     const imageUrls: string[] = [];
@@ -102,6 +104,10 @@ export default function CreateBlog({
       updateBlog(formData as any, {
         onSuccess: () => {
           clearFormData();
+          setActionType(null);
+        },
+        onError: () => {
+          setActionType(null);
         },
       });
     } else {
@@ -109,12 +115,17 @@ export default function CreateBlog({
       createBlog(formData as any, {
         onSuccess: () => {
           clearFormData();
+          setActionType(null);
+        },
+        onError: () => {
+          setActionType(null);
         },
       });
     }
   };
 
   const handleDraft = () => {
+    setActionType("draft");
     // Separate files from URLs
     const imageFiles: File[] = [];
     const imageUrls: string[] = [];
@@ -151,6 +162,10 @@ export default function CreateBlog({
       updateBlog(formData as any, {
         onSuccess: () => {
           clearFormData();
+          setActionType(null);
+        },
+        onError: () => {
+          setActionType(null);
         },
       });
     } else {
@@ -158,6 +173,10 @@ export default function CreateBlog({
       createBlog(formData as any, {
         onSuccess: () => {
           clearFormData();
+          setActionType(null);
+        },
+        onError: () => {
+          setActionType(null);
         },
       });
     }
@@ -235,8 +254,11 @@ export default function CreateBlog({
             variant="ghost"
             className="text-[#3D3A3A]"
             onClick={handleDraft}
+            disabled={isLoading || isUpdating}
           >
-            Save as Draft
+            {(isLoading || isUpdating) && actionType === "draft"
+              ? "Saving as Draft..."
+              : "Save as Draft"}
           </Button>
           <Button
             variant="outline"
@@ -246,7 +268,9 @@ export default function CreateBlog({
             Preview
           </Button>
           <Button onClick={handlePublish} disabled={isLoading || isUpdating}>
-            {isLoading || isUpdating ? "Publishing..." : "Publish"}
+            {(isLoading || isUpdating) && actionType === "publish"
+              ? "Publishing..."
+              : "Publish"}
           </Button>
         </div>
       </div>

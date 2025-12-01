@@ -25,6 +25,11 @@ export default function FeatureImg({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
+      // Check maximum images limit
+      if (images.length >= 3) {
+        alert("Maximum 3 images allowed");
+        return;
+      }
       // Check file size (10MB limit)
       if (selectedFile.size > 10 * 1024 * 1024) {
         alert("File size exceeds 10MB limit");
@@ -42,7 +47,7 @@ export default function FeatureImg({
   const handleClearFile = () => {
     setFile(null);
     if (previewUrl) {
-      URL.revokeObjectURL(previewUrl); 
+      URL.revokeObjectURL(previewUrl);
       setPreviewUrl("");
     }
     if (fileInputRef.current) {
@@ -58,6 +63,11 @@ export default function FeatureImg({
     e.preventDefault();
     const droppedFile = e.dataTransfer.files[0];
     if (droppedFile) {
+      // Check maximum images limit
+      if (images.length >= 3) {
+        alert("Maximum 3 images allowed");
+        return;
+      }
       if (droppedFile.size > 10 * 1024 * 1024) {
         alert("File size exceeds 10MB limit");
         return;
@@ -76,6 +86,12 @@ export default function FeatureImg({
   };
 
   const handleSave = () => {
+    // Check maximum images limit before saving
+    if (images.length >= 3) {
+      alert("Maximum 3 images allowed");
+      return;
+    }
+
     if (file) {
       // Save the file with its blob URL for preview
       setImages([...images, { url: previewUrl, file: file }]);
@@ -113,7 +129,7 @@ export default function FeatureImg({
   return (
     <div className="p-4 space-y-4 font-secondary bg-[#FFFFFF] rounded-sm border shadow-md border-[#C4C4C4] h-fit">
       <p className="text-[#8F8F8F] text-xs text-center">
-        Kindly upload files according to hierarchy
+        Kindly upload files according to hierarchy (Maximum 3 images)
       </p>
 
       {/* File upload area */}
@@ -196,7 +212,7 @@ export default function FeatureImg({
         <Button
           variant="ghost"
           onClick={handleSave}
-          disabled={!file && !link}
+          disabled={(!file && !link) || images.length >= 3}
           className="bg-[#3D3A3A] text-white hover:bg-gray-500 disabled:opacity-50"
         >
           Add Image
