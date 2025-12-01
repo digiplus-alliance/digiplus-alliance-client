@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import { Download } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
-import { exportYearlyDataToExcel } from "@/utils/exportCSV";
+import { exportAsCSV } from "@/lib/exportAsCSV";
 import { useGetUsersMonthlyStats } from "@/app/api/admin/reports/get-users-monthly-stats";
 import { useGetUsersYearlyStats } from "@/app/api/admin/reports/get-users-yearly-stats";
 
@@ -10,6 +10,8 @@ export function UsersChart() {
   const [viewMode, setViewMode] = useState<"monthly" | "yearly">("monthly");
   const { data: monthlyStatsData, isLoading: isLoadingMonthly } =
     useGetUsersMonthlyStats();
+
+  console.log("Monthly Stats Data:", monthlyStatsData);
   const { data: yearlyStatsData, isLoading: isLoadingYearly } =
     useGetUsersYearlyStats();
 
@@ -53,12 +55,53 @@ export function UsersChart() {
   };
 
   const exportAssessmentToCSV = async () => {
-    // Export the appropriate data based on view mode
-    const dataToExport =
-      viewMode === "monthly"
-        ? monthlyStatsData?.monthly_breakdown
-        : yearlyStatsData?.yearly_breakdown;
-    exportYearlyDataToExcel(dataToExport as any);
+    if (viewMode === "monthly" && monthlyStatsData) {
+      // Flatten the monthly breakdown with user details for complete export
+      const flattenedData = monthlyStatsData.monthly_breakdown.flatMap(
+        (monthData) =>
+          monthData.user_details.map((user) => ({
+            month: monthData.month,
+            month_number: monthData.month_number,
+            year: monthData.year,
+            total_users_in_month: monthData.total_users,
+            user_id: user.user_id || "",
+            email: user.email || "",
+            phone_number: user.phone_number || "",
+            business_name: user.business_name || "",
+            website: user.website || "",
+            created_at: user.createdAt || "",
+            updated_at: user.updatedAt || "",
+          }))
+      );
+
+      exportAsCSV(
+        flattenedData,
+        `users-monthly-stats-${monthlyStatsData.year}`,
+        [
+          { key: "month", header: "Month" },
+          { key: "month_number", header: "Month Number" },
+          { key: "year", header: "Year" },
+          { key: "total_users_in_month", header: "Total Users in Month" },
+          { key: "user_id", header: "User ID" },
+          { key: "email", header: "Email" },
+          { key: "phone_number", header: "Phone Number" },
+          { key: "business_name", header: "Business Name" },
+          { key: "website", header: "Website" },
+          { key: "created_at", header: "Created At" },
+          { key: "updated_at", header: "Updated At" },
+        ]
+      );
+    } else if (viewMode === "yearly" && yearlyStatsData) {
+      // Export the yearly breakdown
+      exportAsCSV(
+        yearlyStatsData.yearly_breakdown,
+        `users-yearly-stats-${yearlyStatsData.start_year}-${yearlyStatsData.end_year}`,
+        [
+          { key: "year", header: "Year" },
+          { key: "total_users", header: "Total Users" },
+        ]
+      );
+    }
   };
 
   const isLoading = isLoadingMonthly || isLoadingYearly;
