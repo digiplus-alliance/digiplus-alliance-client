@@ -66,8 +66,6 @@ export default function TrainingsPage() {
         timetable_url: timetableLink,
       };
     }
-
-    console.log("Send to Listed Participants - Payload:", payload);
     sendTimetable(payload as any, {
       onSuccess: () => {
         // Clear all input values
