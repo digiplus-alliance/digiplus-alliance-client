@@ -49,11 +49,11 @@ export default function AssessmentPage() {
             </h1>
           </div>
           <div className="hidden md:flex md:items-center md:gap-4">
-            {activeComponent === "current" && (
+            {/* {activeComponent === "current" && (
               <>
                 <Button>Import Assessment Questions</Button>
               </>
-            )}
+            )} */}
             {activeComponent === "edit" && (
               <>
                 <Button>Update</Button>

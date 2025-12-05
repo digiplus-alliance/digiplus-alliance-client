@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import TextareaAutosize from "react-textarea-autosize";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useFormStore } from "@/store/form-store";
@@ -14,10 +15,10 @@ const welcomeFormSchema = z.object({
     .string()
     .min(1, "Title is required")
     .min(3, "Title must be at least 3 characters long")
-    .max(100, "Title must be less than 100 characters"),
+    .max(500, "Title must be less than 100 characters"),
   description: z
     .string()
-    .max(500, "Description must be less than 500 characters")
+    .max(2000, "Description must be less than 2000 characters")
     .optional(),
   instruction: z
     .string()
@@ -104,9 +105,10 @@ export default function WelcomePageQuestion({
 
         {/* Description Field */}
         <div className="w-full text-center space-y-2">
-          <textarea
+          <TextareaAutosize
             id="description"
-            rows={2}
+            minRows={5}
+            maxRows={15}
             placeholder="Description is optional"
             {...register("description")}
             className={`w-full text-[#7A7A7A] text-center border-none shadow-none resize-none focus:ring-0 focus:outline-none ${
@@ -120,9 +122,10 @@ export default function WelcomePageQuestion({
 
         {/* Instruction Field */}
         <div className="w-full text-center space-y-2">
-          <textarea
+          <TextareaAutosize
             id="instruction"
-            rows={2}
+            minRows={2}
+            maxRows={10}
             placeholder="Instruction is optional"
             {...register("instruction")}
             className={`w-full text-[#7A7A7A] italic text-center border-none shadow-none resize-none focus:ring-0 focus:outline-none ${

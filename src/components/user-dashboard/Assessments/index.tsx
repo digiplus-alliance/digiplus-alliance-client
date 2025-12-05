@@ -1,28 +1,35 @@
-'use client';
-import { useState, useMemo, Fragment } from 'react';
-import { WelcomeScreen } from './WelcomeScreen';
-import { ModuleTitleScreen } from './ModuleTitleScreen';
-import { MultipleChoiceQuestion } from './MultipleChoiceQuestion';
-import { CheckboxQuestion } from './CheckboxQuestion';
-import { TextQuestion } from './TextQuestion';
-import { DropdownQuestion } from './DropdownQuestion';
-import { GridQuestion } from './GridQuestion';
-import { AssessmentResults } from './AssessmentResults';
-import { useGetAvailableAssessments, useGetAssessmentById, useSubmitAssessment } from '@/app/api/assessments';
-import { useAuthStore } from '@/store/auth';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
-import { groupQuestionsByModuleAndStep, IGroupedModule } from '@/utils/assessmentUtils';
-import { type AssessmentSubmissionResponse } from '@/types/assessment';
+"use client";
+import { useState, useMemo, Fragment } from "react";
+import { WelcomeScreen } from "./WelcomeScreen";
+import { ModuleTitleScreen } from "./ModuleTitleScreen";
+import { MultipleChoiceQuestion } from "./MultipleChoiceQuestion";
+import { CheckboxQuestion } from "./CheckboxQuestion";
+import { TextQuestion } from "./TextQuestion";
+import { DropdownQuestion } from "./DropdownQuestion";
+import { GridQuestion } from "./GridQuestion";
+import { AssessmentResults } from "./AssessmentResults";
+import {
+  useGetAvailableAssessments,
+  useGetAssessmentById,
+  useSubmitAssessment,
+} from "@/app/api/assessments";
+import { useAuthStore } from "@/store/auth";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import {
+  groupQuestionsByModuleAndStep,
+  IGroupedModule,
+} from "@/utils/assessmentUtils";
+import { type AssessmentSubmissionResponse } from "@/types/assessment";
 
 // Import types from the assessment types file
-import type { Assessment, AssessmentQuestion } from '@/types/assessment';
-import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
-import { useGetServices } from '@/app/api/services/useGetServices';
-import { useValidateResponse } from '@/app/api/assessments/useValidateResponse';
+import type { Assessment, AssessmentQuestion } from "@/types/assessment";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { useGetServices } from "@/app/api/services/useGetServices";
+import { useValidateResponse } from "@/app/api/assessments/useValidateResponse";
 
 export default function Assessment() {
   const [currentAssessmentIndex, setCurrentAssessmentIndex] = useState(0);
@@ -32,7 +39,9 @@ export default function Assessment() {
   const [showAssessment, setShowAssessment] = useState(false);
 
   const [responses, setResponses] = useState<Record<string, any>>({});
-  const [completedAssessments, setCompletedAssessments] = useState<Set<string>>(new Set());
+  const [completedAssessments, setCompletedAssessments] = useState<Set<string>>(
+    new Set()
+  );
   const [allAssessmentsCompleted, setAllAssessmentsCompleted] = useState(false);
   const { user } = useAuthStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,19 +51,19 @@ export default function Assessment() {
 
   const router = useRouter();
 
-  // const {
-  //   data: availableAssessments,
-  //   isLoading: loadingAssessments,
-  //   error: assessmentsError,
-  // } = useGetAvailableAssessments();
+  const {
+    data: availableAssessments,
+    isLoading: loadingAssessments,
+    error: assessmentsError,
+  } = useGetAvailableAssessments();
 
-  const availableAssessments: any[] = ['68dec54109ae0fe9fd7c43cb'];
-  const loadingAssessments: boolean = false;
-  const assessmentsError = null;
+  // const availableAssessments: any[] = ['68dec54109ae0fe9fd7c43cb'];
+  // const loadingAssessments: boolean = false;
+  // const assessmentsError = null;
 
   const { suggestedServices, setSuggestedServices } = useAuthStore();
 
-  const currentAssessmentId = availableAssessments[0] || null;
+  const currentAssessmentId = availableAssessments?.[0]?._id || null;
 
   // const {
   //   data: assessmentData,
@@ -66,10 +75,11 @@ export default function Assessment() {
     data: assessmentData,
     isLoading,
     error,
-  } = useGetAssessmentById('68dec54109ae0fe9fd7c43cb', !!currentAssessmentId);
+  } = useGetAssessmentById(currentAssessmentId || "", !!currentAssessmentId);
 
   const submitAssessment = useSubmitAssessment();
-  const [assessmentResult, setAssessmentResult] = useState<AssessmentSubmissionResponse | null>(null);
+  const [assessmentResult, setAssessmentResult] =
+    useState<AssessmentSubmissionResponse | null>(null);
 
   // Group questions by module and step
   const groupedModules: IGroupedModule[] = useMemo(
@@ -97,7 +107,9 @@ export default function Assessment() {
       <div className="min-h-screen bg-muted/30 flex items-center justify-center p-6">
         <Card className="w-full max-w-4xl">
           <CardContent className="p-12 text-center">
-            <p className="text-red-600 mb-4">Error loading assessments: {String(assessmentsError)}</p>
+            <p className="text-red-600 mb-4">
+              Error loading assessments: {String(assessmentsError)}
+            </p>
             <Button onClick={() => window.location.reload()}>Retry</Button>
           </CardContent>
         </Card>
@@ -124,14 +136,18 @@ export default function Assessment() {
       <AssessmentResults
         score={assessmentResult?.data?.user_score || 0}
         maxScore={Math.max(
-          ...(assessmentResult?.data?.recommended_services?.map((service) => service.max_points) || [])
+          ...(assessmentResult?.data?.recommended_services?.map(
+            (service) => service.max_points
+          ) || [])
         )}
-        level={assessmentResult?.data?.user_level || ''}
+        level={assessmentResult?.data?.user_level || ""}
         onSuggestions={() => {
           setSuggestedServices(
-            assessmentResult?.data?.recommended_services?.map((service) => service.service_name) || []
+            assessmentResult?.data?.recommended_services?.map(
+              (service) => service.service_name
+            ) || []
           );
-          router.push('/user-dashboard/services');
+          router.push("/user-dashboard/services");
         }}
         onRestart={() => {
           // Reset state for restarting all assessments
@@ -141,7 +157,7 @@ export default function Assessment() {
           setCompletedAssessments(new Set());
           setAllAssessmentsCompleted(false);
         }}
-        assessment_title={assessmentResult?.data?.assessment_title || ''}
+        assessment_title={assessmentResult?.data?.assessment_title || ""}
       />
     );
   }
@@ -166,7 +182,9 @@ export default function Assessment() {
       <div className="min-h-screen bg-muted/30 flex items-center justify-center p-6">
         <Card className="w-full max-w-4xl">
           <CardContent className="p-12 text-center">
-            <p className="text-red-600 mb-4">Error loading assessment: {String(error)}</p>
+            <p className="text-red-600 mb-4">
+              Error loading assessment: {String(error)}
+            </p>
             <Button onClick={() => window.location.reload()}>Retry</Button>
           </CardContent>
         </Card>
@@ -200,9 +218,12 @@ export default function Assessment() {
   const isLastStepOverall = isLastStepInModule && isLastModule;
 
   // Transform API data to match component interfaces
-  const transformOptions = (options: any[]) => options.map((opt) => ({ ...opt, id: opt._id, _id: opt.id }));
-  const transformGridColumns = (columns: any[]) => columns.map((col) => ({ ...col, id: col.id }));
-  const transformGridRows = (rows: any[]) => rows.map((row) => ({ ...row, id: row.id }));
+  const transformOptions = (options: any[]) =>
+    options.map((opt) => ({ ...opt, id: opt._id, _id: opt.id }));
+  const transformGridColumns = (columns: any[]) =>
+    columns.map((col) => ({ ...col, id: col.id }));
+  const transformGridRows = (rows: any[]) =>
+    rows.map((row) => ({ ...row, id: row.id }));
 
   // A helper to handle single or multiple question responses for a step
   const handleNext = async (stepResponses: Record<string, any>) => {
@@ -231,7 +252,7 @@ export default function Assessment() {
       // Submit the current assessment
       try {
         if (!user?._id) {
-          throw new Error('User not authenticated');
+          throw new Error("User not authenticated");
         }
 
         setIsSubmitting(true);
@@ -243,7 +264,7 @@ export default function Assessment() {
         });
 
         if (!response.success) {
-          toast.error('Failed to submit assessment');
+          toast.error("Failed to submit assessment");
           return;
         }
 
@@ -255,7 +276,10 @@ export default function Assessment() {
         setCompletedAssessments(newCompletedAssessments);
 
         // Check if this was the last assessment
-        if (currentAssessmentIndex === (availableAssessments?.length || 0) - 1) {
+        if (
+          currentAssessmentIndex ===
+          (availableAssessments?.length || 0) - 1
+        ) {
           // All assessments completed
           setAllAssessmentsCompleted(true);
         } else {
@@ -265,7 +289,7 @@ export default function Assessment() {
           setCurrentStepIndex(0);
         }
       } catch (error) {
-        toast.error('Failed to submit assessment');
+        toast.error("Failed to submit assessment");
 
         // // Still move to next assessment even if submission fails
         // if (currentAssessmentIndex === (availableAssessments?.length || 0) - 1) {
@@ -293,14 +317,21 @@ export default function Assessment() {
       const prevModule = groupedModules[currentModuleIndex - 1];
       setCurrentModuleIndex(currentModuleIndex - 1);
       setCurrentStepIndex(prevModule.steps.length - 1);
+    } else if (currentStepIndex === 0 && currentModuleIndex === 0) {
+      // If we're at the very beginning, return to welcome screen
+      setShowAssessment(false);
     }
   };
 
   // Progress calculation across all assessments
   const totalAssessments = availableAssessments?.length || 1;
   const progressInCurrentAssessment =
-    (currentModuleIndex + currentStepIndex / totalStepsInModule) / groupedModules.length;
-  const overallProgress = ((currentAssessmentIndex + progressInCurrentAssessment) / totalAssessments) * 100;
+    (currentModuleIndex + currentStepIndex / totalStepsInModule) /
+    groupedModules.length;
+  const overallProgress =
+    ((currentAssessmentIndex + progressInCurrentAssessment) /
+      totalAssessments) *
+    100;
 
   // Progress bar component
   const ProgressBar = () => (
@@ -311,7 +342,8 @@ export default function Assessment() {
       />
       <div className="flex justify-between text-sm text-gray-600 mt-3 flex-wrap pb-4 ">
         <span className="truncate pr-2">
-          Assessment {currentAssessmentIndex + 1} of {totalAssessments} - Module: {currentModule.moduleName}
+          Assessment {currentAssessmentIndex + 1} of {totalAssessments} -
+          Module: {currentModule.moduleName}
         </span>
         <span>{Math.round(overallProgress)}% Complete</span>
       </div>
@@ -322,8 +354,12 @@ export default function Assessment() {
   const AssessmentHeader = () => (
     <div className="bg-white border-b border-gray-200 p-4 mb-6">
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-xl font-semibold text-gray-800">{assessment.title}</h2>
-        {assessment.description && <p className="text-sm text-gray-600 mt-1">{assessment.description}</p>}
+        <h2 className="text-xl font-semibold text-gray-800">
+          {assessment.title}
+        </h2>
+        {assessment.description && (
+          <p className="text-sm text-gray-600 mt-1">{assessment.description}</p>
+        )}
       </div>
     </div>
   );
@@ -335,24 +371,30 @@ export default function Assessment() {
     const firstQuestion = currentQuestions[0];
 
     // Handle single-page question types like welcome and module titles
-    if (firstQuestion.type === 'welcome_screen') {
+    if (firstQuestion.type === "welcome_screen") {
       return (
         <WelcomeScreen
           title={firstQuestion.welcome_title || assessment.title}
-          message={firstQuestion.welcome_message || assessment.description || ''}
-          buttonText={firstQuestion.button_text || 'Begin Assessment'}
+          message={
+            firstQuestion.welcome_message || assessment.description || ""
+          }
+          buttonText={firstQuestion.button_text || "Begin Assessment"}
           onStart={() => handleNext({ [firstQuestion._id]: null })}
         />
       );
     }
 
-    if (firstQuestion.type === 'module_title') {
+    if (firstQuestion.type === "module_title") {
       return (
         <ModuleTitleScreen
           module={currentModule.moduleName}
-          title={firstQuestion.module_title || ''}
-          description={firstQuestion.module_description || ''}
-          onBack={currentModuleIndex > 0 || currentStepIndex > 0 ? handleBack : undefined}
+          title={firstQuestion.module_title || ""}
+          description={firstQuestion.module_description || ""}
+          onBack={
+            currentModuleIndex > 0 || currentStepIndex > 0
+              ? handleBack
+              : undefined
+          }
           onContinue={() => handleNext({ [firstQuestion._id]: null })}
           showBackButton={currentModuleIndex > 0 || currentStepIndex > 0}
         />
@@ -365,40 +407,58 @@ export default function Assessment() {
     // and instead rely on a shared set of controls.
     // For this example, I'll keep them as they are, but ideally, you'd refactor them.
     return (
-      <Card className={cn('px-0', !showAssessment && 'bg-transparent border-none shadow-none drop-shadow-none ')}>
+      <Card
+        className={cn(
+          "px-0",
+          !showAssessment &&
+            "bg-transparent border-none shadow-none drop-shadow-none "
+        )}
+      >
         <CardContent
           className={cn(
-            ' p-4 px-3 sm:p-6 md:p-8',
-            !showAssessment && 'bg-transparent border-none shadow-none drop-shadow-none '
+            " p-4 px-3 sm:p-6 md:p-8",
+            !showAssessment &&
+              "bg-transparent border-none shadow-none drop-shadow-none "
           )}
         >
           {showAssessment && (
             <>
-              <p className="text-[#227C9D] text-sm font-medium text-center">module {currentModuleIndex + 1}</p>
-              <h1 className="text-2xl font-bold text-[#227C9D] text-center mb-4">{currentModule.moduleName}</h1>
+              <p className="text-[#227C9D] text-sm font-medium text-center">
+                module {currentModuleIndex + 1}
+              </p>
+              <h1 className="text-2xl font-bold text-[#227C9D] text-center mb-4">
+                {currentModule.moduleName}
+              </h1>
             </>
           )}
           {!showAssessment ? (
             <WelcomeScreen
               title={assessment.title}
-              message={assessment.description || ''}
-              buttonText={'Begin Assessment'}
+              message={assessment.description || ""}
+              buttonText={"Begin Assessment"}
               onStart={() => setShowAssessment(true)}
             />
           ) : (
-            currentQuestions.map((currentQuestion: AssessmentQuestion, index) => {
-              const findResponse =
-                validateResponseData &&
-                validateResponseData?.results?.find((resp: any) => resp.field === currentQuestion._id && !resp.isValid);
-              return (
-                <div key={currentQuestion._id} className="mb-6 last:mb-0">
-                  {renderQuestion(currentQuestion, index)}
-                  {findResponse && findResponse?.errors[0] && (
-                    <p className=" text-red-600 text-sm mt-1.5">{findResponse.errors[0].message}</p>
-                  )}
-                </div>
-              );
-            })
+            currentQuestions.map(
+              (currentQuestion: AssessmentQuestion, index) => {
+                const findResponse =
+                  validateResponseData &&
+                  validateResponseData?.results?.find(
+                    (resp: any) =>
+                      resp.field === currentQuestion._id && !resp.isValid
+                  );
+                return (
+                  <div key={currentQuestion._id} className="mb-6 last:mb-0">
+                    {renderQuestion(currentQuestion, index)}
+                    {findResponse && findResponse?.errors[0] && (
+                      <p className=" text-red-600 text-sm mt-1.5">
+                        {findResponse.errors[0].message}
+                      </p>
+                    )}
+                  </div>
+                );
+              }
+            )
           )}
 
           {showAssessment && (
@@ -408,17 +468,20 @@ export default function Assessment() {
                 <Button
                   variant="outline"
                   onClick={handleBack}
-                  disabled={currentModuleIndex === 0 && currentStepIndex === 0}
+                  // disabled={currentModuleIndex === 0 && currentStepIndex === 0}
                   className=" bg-transparent cursor-pointer py-4 border-[#227C9D]"
                 >
                   Back
                 </Button>
                 <Button
                   onClick={async () => {
-                    const stepResponses = currentQuestions.reduce((acc: any, q: any) => {
-                      acc[q._id] = responses[q._id] || null; // Use existing response or null
-                      return acc;
-                    }, {} as Record<string, any>);
+                    const stepResponses = currentQuestions.reduce(
+                      (acc: any, q: any) => {
+                        acc[q._id] = responses[q._id] || null; // Use existing response or null
+                        return acc;
+                      },
+                      {} as Record<string, any>
+                    );
 
                     const fields = currentQuestions.map((question) => {
                       return {
@@ -429,14 +492,14 @@ export default function Assessment() {
 
                     setValidatingResponse(true);
 
-                    await fetch('/api/assessments/validate', {
-                      method: 'POST',
+                    await fetch("/api/assessments/validate", {
+                      method: "POST",
                       headers: {
-                        'Content-Type': 'application/json',
+                        "Content-Type": "application/json",
                       },
                       body: JSON.stringify({
-                        formId: '68dec54109ae0fe9fd7c43cb',
-                        formType: 'assessment',
+                        formId: "68dec54109ae0fe9fd7c43cb",
+                        formType: "assessment",
                         fields,
                       }),
                     })
@@ -444,19 +507,27 @@ export default function Assessment() {
                       .then((data) => {
                         if (!data.isValid) {
                           setValidateResponseData(data);
-                          toast.error('Please confirm your answers before proceeding.');
+                          toast.error(
+                            "Please confirm your answers before proceeding."
+                          );
                           return;
                         } else {
-                          const checkIfAnyIsNull = Object.values(stepResponses).some((value) => value === null);
+                          const checkIfAnyIsNull = Object.values(
+                            stepResponses
+                          ).some((value) => value === null);
 
                           if (checkIfAnyIsNull) {
-                            toast.error('Error validating response, please confirm your answers before proceeding.');
+                            toast.error(
+                              "Error validating response, please confirm your answers before proceeding."
+                            );
                             return;
                           }
                           handleNext(stepResponses);
                         }
                       })
-                      .catch((err) => toast.error(err.message || 'Something went wrong'))
+                      .catch((err) =>
+                        toast.error(err.message || "Something went wrong")
+                      )
                       .finally(() => {
                         setValidatingResponse(false);
                       });
@@ -466,22 +537,22 @@ export default function Assessment() {
                 >
                   {isLastStepOverall ? (
                     isSubmitting ? (
-                      'Submitting Assessment...'
+                      "Submitting Assessment..."
                     ) : validatingResponse ? (
                       <p className=" flex items-center justify-center pt-3">
                         <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
                       </p>
                     ) : (
-                      'Submit Assessment'
+                      "Submit Assessment"
                     )
                   ) : isSubmitting ? (
-                    'Submitting...'
+                    "Submitting..."
                   ) : validatingResponse ? (
                     <p className=" flex items-center justify-center pt-3">
                       <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
                     </p>
                   ) : (
-                    'Next'
+                    "Next"
                   )}
                 </Button>
               </div>
@@ -495,9 +566,12 @@ export default function Assessment() {
     );
   };
 
-  const renderQuestion = (currentQuestion: AssessmentQuestion, index: number) => {
+  const renderQuestion = (
+    currentQuestion: AssessmentQuestion,
+    index: number
+  ) => {
     switch (currentQuestion.type) {
-      case 'multiple_choice':
+      case "multiple_choice":
         return (
           <MultipleChoiceQuestion
             module={currentModule.moduleName}
@@ -506,14 +580,14 @@ export default function Assessment() {
             instruction={currentQuestion.instruction}
             options={transformOptions(currentQuestion.options || [])}
             // currentStep={currentStepIndex + 1}
-            value={responses[currentQuestion._id] || ''}
+            value={responses[currentQuestion._id] || ""}
             onChange={(res) => {
               setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }));
             }}
             index={index}
           />
         );
-      case 'checkbox':
+      case "checkbox":
         return (
           <CheckboxQuestion
             module={currentModule.moduleName}
@@ -525,12 +599,14 @@ export default function Assessment() {
             maxSelections={currentQuestion.max_selections}
             // currentStep={currentStepIndex + 1}
             value={responses[currentQuestion._id] || []}
-            onChange={(res) => setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }))}
+            onChange={(res) =>
+              setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }))
+            }
             index={index}
           />
         );
-      case 'short_text':
-      case 'long_text':
+      case "short_text":
+      case "long_text":
         return (
           <TextQuestion
             module={currentModule.moduleName}
@@ -544,12 +620,14 @@ export default function Assessment() {
             rows={currentQuestion.rows}
             isRequired={currentQuestion.is_required}
             // currentStep={currentStepIndex + 1}
-            value={responses[currentQuestion._id] || ''}
-            onChange={(res) => setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }))}
+            value={responses[currentQuestion._id] || ""}
+            onChange={(res) =>
+              setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }))
+            }
             index={index}
           />
         );
-      case 'dropdown':
+      case "dropdown":
         return (
           <DropdownQuestion
             module={currentModule.moduleName}
@@ -559,12 +637,14 @@ export default function Assessment() {
             options={transformOptions(currentQuestion.options || [])}
             isRequired={currentQuestion.is_required}
             // currentStep={currentStepIndex + 1}
-            value={responses[currentQuestion._id] || ''}
-            onChange={(res) => setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }))}
+            value={responses[currentQuestion._id] || ""}
+            onChange={(res) =>
+              setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }))
+            }
             index={index}
           />
         );
-      case 'multiple_choice_grid':
+      case "multiple_choice_grid":
         return (
           <GridQuestion
             module={currentModule.moduleName}
@@ -576,12 +656,18 @@ export default function Assessment() {
             isRequired={currentQuestion.is_required}
             // currentStep={currentStepIndex + 1}
             value={responses[currentQuestion._id] || {}}
-            onChange={(res) => setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }))}
+            onChange={(res) =>
+              setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }))
+            }
             index={index}
           />
         );
       default:
-        return <div key={currentQuestion._id}>Unsupported question type: {currentQuestion.type}</div>;
+        return (
+          <div key={currentQuestion._id}>
+            Unsupported question type: {currentQuestion.type}
+          </div>
+        );
     }
   };
 

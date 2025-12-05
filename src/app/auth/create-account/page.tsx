@@ -285,6 +285,10 @@ export default function RegisterPage() {
           onButtonClick={() => {
             router.push("/auth/login");
           }}
+          secondButtonLabel="Resend Verification Email"
+          onSecondButtonClick={() => {
+            router.push("/auth/register");
+          }}
         />
       )}
     </div>

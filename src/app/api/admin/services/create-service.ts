@@ -43,5 +43,6 @@ export const useCreateService = () => {
     hasAuth: true,
     schema: createServiceResponseSchema,
     successMessage: "Service created successfully",
+    invalidateKeys: ["services", "all-services"],
   });
 };

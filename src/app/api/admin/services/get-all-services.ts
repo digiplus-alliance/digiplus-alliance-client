@@ -29,5 +29,6 @@ export function useGetAllServices() {
     url: 'services',
     hasAuth: true,
     schema: AllServicesResponseSchema,
+    queryKey: ['services', 'all-services'],
   });
 }

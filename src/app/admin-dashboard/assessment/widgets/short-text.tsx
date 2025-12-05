@@ -45,7 +45,7 @@ export default function ShortText({
     initialData?.descriptions || ""
   );
   const [answerPlaceholder, setAnswerPlaceholder] = useState(
-    initialData?.answer_placeholder || ""
+    initialData?.answer_placeholder || "Enter your answer here..."
   );
   const [maxCharacters, setMaxCharacters] = useState<number>(
     initialData?.max_characters || 200
@@ -68,7 +68,7 @@ export default function ShortText({
       question_no: questionNo,
       question,
       descriptions: description,
-      answer_placeholder: answerPlaceholder,
+      answer_placeholder: answerPlaceholder || "Enter your answer here...",
       min_characters: minCharacters,
       max_characters: maxCharacters,
       completion_points: completionPoints,
@@ -87,7 +87,6 @@ export default function ShortText({
   const isFormValid = () => {
     return (
       question.trim() !== "" &&
-      answerPlaceholder.trim() !== "" &&
       maxCharacters > 0 &&
       completionPoints >= 0 &&
       selectedModule !== ""
@@ -141,7 +140,7 @@ export default function ShortText({
           {/* Answer Placeholder Configuration */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
-              Answer Placeholder Text:
+              Answer Placeholder Text (Optional):
             </label>
             <Input
               placeholder="e.g., Enter your answer here..."
@@ -149,6 +148,9 @@ export default function ShortText({
               onChange={(e) => setAnswerPlaceholder(e.target.value)}
               className="w-full"
             />
+            <p className="text-xs text-gray-500">
+              Default: &quot;Enter your answer here...&quot;
+            </p>
           </div>
 
           {/* Character Limit Configuration */}

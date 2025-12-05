@@ -575,9 +575,24 @@ export default function PreviewModal({
         <div className="p-6 border-b">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">Assessment Preview</h2>
-            <Button variant="outline" onClick={onClose}>
-              Close
-            </Button>
+            <div>
+              <Button
+                variant="default"
+                className="m-2"
+                onClick={handleFinalSave}
+              >
+                {isPending
+                  ? applicationId
+                    ? "Updating..."
+                    : "Saving..."
+                  : applicationId
+                  ? "Update"
+                  : "Save"}
+              </Button>
+              <Button variant="outline" onClick={onClose}>
+                Close
+              </Button>
+            </div>
           </div>
         </div>
         <div className="p-6 space-y-6">
