@@ -3,16 +3,25 @@
 import FilterButton from "@/components/FilterButton";
 import { Button } from "@/components/ui/button";
 import ApplicationTable from "./widgets/application-table";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CreateApplication from "./widgets/create-application";
 import { useGetAllApplications } from "@/app/api/admin/applications";
 import { exportAsCSV } from "@/lib/exportAsCSV";
 import { toast } from "sonner";
 import ApplicationsList from "./widgets/applications-list";
+import { useSearchParams } from "next/navigation";
 
 export default function ApplicationsPage() {
+  const searchParams = useSearchParams();
+  const viewParam = searchParams.get("view");
   const [activeScreen, setActiveScreen] = useState("create");
   const [serviceTypeFilter, setServiceTypeFilter] = useState<string>("");
+
+  useEffect(() => {
+    if (viewParam === "list") {
+      setActiveScreen("list");
+    }
+  }, [viewParam]);
 
   // Fetch applications data for export
   const { data: applications } = useGetAllApplications({

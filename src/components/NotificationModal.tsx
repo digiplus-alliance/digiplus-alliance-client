@@ -1,7 +1,14 @@
 "use client";
 
 import React from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle } from "lucide-react";
 
@@ -15,6 +22,9 @@ interface NotificationModalProps {
   description?: React.ReactNode;
   buttonLabel?: React.ReactNode;
   onButtonClick?: () => void;
+  secondButton?: React.ReactNode;
+  onSecondButtonClick?: () => void;
+  secondButtonLabel?: React.ReactNode;
 }
 
 export default function NotificationModal({
@@ -25,6 +35,9 @@ export default function NotificationModal({
   description,
   buttonLabel,
   onButtonClick,
+  secondButton,
+  onSecondButtonClick,
+  secondButtonLabel,
 }: NotificationModalProps) {
   const isSuccess = variant === "success";
 
@@ -34,7 +47,9 @@ export default function NotificationModal({
       <DialogContent>
         <DialogHeader className="flex flex-col items-center gap-3">
           <div
-            className={`p-4 rounded-full ${isSuccess ? "bg-green-100" : "bg-red-100"}`}
+            className={`p-4 rounded-full ${
+              isSuccess ? "bg-green-100" : "bg-red-100"
+            }`}
             aria-hidden
           >
             {isSuccess ? (
@@ -45,22 +60,38 @@ export default function NotificationModal({
           </div>
           <DialogTitle className="text-center">{title}</DialogTitle>
           {description ? (
-            <DialogDescription className="text-center">{description}</DialogDescription>
+            <DialogDescription className="text-center">
+              {description}
+            </DialogDescription>
           ) : null}
         </DialogHeader>
 
-        {buttonLabel ? (
-          <DialogFooter>
-            <div className="w-full flex justify-center">
-              <Button
-                onClick={() => onButtonClick && onButtonClick()}
-                className={isSuccess ? "bg-green-500 text-white hover:bg-green-400" : "bg-red-600 text-white"}
-              >
-                {buttonLabel}
-              </Button>
-            </div>
-          </DialogFooter>
-        ) : null}
+        <div className="mt-4 items-center text-center justify-center flex">
+          {buttonLabel ? (
+            <DialogFooter>
+              <div className="flex flex-col md:flex-row items-center gap-4">
+                <Button
+                  onClick={() => onButtonClick && onButtonClick()}
+                  className={` max-w-xs ${
+                    isSuccess
+                      ? "bg-green-500 text-white hover:bg-green-400"
+                      : "bg-red-600 text-white"
+                  }`}
+                >
+                  {buttonLabel}
+                </Button>
+                {/* {secondButtonLabel && (
+                  <Button
+                    onClick={() => onSecondButtonClick && onSecondButtonClick()}
+                    className="max-w-xs bg-gray-200 hover:bg-gray-300 text-gray-800"
+                  >
+                    {secondButtonLabel}
+                  </Button>
+                )} */}
+              </div>
+            </DialogFooter>
+          ) : null}
+        </div>
       </DialogContent>
     </Dialog>
   );

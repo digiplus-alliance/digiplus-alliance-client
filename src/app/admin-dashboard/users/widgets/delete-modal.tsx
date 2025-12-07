@@ -1,6 +1,7 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -13,7 +14,7 @@ type Props = {
   deleteModalOpen: boolean;
   setDeleteModalOpen: (open: boolean) => void;
   confirmDeleteUser: () => void;
-  loading?: boolean;  
+  loading?: boolean;
   title?: string;
   description?: string;
   confirmButtonText?: string;
@@ -40,13 +41,15 @@ export default function DeactivateUserModal({
         </DialogHeader>
 
         {/* Description */}
-        <p className="text-[#706C6C] text-base px-10">
+        <DialogDescription className="text-[#706C6C] text-base px-10">
           {description}
-        </p>
+        </DialogDescription>
 
         {/* Footer Buttons */}
         <div className="flex justify-end gap-3 pt-4">
-          <Button onClick={confirmDeleteUser}>{loading ? <SpinnerIcon /> : confirmButtonText}</Button>
+          <Button onClick={confirmDeleteUser}>
+            {loading ? <SpinnerIcon /> : confirmButtonText}
+          </Button>
           <Button
             variant="outline"
             className="border-[#FBEFEF] text-[#D63A3A] hover:bg-red-50"

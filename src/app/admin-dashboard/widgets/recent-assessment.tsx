@@ -22,7 +22,7 @@ export default function RecentAssessment() {
           </h3>
           <button
             className="text-sm text-[#8F8F8F] border border-[#227C9D] p-2 rounded-lg items-center flex"
-            onClick={() => router.push("/admin-dashboard/assessment")}
+            onClick={() => router.push("/admin-dashboard/assessment?view=list")}
           >
             <p className="hidden md:block">See all</p>
             <span className="inline-block ml-1">
@@ -97,7 +97,7 @@ export default function RecentAssessment() {
         </h3>
         <button
           className="text-sm text-[#8F8F8F] border border-[#227C9D] p-2 rounded-lg items-center flex"
-          onClick={() => router.push("/admin-dashboard/assessment")}
+          onClick={() => router.push("/admin-dashboard/assessment?view=list")}
         >
           <p className="hidden md:block">See all</p>
           <span className="inline-block ml-1">
@@ -129,7 +129,9 @@ export default function RecentAssessment() {
                   ) : (
                     <div className="w-10 h-10 rounded-lg bg-[#EBFBFF] flex items-center justify-center text-sm font-semibold text-[#227C9D]">
                       {submission.user.business_name
-                        ? submission.user.business_name.slice(0, 2).toUpperCase()
+                        ? submission.user.business_name
+                            .slice(0, 2)
+                            .toUpperCase()
                         : "NA"}
                     </div>
                   )}
@@ -139,7 +141,8 @@ export default function RecentAssessment() {
                     </p>
                     <p className="text-xs text-[#3D424F]">
                       <span className="text-[#A3A3A3]">
-                        {submission.completed_date} at {submission.completed_time}
+                        {submission.completed_date} at{" "}
+                        {submission.completed_time}
                       </span>
                     </p>
                   </div>
@@ -149,7 +152,8 @@ export default function RecentAssessment() {
                     Submitted
                   </button>
                   <p className="flex justify-end text-[#B8B8B8] text-sm font-medium">
-                    Score: {submission.scores.user_score}/{submission.scores.max_possible_score}
+                    Score: {submission.scores.user_score}/
+                    {submission.scores.max_possible_score}
                   </p>
                 </div>
               </div>
@@ -160,4 +164,3 @@ export default function RecentAssessment() {
     </div>
   );
 }
-

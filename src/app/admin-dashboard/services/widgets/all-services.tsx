@@ -35,7 +35,11 @@ function ServiceCardSkeleton() {
   );
 }
 
-export default function AllServices() {
+interface AllServicesProps {
+  onEdit: (serviceId: string) => void;
+}
+
+export default function AllServices({ onEdit }: AllServicesProps) {
   const { data: services, isLoading, error } = useGetAllServices();
 
   // Loading State - Show 8 skeletons

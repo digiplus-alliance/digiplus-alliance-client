@@ -351,6 +351,15 @@ export default function QuestionScreen({
         >
           Add Another Question
         </Button>
+
+        <Button
+          variant="outline"
+          onClick={() => setShowPreview(true)}
+          className="flex items-center gap-2"
+        >
+          <Eye className="h-4 w-4" />
+          Preview ({questions.length})
+        </Button>
       </div>
 
       {/* Preview Modal */}

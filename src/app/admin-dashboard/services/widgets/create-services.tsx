@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useState, useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
@@ -17,7 +17,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCreateService } from "@/app/api/admin/services/create-service";
+import { useUpdateService } from "@/app/api/admin/services/update-services";
+import { useGetServiceById } from "@/app/api/admin/services/get-service-by-id";
 import SpinnerIcon from "@/components/icons/spinner";
+import { ArrowLeft } from "lucide-react";
 
 const serviceSchema = z.object({
   name: z.string().min(2, "Service name is required"),
@@ -61,22 +64,44 @@ const serviceTypes = [
 const pricingUnits = [
   { value: "per_hour", label: "Per Hour" },
   { value: "per_project", label: "Per Project" },
-  { value: "one_time", label: "One Time" },
+  { value: "one_time_payment", label: "One Time Payment" },
   { value: "per_day", label: "Per Day" },
   { value: "per_month", label: "Per Month" },
 ];
 
-export default function CreateService() {
+interface CreateServiceProps {
+  serviceId?: string | null;
+  onBack?: () => void;
+}
+
+export default function CreateService({
+  serviceId,
+  onBack,
+}: CreateServiceProps) {
   const [preview, setPreview] = useState<string | null>(null);
-  const { mutate: createService, isPending } = useCreateService();
+  const [selectedServiceType, setSelectedServiceType] = useState<string>("");
+  const [selectedPricingUnit, setSelectedPricingUnit] = useState<string>("");
+  const { mutate: createService, isPending: isCreating } = useCreateService();
+  const { mutate: updateService, isPending: isUpdating } = useUpdateService(
+    serviceId || ""
+  );
+
+  const isPending = isCreating || isUpdating;
+
+  // Fetch service data if editing
+  const { data: serviceData, isLoading: isLoadingService } = useGetServiceById(
+    serviceId || "",
+    !!serviceId
+  );
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
+    control,
     reset,
     setValue,
+    watch,
   } = useForm<ServiceFormData>({
     resolver: zodResolver(serviceSchema),
     defaultValues: {
@@ -89,6 +114,44 @@ export default function CreateService() {
       pricingUnit: "",
     },
   });
+
+  // Prefill form when editing
+  useEffect(() => {
+    if (serviceData && serviceId) {
+      // Find matching service type from the array
+      const matchingServiceType = serviceTypes.find(
+        (type) => type.value === serviceData.service_type
+      );
+
+      // Find matching pricing unit from the array
+      const matchingPricingUnit = pricingUnits.find(
+        (unit) => unit.value === serviceData.pricing_unit
+      );
+
+      const serviceTypeValue = matchingServiceType?.value || "";
+      const pricingUnitValue = matchingPricingUnit?.value || "";
+
+      // Update states
+      setSelectedServiceType(serviceTypeValue);
+      setSelectedPricingUnit(pricingUnitValue);
+
+      // Reset form with all values
+      reset({
+        name: serviceData.name,
+        shortDescription: serviceData.short_description,
+        longDescription: serviceData.long_description,
+        price: serviceData.price.toString(),
+        discountedPrice: serviceData.discounted_price?.toString() || "",
+        serviceType: serviceTypeValue,
+        pricingUnit: pricingUnitValue,
+      });
+
+      // Set preview image
+      if (serviceData.image) {
+        setPreview(serviceData.image);
+      }
+    }
+  }, [serviceData, serviceId, reset]);
 
   const watchAll = watch();
 
@@ -111,12 +174,25 @@ export default function CreateService() {
       formData.append("images", data.image);
     }
 
-    createService(formData as any, {
-      onSuccess: () => {
-        reset();
-        setPreview(null);
+    const onSuccessCallback = () => {
+      reset();
+      setPreview(null);
+      if (onBack) {
+        onBack();
       }
-    });
+    };
+
+    if (serviceId) {
+      // Update existing service
+      updateService(formData as any, {
+        onSuccess: onSuccessCallback,
+      });
+    } else {
+      // Create new service
+      createService(formData as any, {
+        onSuccess: onSuccessCallback,
+      });
+    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -127,6 +203,15 @@ export default function CreateService() {
     }
   };
 
+  // Show loading state when fetching service data
+  if (isLoadingService && serviceId) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <SpinnerIcon className="w-8 h-8 animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col md:flex-row md:space-x-10 gap-8 py-6 rounded-xl">
       {/* Left Form */}
@@ -134,6 +219,21 @@ export default function CreateService() {
         onSubmit={handleSubmit(onSubmit)}
         className="flex-1 space-y-4 bg-white p-6 rounded-2xl shadow-sm"
       >
+        {/* Back button and title */}
+        {serviceId && onBack && (
+          <div className="flex items-center gap-2 mb-4">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={onBack}
+              className="h-8 w-8"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <h2 className="text-lg font-semibold">Edit Service</h2>
+          </div>
+        )}
         {/* Image Upload */}
         <div className="flex flex-col md:flex-row items-start gap-4">
           <label className="relative w-32 h-32 bg-gray-100 rounded-xl flex items-center justify-center cursor-pointer overflow-hidden">
@@ -227,21 +327,31 @@ export default function CreateService() {
             <label className="text-sm font-medium text-[#706C6C]">
               Service Type
             </label>
-            <Select
-              onValueChange={(value) => setValue("serviceType", value)}
-              defaultValue={watchAll.serviceType}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select service type" />
-              </SelectTrigger>
-              <SelectContent>
-                {serviceTypes.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Controller
+              name="serviceType"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  key={`serviceType-${field.value || selectedServiceType}`}
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    setSelectedServiceType(value);
+                  }}
+                  value={field.value || selectedServiceType}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select service type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {serviceTypes.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
             {errors.serviceType && (
               <p className="text-red-500 text-sm">
                 {errors.serviceType.message}
@@ -252,21 +362,31 @@ export default function CreateService() {
             <label className="text-sm font-medium text-[#706C6C]">
               Pricing Unit
             </label>
-            <Select
-              onValueChange={(value) => setValue("pricingUnit", value)}
-              defaultValue={watchAll.pricingUnit}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select pricing unit" />
-              </SelectTrigger>
-              <SelectContent>
-                {pricingUnits.map((unit) => (
-                  <SelectItem key={unit.value} value={unit.value}>
-                    {unit.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Controller
+              name="pricingUnit"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  key={`pricingUnit-${field.value || selectedPricingUnit}`}
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    setSelectedPricingUnit(value);
+                  }}
+                  value={field.value || selectedPricingUnit}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select pricing unit" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {pricingUnits.map((unit) => (
+                      <SelectItem key={unit.value} value={unit.value}>
+                        {unit.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
             {errors.pricingUnit && (
               <p className="text-red-500 text-sm">
                 {errors.pricingUnit.message}
@@ -277,7 +397,13 @@ export default function CreateService() {
 
         <div className="flex gap-3 pt-4 items-center justify-center">
           <Button type="submit" className="w-32">
-            {isPending ? <SpinnerIcon className="animate-spin" /> : "Save"}
+            {isPending ? (
+              <SpinnerIcon className="animate-spin" />
+            ) : serviceId ? (
+              "Update"
+            ) : (
+              "Save"
+            )}
           </Button>
         </div>
       </form>

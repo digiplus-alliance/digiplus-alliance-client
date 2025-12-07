@@ -8,10 +8,9 @@ import Pagination from "@/components/Pagination";
 import { useGetAllUsers } from "@/app/api/admin/users";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function UsersMiniTable() {
+export default function UsersMiniTable({pageSize = 5}: {pageSize?: number}) {
   const [currentPage, setCurrentPage] = useState(1);
   const { data: users, isLoading, error } = useGetAllUsers();
-  const pageSize = 5;
 
   // map API users to table rows
   const mappedUsers = useMemo(() => {
@@ -159,7 +158,7 @@ export default function UsersMiniTable() {
           </tbody>
         </table>
       </div>
-      <div className="mt-4 flex flex-col md:flex-row md:justify-between md:items-center gap-2 px-4">
+      <div className="mt-0 flex flex-col md:flex-row md:justify-between md:items-center gap-2 px-4">
         <p className="text-sm text-[#667085] border border-[#EBFBFF] p-2 rounded-lg">
           5 List per Page
         </p>

@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useGetApplicationBySlug } from '@/app/api/assessments/useGetApplicationFormBySlug';
+import { useGetAvailableApplications } from '@/app/api/assessments/useGetAvailableApplication';
 import { useCreateApplication } from '@/app/api/user';
 import ApplicationSuccessModal from './ApplicationSuccessModal';
 
@@ -40,9 +41,18 @@ export default function UserApplicationForm(props: WelcomeDatas) {
   const [validatingResponse, setValidatingResponse] = useState(false);
 
   const router = useRouter();
-  const currentApplicationSlug = 'application-for-digiplus-alliance-services-1';
   const { selectedService } = useAuthStore();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  // Get available applications
+  const {
+    data: availableApplications,
+    isLoading: loadingApplications,
+    error: applicationsError,
+  } = useGetAvailableApplications();
+
+  // Get the current application slug from the first available application
+  const currentApplicationSlug = availableApplications?.[0]?.id || null;
 
   // const {
   //   data: applicationData,
@@ -54,11 +64,11 @@ export default function UserApplicationForm(props: WelcomeDatas) {
     data: applicationData,
     isLoading,
     error,
-  } = useGetApplicationBySlug(currentApplicationSlug, !!currentApplicationSlug);
+  } = useGetApplicationBySlug(currentApplicationSlug || '', !!currentApplicationSlug);
 
   // const submitAssessment = useSubmitAssessment();
 
-  const { mutate: createApplication, isPending } = useCreateApplication(currentApplicationSlug);
+  const { mutate: createApplication, isPending } = useCreateApplication(currentApplicationSlug || '');
 
   // Group questions by module and step
   const groupedModules: IGroupedModule[] = useMemo(() => {
@@ -73,7 +83,48 @@ export default function UserApplicationForm(props: WelcomeDatas) {
     return [];
   }, [applicationData]);
 
-  // Show error state for available assessments
+  // Show loading state for available applications
+  if (loadingApplications) {
+    return (
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center p-6">
+        <Card className="w-full max-w-4xl">
+          <CardContent className="p-12 text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p>Loading available applications...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show error state for available applications
+  if (applicationsError) {
+    return (
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center p-6">
+        <Card className="w-full max-w-4xl">
+          <CardContent className="p-12 text-center">
+            <p className="text-red-600 mb-4">Error loading available applications</p>
+            <Button onClick={() => window.location.reload()}>Retry</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show message if no applications available
+  if (!availableApplications || availableApplications.length === 0) {
+    return (
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center p-6">
+        <Card className="w-full max-w-4xl">
+          <CardContent className="p-12 text-center">
+            <p>No applications available at this time.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show error state for application form data
   if (error) {
     return (
       <div className="min-h-screen bg-muted/30 flex items-center justify-center p-6">

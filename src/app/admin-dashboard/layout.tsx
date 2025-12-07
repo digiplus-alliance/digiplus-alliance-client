@@ -33,6 +33,12 @@ export default function AdminDashboardLayout({
       iconLogo: "/icons/sidebar-icon-one.svg",
     },
     {
+      title: "Reports",
+      url: "reports",
+      icon: Inbox,
+      iconLogo: "/icons/sidebar-icon-two.svg",
+    },
+    {
       title: "Users",
       url: "users",
       icon: Inbox,
