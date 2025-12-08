@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Call the backend refresh endpoint
-    const response = await fetch(`${apiUrl}auth/refresh`, {
+    const response = await fetch(`${apiUrl}/auth/refresh`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

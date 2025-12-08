@@ -1,6 +1,5 @@
 "use client";
 import { useGetBlogPosts } from "@/app/api/admin/blog/getBlogs";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "react-feather";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -59,13 +58,13 @@ export default function RecentBlog() {
             className="flex items-center justify-between p-2 border rounded-md"
           >
             <div className="flex items-center gap-3">
-              <Image
-                src="/about/team-placeholder-four.png"
+              {/* <Image
+                src={blogPost.featuredImageUrls[0] || "/placeholder-image.png"}
                 alt="author"
                 width={32}
                 height={32}
                 className="rounded-lg"
-              />
+              /> */}
               <div>
                 <p className="font-normal text-base">
                   {blogPost.title || "No Title"}
@@ -73,7 +72,7 @@ export default function RecentBlog() {
                 <span
                   className={`text-xs text-gray-400 bg-[#F5F5F5] px-2 py-1 rounded-2xl`}
                 >
-                  No Status
+                  {blogPost.isPublished ? "Published" : "Draft"}
                 </span>
               </div>
             </div>

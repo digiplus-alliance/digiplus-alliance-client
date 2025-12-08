@@ -1,226 +1,426 @@
+"use client";
+
+import React from "react";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import type { Metadata } from "next";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Clock, Calendar, User, Share2 } from "lucide-react";
-import { blogPosts, allPosts } from "../data/blog-data";
+import { ArrowLeft } from "lucide-react";
+import { useGetBlogPost } from "@/app/api/admin/blog/getBlog";
+import { useGetBlogPosts } from "@/app/api/admin/blog/getBlogs";
+import OurPartners from "../../widgets/our-partners";
+import { FaLinkedin, FaSquareXTwitter } from "react-icons/fa6";
+import { ImFacebook2 } from "react-icons/im";
+import { FaInstagramSquare } from "react-icons/fa";
+import BlogContentViewer from "@/components/BlogContentViewer";
 
 interface BlogPostPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
-  const { id } = await params;
-  const post = blogPosts.find((p) => p.id === id);
+// Helper function to strip HTML tags
+const stripHtmlTags = (html: string) => {
+  return html.replace(/<[^>]*>/g, "").trim();
+};
 
-  if (!post) {
-    return {
-      title: "Blog Post Not Found",
-      description: "The requested blog post could not be found.",
+export default function BlogPostPage({ params }: BlogPostPageProps) {
+  const [id, setId] = React.useState<string>("");
+
+  // Unwrap params
+  React.useEffect(() => {
+    params.then((p) => setId(p.id));
+  }, [params]);
+
+  const { data: blogPost, isLoading, error } = useGetBlogPost(id);
+  const { data: allBlogPosts } = useGetBlogPosts();
+
+  // Share handlers
+  const handleShare = (
+    platform: "twitter" | "facebook" | "instagram" | "linkedin"
+  ) => {
+    if (!blogPost) return;
+
+    const url = window.location.href;
+    const title = encodeURIComponent(blogPost.title);
+    const description = encodeURIComponent(
+      stripHtmlTags(blogPost.content).substring(0, 150)
+    );
+
+    const shareUrls = {
+      twitter: `https://twitter.com/intent/tweet?text=${title}&url=${url}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
+      instagram: url, // Instagram doesn't support direct sharing via URL, so we'll copy to clipboard
     };
+
+    if (platform === "instagram") {
+      // For Instagram, copy the link to clipboard
+      navigator.clipboard
+        .writeText(url)
+        .then(() => {
+          alert("Link copied to clipboard! Share it on Instagram.");
+        })
+        .catch(() => {
+          alert("Failed to copy link. Please copy it manually: " + url);
+        });
+    } else {
+      window.open(shareUrls[platform], "_blank", "width=600,height=400");
+    }
+  };
+
+  // Loading state
+  if (isLoading || !id) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-6 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center space-y-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+              <p className="text-gray-600">Loading blog post...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
-  return {
-    title: `${post.title} | DigiPlus Alliance Blog`,
-    description: post.description,
-    openGraph: {
-      title: post.title,
-      description: post.description,
-      images: [
-        {
-          url: post.image,
-          width: 1200,
-          height: 600,
-          alt: post.title,
-        },
-      ],
-      type: "article",
-      publishedTime: post.date,
-      authors: post.author ? [post.author] : undefined,
-      tags: post.tags,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: post.title,
-      description: post.description,
-      images: [post.image],
-    },
-    keywords: post.tags.join(", "),
-  };
-}
-
-export async function generateStaticParams() {
-  return blogPosts.map((post) => ({
-    id: post.id,
-  }));
-}
-
-export default async function BlogPostPage({ params }: BlogPostPageProps) {
-  const { id } = await params;
-  const post = blogPosts.find((p) => p.id === id);
-
-  if (!post) {
+  // Error state
+  if (error || !blogPost) {
     notFound();
   }
 
-  // Get related posts (excluding current post)
-  const relatedPosts = allPosts.filter((p) => p.id !== post.id).slice(0, 3);
+  // Transform blog data
+  const post = {
+    id: blogPost._id,
+    image: blogPost.featuredImageUrls[0] || "/blog/image_one.png",
+    title: blogPost.title,
+    description: stripHtmlTags(blogPost.content).substring(0, 150) + "...",
+    content: blogPost.content,
+    tags: blogPost.tags.filter((tag) => tag.trim() !== ""),
+    date: new Date(blogPost.createdAt).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+    }),
+    category: blogPost.tags.find((tag) => tag.trim() !== "") || "General",
+    readTime: `${Math.max(
+      1,
+      Math.ceil(stripHtmlTags(blogPost.content).split(" ").length / 200)
+    )}min`,
+    author: blogPost.author,
+  };
+
+  // Get related posts from relatedBlogs or fallback to recent posts
+  const relatedPosts =
+    blogPost.relatedBlogs && blogPost.relatedBlogs.length > 0
+      ? blogPost.relatedBlogs.slice(0, 3).map((related: any) => ({
+          id: related._id,
+          image: related.featuredImageUrls[0] || "/blog/image_one.png",
+          title: related.title,
+          description: stripHtmlTags(related.content).substring(0, 120) + "...", // Extract first 120 chars
+          date: new Date(related.createdAt).toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+          }),
+          tag:
+            related.tags.find((tag: string) => tag.trim() !== "") || "General",
+          readTime: `${Math.max(
+            1,
+            Math.ceil(stripHtmlTags(related.content).split(" ").length / 200)
+          )}min`,
+        }))
+      : allBlogPosts
+          ?.filter((p) => p._id !== blogPost._id && p.isPublished)
+          .slice(0, 3)
+          .map((p) => ({
+            id: p._id,
+            image: p.featuredImageUrls[0] || "/blog/image_one.png",
+            title: p.title,
+            description: stripHtmlTags(p.content).substring(0, 120) + "...", // Extract first 120 chars
+            date: new Date(p.createdAt).toLocaleDateString("en-GB", {
+              day: "2-digit",
+              month: "short",
+            }),
+            tag: p.tags.find((tag: string) => tag.trim() !== "") || "General",
+            readTime: `${Math.max(
+              1,
+              Math.ceil(stripHtmlTags(p.content).split(" ").length / 200)
+            )}min`,
+          })) || [];
+
+  // Get all unique tags from all posts for the sidebar
+  const allTags = Array.from(
+    new Set(
+      allBlogPosts?.flatMap((p) => p.tags.filter((tag) => tag.trim() !== "")) ||
+        []
+    )
+  ).slice(0, 8); // Show top 8 tags
+
+  // Get all featured images
+  const featuredImages = blogPost.featuredImageUrls || [];
+  const imageCount = featuredImages.length;
+
+  // Render featured images based on count (like preview modal)
+  const renderImages = () => {
+    if (imageCount === 0) {
+      return (
+        <div className="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center">
+          <p className="text-gray-500">No featured image</p>
+        </div>
+      );
+    }
+
+    if (imageCount === 1) {
+      // Single image - full width
+      return (
+        <div className="w-full h-96 relative rounded-lg overflow-hidden">
+          <Image
+            src={featuredImages[0]}
+            alt={post.title}
+            fill
+            className="object-cover"
+            priority
+          />
+        </div>
+      );
+    }
+
+    if (imageCount === 2) {
+      // Two images - 70% : 30% grid
+      return (
+        <div className="grid grid-cols-[70%_30%] gap-4">
+          <div className="relative h-96 rounded-lg overflow-hidden">
+            <Image
+              src={featuredImages[0]}
+              alt="Featured image 1"
+              fill
+              className="object-cover"
+            />
+          </div>
+          <div className="relative h-96 rounded-lg overflow-hidden">
+            <Image
+              src={featuredImages[1]}
+              alt="Featured image 2"
+              fill
+              className="object-cover"
+            />
+          </div>
+        </div>
+      );
+    }
+
+    if (imageCount >= 3) {
+      // Three or more images - 70% : 30% (2 images stacked)
+      return (
+        <div className="grid grid-cols-[70%_30%] gap-4">
+          <div className="relative h-96 rounded-lg overflow-hidden">
+            <Image
+              src={featuredImages[0]}
+              alt="Featured image 1"
+              fill
+              className="object-cover"
+            />
+          </div>
+          <div className="flex flex-col gap-4">
+            <div className="relative h-[calc(50%-0.5rem)] rounded-lg overflow-hidden">
+              <Image
+                src={featuredImages[1]}
+                alt="Featured image 2"
+                fill
+                className="object-cover"
+              />
+            </div>
+            <div className="relative h-[calc(50%-0.5rem)] rounded-lg overflow-hidden">
+              <Image
+                src={featuredImages[2]}
+                alt="Featured image 3"
+                fill
+                className="object-cover"
+              />
+            </div>
+          </div>
+        </div>
+      );
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#EBFBFF] font-secondary">
       <div className="container mx-auto px-6 py-8">
         {/* Back Button */}
         <div className="mb-6">
           <Link href="/landing/blog">
-            <Button variant="ghost" className="flex items-center gap-2 hover:bg-gray-100">
+            <Button
+              variant="ghost"
+              className="flex items-center gap-2 hover:bg-gray-100"
+            >
               <ArrowLeft className="h-4 w-4" />
               Back to Blog
             </Button>
           </Link>
         </div>
 
-        {/* Main Content */}
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Article Content */}
-          <div className="lg:col-span-2">
-            <article className="bg-white rounded-lg shadow-lg overflow-hidden">
-              {/* Hero Image */}
-              <div className="relative h-80 lg:h-96">
-                <Image
-                  src={post.image}
-                  alt={post.title}
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              </div>
+        {/* Main Content - Centered */}
+        <div className="max-w-6xl mx-auto">
+          <article className=" overflow-hidden p-6 lg:p-8">
+            {/* Featured Images */}
+            <div className="mb-6">{renderImages()}</div>
 
-              {/* Article Header */}
-              <div className="p-6 lg:p-8">
-                <div className="flex flex-wrap gap-2 mb-4">
+            {/* Tags, Date, and Author Badges */}
+            <div className="flex flex-col md:flex-row md:justify-center md:items-center gap-4 mb-6">
+              {/* Tags */}
+              {post.tags.length > 0 && (
+                <div className="flex flex-wrap justify-center items-center gap-2">
                   {post.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="bg-black text-white hover:bg-gray-800">
+                    <span
+                      key={tag}
+                      className="px-3 py-1 bg-[#CCFFF9] border border-[#4397B6] text-primary rounded-full text-sm"
+                    >
                       {tag}
-                    </Badge>
+                    </span>
                   ))}
                 </div>
+              )}
 
-                <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              {/* Date */}
+              <div>
+                <p className="px-3 py-1 bg-[#CCFFF9] border border-[#4397B6] text-primary rounded-full text-sm">
+                  {new Date(blogPost.createdAt).toLocaleDateString(undefined, {
+                    weekday: "short",
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </p>
+              </div>
+
+              {/* Author */}
+              {post.author && (
+                <div>
+                  <p className="px-3 py-1 bg-[#CCFFF9] border border-[#4397B6] text-primary rounded-full text-sm">
+                    {post.author}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Title */}
+            {post.title && (
+              <div className="mb-6">
+                <h1 className="text-3xl font-bold text-primary text-center my-4">
                   {post.title}
                 </h1>
-
-                <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-                  {post.description}
-                </p>
-
-                {/* Article Meta */}
-                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-6">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
-                    {post.date}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    {post.readTime} read
-                  </div>
-                  {post.author && (
-                    <div className="flex items-center gap-1">
-                      <User className="h-4 w-4" />
-                      {post.author}
-                    </div>
-                  )}
-                  <div className="flex items-center gap-1">
-                    <Badge variant="outline">{post.category}</Badge>
-                  </div>
-                </div>
-
-                <Separator className="mb-6" />
-
-                {/* Article Content */}
-                <div 
-                  className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed prose-li:text-gray-700 prose-strong:text-gray-900 prose-blockquote:border-l-gray-300 prose-blockquote:text-gray-600"
-                  dangerouslySetInnerHTML={{ __html: post.content }}
-                />
-
-                {/* Share Button */}
-                <div className="mt-8 pt-6 border-t">
-                  <Button variant="outline" className="flex items-center gap-2">
-                    <Share2 className="h-4 w-4" />
-                    Share Article
-                  </Button>
-                </div>
               </div>
-            </article>
-          </div>
+            )}
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Related Articles */}
-            <Card className="p-6">
-              <h3 className="text-xl font-bold mb-4">Related Articles</h3>
-              <div className="space-y-4">
+            {/* Content - Rendered with TipTap */}
+            <BlogContentViewer content={post.content} />
+
+            {/* Share Button */}
+            <div className="mt-8 pt-6 flex flex-row justify-center">
+              <p className="mr-2 text-[#5E5B5B] font-primary">Share: </p>
+              <div className="flex gap-4 items-center justify-center">
+                <button
+                  onClick={() => handleShare("twitter")}
+                  className="hover:opacity-70 transition-opacity cursor-pointer"
+                  aria-label="Share on Twitter"
+                >
+                  <FaSquareXTwitter
+                    size={25}
+                    className="text-gray-700 hover:text-black"
+                  />
+                </button>
+                <button
+                  onClick={() => handleShare("facebook")}
+                  className="hover:opacity-70 transition-opacity cursor-pointer"
+                  aria-label="Share on Facebook"
+                >
+                  <ImFacebook2
+                    size={22}
+                    className="text-gray-700 hover:text-[#1877F2]"
+                  />
+                </button>
+                <button
+                  onClick={() => handleShare("instagram")}
+                  className="hover:opacity-70 transition-opacity cursor-pointer"
+                  aria-label="Share on Instagram"
+                >
+                  <FaInstagramSquare
+                    size={25}
+                    className="text-gray-700 hover:text-[#E4405F]"
+                  />
+                </button>
+                <button
+                  onClick={() => handleShare("linkedin")}
+                  className="hover:opacity-70 transition-opacity cursor-pointer"
+                  aria-label="Share on LinkedIn"
+                >
+                  <FaLinkedin
+                    size={25}
+                    className="text-gray-700 hover:text-[#0A66C2]"
+                  />
+                </button>
+              </div>
+            </div>
+          </article>
+
+          {/* Related Articles - Below Main Content */}
+          {relatedPosts.length > 0 && (
+            <div className="mt-12">
+              <h2 className="text-2xl text-center font-bold text-gray-900 mb-6">
+                Related Posts
+              </h2>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {relatedPosts.map((relatedPost) => (
-                  <Link key={relatedPost.id} href={`/landing/blog/${relatedPost.id}`}>
-                    <div className="flex gap-3 items-start hover:bg-gray-50 p-2 rounded-md transition-colors cursor-pointer">
-                      <Image
-                        src={relatedPost.image}
-                        alt={relatedPost.title}
-                        width={80}
-                        height={60}
-                        className="w-20 h-15 object-cover rounded flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-sm line-clamp-2 text-gray-900">
-                          {relatedPost.title}
-                        </h4>
-                        <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                  <Link
+                    key={relatedPost.id}
+                    href={`/landing/blog/${relatedPost.id}`}
+                  >
+                    <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full bg-[#CCF1FF]">
+                      <div>
+                        <div className="relative h-48 mx-4">
+                          <Image
+                            src={relatedPost.image}
+                            alt={relatedPost.title}
+                            fill
+                            className="object-cover rounded-2xl"
+                          />
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-500 mx-4 py-2">
                           <span>{relatedPost.date}</span>
+                          <span>•</span>
+                          <span>{relatedPost.tag}</span>
                           <span>•</span>
                           <span>{relatedPost.readTime}</span>
                         </div>
+
+                        <div className="px-4 my-2">
+                          <h3 className="font-semibold text-lg line-clamp-2 text-gray-900 mb-2">
+                            {relatedPost.title}
+                          </h3>
+                        </div>
+
+                        <div>
+                          {relatedPost.description && (
+                            <p className="text-gray-700 px-4 mb-4 line-clamp-3">
+                              {relatedPost.description}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
+                    </Card>
                   </Link>
                 ))}
               </div>
-            </Card>
-
-            {/* Categories */}
-            <Card className="p-6">
-              <h3 className="text-xl font-bold mb-4">Categories</h3>
-              <div className="space-y-2">
-                {["Innovation", "Research", "News", "Training", "Startups"].map((category) => (
-                  <Link key={category} href={`/landing/blog?category=${category.toLowerCase()}`}>
-                    <div className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-gray-50 cursor-pointer">
-                      <span className="text-gray-700">{category}</span>
-                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                        {allPosts.filter(p => p.category.toLowerCase() === category.toLowerCase()).length}
-                      </span>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </Card>
-
-            {/* Tags */}
-            <Card className="p-6">
-              <h3 className="text-xl font-bold mb-4">Popular Tags</h3>
-              <div className="flex flex-wrap gap-2">
-                {["Training", "Innovation", "Africa", "Research", "MSMEs", "Startups", "Digital Hubs", "Empowerment"].map((tag) => (
-                  <Badge key={tag} variant="outline" className="hover:bg-gray-100 cursor-pointer">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            </Card>
-          </div>
+            </div>
+          )}
         </div>
+      </div>
+
+      <div className="mt-12">
+        <OurPartners />
       </div>
     </div>
   );
