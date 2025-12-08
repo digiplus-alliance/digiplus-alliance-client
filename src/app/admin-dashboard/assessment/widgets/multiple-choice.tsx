@@ -27,6 +27,7 @@ type MultipleChoiceData = {
   required_score: number;
   module: string;
   required_option: boolean;
+  // allow_other: boolean;
   type: "multiple_choice";
 };
 
@@ -49,6 +50,7 @@ export default function MultipleChoice({
   const [requiredScore, setRequiredScore] = useState<number>(initialData?.required_score || 0);
   const [selectedModule, setSelectedModule] = useState(initialData?.module || "");
   const [requiredOption, setRequiredOption] = useState(initialData?.required_option || false);
+  // const [allowOther, setAllowOther] = useState(initialData?.allow_other || false);
   const [options, setOptions] = useState<Option[]>(
     initialData?.options || [
       { option: "A", optiondesc: "", point_value: 0 },
@@ -99,6 +101,7 @@ export default function MultipleChoice({
       required_score: requiredScore,
       module: selectedModule,
       required_option: requiredOption,
+      // allow_other: allowOther,
       type: "multiple_choice"
     };
 
@@ -184,6 +187,21 @@ export default function MultipleChoice({
             </div>
           ))}
 
+          {/* Other Option */}
+          {/* {allowOther && (
+            <div className="flex items-center gap-3 bg-gray-50 p-2 rounded-md border border-gray-300">
+              <input type="radio" disabled className="h-4 w-4" />
+              <span className="font-medium text-gray-600 min-w-[20px]">
+                Other:
+              </span>
+              <Input
+                placeholder="User will type their answer here..."
+                disabled
+                className="flex-1 bg-white border border-gray-300"
+              />
+            </div>
+          )} */}
+
           <Button
             type="button"
             variant="outline"
@@ -236,6 +254,14 @@ export default function MultipleChoice({
               onCheckedChange={(checked) => setRequiredOption(checked as boolean)}
             />
           </div>
+
+          {/* <div className="flex justify-between items-center">
+            <span>Allow &quot;Other&quot; Option</span>
+            <Checkbox 
+              checked={allowOther}
+              onCheckedChange={(checked) => setAllowOther(checked as boolean)}
+            />
+          </div> */}
         </div>
 
         <div className="flex gap-3 mt-6">

@@ -1,16 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CurrentAssessment from "./current-assessment/main";
 import EditAssessment from "./edit-assessment/main";
 import ListAssessment from "./list-assessment/main";
 import { Button } from "@/components/ui/button";
 import FilterButton from "@/components/FilterButton";
+import { useSearchParams } from "next/navigation";
 
 export default function AssessmentPage() {
+  const searchParams = useSearchParams();
+  const viewParam = searchParams.get("view");
   const [activeComponent, setActiveComponent] = useState<
     "current" | "edit" | "list"
   >("current");
+
+  useEffect(() => {
+    if (viewParam === "list") {
+      setActiveComponent("list");
+    }
+  }, [viewParam]);
 
   const handleFilterChange = (value: string) => {
     console.log("Selected filter:", value);
@@ -40,11 +49,11 @@ export default function AssessmentPage() {
             </h1>
           </div>
           <div className="hidden md:flex md:items-center md:gap-4">
-            {activeComponent === "current" && (
+            {/* {activeComponent === "current" && (
               <>
                 <Button>Import Assessment Questions</Button>
               </>
-            )}
+            )} */}
             {activeComponent === "edit" && (
               <>
                 <Button>Update</Button>

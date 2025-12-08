@@ -41,6 +41,8 @@ export default function EditAssessmentForm({
       // Clear existing data first
       clearAll();
 
+      console.log("Assessment Data:", assessmentData);
+
       // Set welcome screen data
       if (assessmentData?.assessment) {
         const welcomeData = {

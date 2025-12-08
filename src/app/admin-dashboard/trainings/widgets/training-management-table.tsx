@@ -19,7 +19,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getAssessmentStatusStyles } from "@/lib/getStatusStyles";
 import {
   useGetAllTrainingUsers,
-  AllTrainingApplicationsResponse,
 } from "@/app/api/admin/trainings/getUsers";
 
 type TableUser = {

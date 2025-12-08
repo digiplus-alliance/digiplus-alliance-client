@@ -49,7 +49,7 @@ export default function LongTextQuestion({
   
   const [question, setQuestion] = useState(initialData?.question || "");
   const [description, setDescription] = useState(initialData?.descriptions || "");
-  const [answerPlaceholder, setAnswerPlaceholder] = useState(initialData?.answer_placeholder || "");
+  const [answerPlaceholder, setAnswerPlaceholder] = useState(initialData?.answer_placeholder || "Enter your detailed answer here...");
   const [minCharacters, setMinCharacters] = useState<number>(initialData?.min_characters || 50);
   const [maxCharacters, setMaxCharacters] = useState<number>(initialData?.max_characters || 1000);
   const [rows, setRows] = useState<number>(initialData?.rows || 5);
@@ -80,7 +80,7 @@ export default function LongTextQuestion({
       question_no: questionNo,
       question,
       descriptions: description,
-      answer_placeholder: answerPlaceholder,
+      answer_placeholder: answerPlaceholder || "Enter your detailed answer here...",
       min_characters: minCharacters,
       max_characters: maxCharacters,
       rows: rows,
@@ -101,7 +101,6 @@ export default function LongTextQuestion({
   const isFormValid = () => {
     return (
       question.trim() !== "" &&
-      answerPlaceholder.trim() !== "" &&
       minCharacters > 0 &&
       maxCharacters > minCharacters &&
       rows > 0 &&
@@ -162,7 +161,7 @@ export default function LongTextQuestion({
             {/* Answer Placeholder Configuration */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
-                Answer Placeholder Text:
+                Answer Placeholder Text (Optional):
               </label>
               <Input
                 placeholder="e.g., Provide detailed explanation..."
@@ -170,6 +169,9 @@ export default function LongTextQuestion({
                 onChange={(e) => setAnswerPlaceholder(e.target.value)}
                 className="w-full"
               />
+              <p className="text-xs text-gray-500">
+                Default: &quot;Enter your detailed answer here...&quot;
+              </p>
             </div>
 
             {/* Textarea Rows Configuration */}

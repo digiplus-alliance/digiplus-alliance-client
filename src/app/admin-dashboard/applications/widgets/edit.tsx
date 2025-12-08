@@ -32,6 +32,8 @@ export default function EditApplication({
       // Clear existing data first
       clearAll();
 
+      console.log("Application Data:", application);
+
       // Set welcome screen data
       if (appData?.welcome_title) {
         const welcomeData = {
