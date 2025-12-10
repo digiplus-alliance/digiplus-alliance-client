@@ -334,10 +334,10 @@ export default function UserApplicationForm(props: WelcomeDatas) {
                           handleNext(stepResponses);
                         }
                       })
-                      .catch((err) => toast.error(err.message || 'Something went wrong'));
-                    // .finally(() => {
-                    //   setValidatingResponse(false);
-                    // });
+                      .catch((err) => toast.error(err.message || 'Something went wrong'))
+                      .finally(() => {
+                        setValidatingResponse(false);
+                      });
                   }}
                   disabled={isSubmitting}
                 >

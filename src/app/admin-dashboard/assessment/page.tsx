@@ -54,11 +54,11 @@ export default function AssessmentPage() {
                 <Button>Import Assessment Questions</Button>
               </>
             )} */}
-            {activeComponent === "edit" && (
+            {/* {activeComponent === "edit" && (
               <>
                 <Button>Update</Button>
               </>
-            )}
+            )} */}
             {activeComponent === "list" && (
               <>
                 <div className="hidden md:flex md:items-center md:gap-4">

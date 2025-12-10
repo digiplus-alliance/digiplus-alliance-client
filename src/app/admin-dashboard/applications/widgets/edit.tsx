@@ -22,7 +22,7 @@ export default function EditApplication({
     "welcome" | "module" | "question"
   >("welcome");
 
-  const { setWelcomeScreen, setModules, clearAll, addQuestion } =
+  const { setWelcomeScreen, setModules, clearAll, addQuestion, setOriginalQuestions, setOriginalModules } =
     useApplicationStore();
 
   // Load application data into store
@@ -32,7 +32,7 @@ export default function EditApplication({
       // Clear existing data first
       clearAll();
 
-      console.log("Application Data:", application);
+      // console.log("Application Data:", application);
 
       // Set welcome screen data
       if (appData?.welcome_title) {
@@ -53,17 +53,23 @@ export default function EditApplication({
           step: mod.order || mod.step,
         }));
         setModules(modules);
+        // Set original modules for change tracking
+        setOriginalModules(modules);
       }
 
       // Set questions data
+      const loadedQuestions: any[] = [];
       if (appData.questions && Array.isArray(appData.questions)) {
         console.log("Loading questions:", appData.questions.length);
         appData.questions.forEach((q: any, index: number) => {
           const questionData = mapAPIQuestionToStoreQuestion(q, index + 1);
           if (questionData) {
             addQuestion(questionData);
+            loadedQuestions.push(questionData);
           }
         });
+        // Set original questions for change tracking
+        setOriginalQuestions(loadedQuestions);
       }
     }
   }, [application]);

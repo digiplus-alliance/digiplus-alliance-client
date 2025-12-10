@@ -52,6 +52,8 @@ export default function PreviewModal({
     serviceRecommendations,
     clearQuestions,
     clearAll,
+    getModifiedAndNewQuestions,
+    getModifiedAndNewModules,
   } = useFormStore();
 
   const { mutate: createApplication, isPending: isCreating } =
@@ -343,17 +345,25 @@ export default function PreviewModal({
 
   const handleFinalSave = () => {
     if (formType === "application") {
+      // When updating, only send modified and new questions/modules
+      const questionsToSend = applicationId 
+        ? getModifiedAndNewQuestions() 
+        : questions;
+      const modulesToSend = applicationId
+        ? getModifiedAndNewModules()
+        : modules;
+
       const payload = {
         welcome_title: welcomeScreen?.title,
         welcome_description: welcomeScreen?.description,
         welcome_instruction: welcomeScreen?.instruction,
-        modules: modules.map((mod) => ({
+        modules: modulesToSend.map((mod) => ({
           temp_id: `mod-${mod.step}`,
           title: mod.title,
           description: mod.description,
           order: mod.step,
         })),
-        questions: questions.map((q) => {
+        questions: questionsToSend.map((q) => {
           const apiQuestion: APIQuestion = {
             type: q?.type,
             question: q?.question,
@@ -435,6 +445,14 @@ export default function PreviewModal({
       });
       return;
     } else if (formType === "assessment") {
+      // When updating, only send modified and new questions/modules
+      const questionsToSend = assessmentId 
+        ? getModifiedAndNewQuestions() 
+        : questions;
+      const modulesToSend = assessmentId
+        ? getModifiedAndNewModules()
+        : modules;
+
       const payload = {
         title: welcomeScreen?.title || "New Assessment",
         description:
@@ -442,13 +460,13 @@ export default function PreviewModal({
           "Evaluate your digital transformation readiness",
         instruction:
           welcomeScreen?.instruction || "Please complete all sections honestly",
-        modules: modules.map((mod) => ({
+        modules: modulesToSend.map((mod) => ({
           temp_id: `mod-${mod.title.toLowerCase().replace(/\s+/g, "_")}`,
           title: mod.title,
           description: mod.description,
           order: mod.step,
         })),
-        questions: questions
+        questions: questionsToSend
           .filter((q) => q.type !== "service_recommendations") // Exclude service_recommendations from questions
           .map((q) => {
             const apiQuestion: APIQuestion = {

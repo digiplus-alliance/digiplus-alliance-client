@@ -170,6 +170,16 @@ interface AssessmentStore {
   questions: Question[];
   serviceRecommendations: ServiceRecommendation[];
   currentQuestionIndex: number;
+  // Track original questions when editing
+  originalQuestions: Question[];
+  // Track which questions have been modified or are new
+  modifiedQuestionIds: Set<string>;
+  newQuestionIds: Set<string>;
+  // Track original modules when editing
+  originalModules: Module[];
+  // Track which modules have been modified or are new
+  modifiedModuleIds: Set<string>;
+  newModuleIds: Set<string>;
 
   // Actions
   setFormType: (type: FormType) => void;
@@ -187,6 +197,17 @@ interface AssessmentStore {
   setCurrentQuestionIndex: (index: number) => void;
   getNextQuestionNumber: () => number;
   getQuestionById: (id: string) => Question | undefined;
+  // New actions for tracking question changes
+  setOriginalQuestions: (questions: Question[]) => void;
+  getModifiedAndNewQuestions: () => Question[];
+  markQuestionAsModified: (id: string) => void;
+  markQuestionAsNew: (id: string) => void;
+  resetChangeTracking: () => void;
+  // New actions for tracking module changes
+  setOriginalModules: (modules: Module[]) => void;
+  getModifiedAndNewModules: () => Module[];
+  markModuleAsModified: (id: string) => void;
+  markModuleAsNew: (id: string) => void;
 }
 
 // Create the store
@@ -197,6 +218,12 @@ export const useAssessmentStore = create<AssessmentStore>((set, get) => ({
   questions: [],
   serviceRecommendations: [],
   currentQuestionIndex: 0,
+  originalQuestions: [],
+  modifiedQuestionIds: new Set<string>(),
+  newQuestionIds: new Set<string>(),
+  originalModules: [],
+  modifiedModuleIds: new Set<string>(),
+  newModuleIds: new Set<string>(),
 
   setFormType: (type: FormType) =>
     set({
@@ -209,16 +236,37 @@ export const useAssessmentStore = create<AssessmentStore>((set, get) => ({
     }),
 
   addModule: (module: Module) =>
-    set((state) => ({
-      modules: [...state.modules, module],
-    })),
+    set((state) => {
+      const newModuleIds = new Set(state.newModuleIds);
+      // Check if this is a truly new module (not in original modules)
+      const isOriginalModule = state.originalModules.some(m => m.id === module.id);
+      if (!isOriginalModule) {
+        newModuleIds.add(module.id);
+      }
+      return {
+        modules: [...state.modules, module],
+        newModuleIds,
+      };
+    }),
 
   updateModule: (id: string, updates: Partial<Module>) =>
-    set((state) => ({
-      modules: state.modules.map((m) =>
-        m.id === id ? { ...m, ...updates } : m
-      ),
-    })),
+    set((state) => {
+      const modifiedModuleIds = new Set(state.modifiedModuleIds);
+      const isOriginalModule = state.originalModules.some(m => m.id === id);
+      const isNewModule = state.newModuleIds.has(id);
+      
+      // Only mark as modified if it's an original module (not a new one)
+      if (isOriginalModule && !isNewModule) {
+        modifiedModuleIds.add(id);
+      }
+      
+      return {
+        modules: state.modules.map((m) =>
+          m.id === id ? { ...m, ...updates } : m
+        ),
+        modifiedModuleIds,
+      };
+    }),
 
   removeModule: (id: string) =>
     set((state) => {
@@ -238,16 +286,37 @@ export const useAssessmentStore = create<AssessmentStore>((set, get) => ({
     }),
 
   addQuestion: (question: Question) =>
-    set((state) => ({
-      questions: [...state.questions, question],
-    })),
+    set((state) => {
+      const newQuestionIds = new Set(state.newQuestionIds);
+      // Check if this is a truly new question (not in original questions)
+      const isOriginalQuestion = state.originalQuestions.some(q => q.id === question.id);
+      if (!isOriginalQuestion) {
+        newQuestionIds.add(question.id);
+      }
+      return {
+        questions: [...state.questions, question],
+        newQuestionIds,
+      };
+    }),
 
   updateQuestion: (id: string, updatedQuestion: Question) =>
-    set((state) => ({
-      questions: state.questions.map((q) =>
-        q.id === id ? updatedQuestion : q
-      ),
-    })),
+    set((state) => {
+      const modifiedQuestionIds = new Set(state.modifiedQuestionIds);
+      const isOriginalQuestion = state.originalQuestions.some(q => q.id === id);
+      const isNewQuestion = state.newQuestionIds.has(id);
+      
+      // Only mark as modified if it's an original question (not a new one)
+      if (isOriginalQuestion && !isNewQuestion) {
+        modifiedQuestionIds.add(id);
+      }
+      
+      return {
+        questions: state.questions.map((q) =>
+          q.id === id ? updatedQuestion : q
+        ),
+        modifiedQuestionIds,
+      };
+    }),
 
   removeQuestion: (id: string) =>
     set((state) => ({
@@ -273,6 +342,12 @@ export const useAssessmentStore = create<AssessmentStore>((set, get) => ({
       questions: [],
       serviceRecommendations: [],
       currentQuestionIndex: 0,
+      originalQuestions: [],
+      modifiedQuestionIds: new Set<string>(),
+      newQuestionIds: new Set<string>(),
+      originalModules: [],
+      modifiedModuleIds: new Set<string>(),
+      newModuleIds: new Set<string>(),
     }),
 
   setCurrentQuestionIndex: (index: number) =>
@@ -289,4 +364,80 @@ export const useAssessmentStore = create<AssessmentStore>((set, get) => ({
     const { questions } = get();
     return questions.find((q) => q.id === id);
   },
+
+  // Methods for tracking question changes
+  setOriginalQuestions: (questions: Question[]) =>
+    set({
+      originalQuestions: questions,
+      modifiedQuestionIds: new Set<string>(),
+      newQuestionIds: new Set<string>(),
+    }),
+
+  getModifiedAndNewQuestions: () => {
+    const { questions, modifiedQuestionIds, newQuestionIds } = get();
+    // Return only questions that are modified or new
+    return questions.filter(
+      (q) => modifiedQuestionIds.has(q.id) || newQuestionIds.has(q.id)
+    );
+  },
+
+  markQuestionAsModified: (id: string) =>
+    set((state) => {
+      const modifiedQuestionIds = new Set(state.modifiedQuestionIds);
+      const isNewQuestion = state.newQuestionIds.has(id);
+      // Only mark as modified if it's not a new question
+      if (!isNewQuestion) {
+        modifiedQuestionIds.add(id);
+      }
+      return { modifiedQuestionIds };
+    }),
+
+  markQuestionAsNew: (id: string) =>
+    set((state) => {
+      const newQuestionIds = new Set(state.newQuestionIds);
+      newQuestionIds.add(id);
+      return { newQuestionIds };
+    }),
+
+  resetChangeTracking: () =>
+    set({
+      modifiedQuestionIds: new Set<string>(),
+      newQuestionIds: new Set<string>(),
+      modifiedModuleIds: new Set<string>(),
+      newModuleIds: new Set<string>(),
+    }),
+
+  // Methods for tracking module changes
+  setOriginalModules: (modules: Module[]) =>
+    set({
+      originalModules: modules,
+      modifiedModuleIds: new Set<string>(),
+      newModuleIds: new Set<string>(),
+    }),
+
+  getModifiedAndNewModules: () => {
+    const { modules, modifiedModuleIds, newModuleIds } = get();
+    // Return only modules that are modified or new
+    return modules.filter(
+      (m) => modifiedModuleIds.has(m.id) || newModuleIds.has(m.id)
+    );
+  },
+
+  markModuleAsModified: (id: string) =>
+    set((state) => {
+      const modifiedModuleIds = new Set(state.modifiedModuleIds);
+      const isNewModule = state.newModuleIds.has(id);
+      // Only mark as modified if it's not a new module
+      if (!isNewModule) {
+        modifiedModuleIds.add(id);
+      }
+      return { modifiedModuleIds };
+    }),
+
+  markModuleAsNew: (id: string) =>
+    set((state) => {
+      const newModuleIds = new Set(state.newModuleIds);
+      newModuleIds.add(id);
+      return { newModuleIds };
+    }),
 }));
