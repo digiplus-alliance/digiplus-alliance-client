@@ -33,6 +33,8 @@ export default function EditAssessmentForm({
     clearAll,
     addQuestion,
     setServiceRecommendations,
+    setOriginalQuestions,
+    setOriginalModules,
   } = useAssessmentStore();
 
   // Load assessment data into store
@@ -41,7 +43,7 @@ export default function EditAssessmentForm({
       // Clear existing data first
       clearAll();
 
-      console.log("Assessment Data:", assessmentData);
+      // console.log("Assessment Data:", assessmentData);
 
       // Set welcome screen data
       if (assessmentData?.assessment) {
@@ -62,17 +64,23 @@ export default function EditAssessmentForm({
           step: mod.order || mod.step,
         }));
         setModules(modules);
+        // Set original modules for change tracking
+        setOriginalModules(modules);
       }
 
       // Set questions data
+      const loadedQuestions: any[] = [];
       if (assessmentData.questions && Array.isArray(assessmentData.questions)) {
         console.log("Loading questions:", assessmentData.questions.length);
         assessmentData.questions.forEach((q: any, index: number) => {
           const questionData = mapAPIQuestionToStoreQuestion(q, index + 1);
           if (questionData) {
             addQuestion(questionData);
+            loadedQuestions.push(questionData);
           }
         });
+        // Set original questions for change tracking
+        setOriginalQuestions(loadedQuestions);
       }
 
       // Set service recommendations

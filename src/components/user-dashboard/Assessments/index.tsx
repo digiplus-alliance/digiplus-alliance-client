@@ -498,7 +498,7 @@ export default function Assessment() {
                         "Content-Type": "application/json",
                       },
                       body: JSON.stringify({
-                        formId: "68dec54109ae0fe9fd7c43cb",
+                        formId: assessment._id,
                         formType: "assessment",
                         fields,
                       }),
