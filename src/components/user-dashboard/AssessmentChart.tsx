@@ -45,9 +45,9 @@ export function AssessmentChart() {
       setFetching(true);
       const response = await fetch(`/api/assessments/stats?id=${user?._id}&year=${year}`);
       const data = await response.json();
-      console.log(response);
+      // console.log(response);
       if (response.ok) {
-        console.log(data.data);
+        // console.log(data.data);
         setChartData(data.data.monthly_breakdown);
         setYearlyData(data.data);
       }

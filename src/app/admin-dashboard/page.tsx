@@ -38,7 +38,7 @@ export default function AdminDashboard() {
         </div>
 
         <div className="hidden md:block">
-          <Button onClick={() => router.push("/admin-dashboard/assessment")}>
+          <Button onClick={() => router.push("/admin-dashboard/assessment?view=list")}>
             View Assessments
           </Button>
         </div>

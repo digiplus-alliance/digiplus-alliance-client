@@ -132,14 +132,9 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // Handle root path redirect based on role
-  if (pathname === '/') {
-    const dashboardUrl = role === 'admin' 
-      ? new URL('/admin-dashboard', request.url)
-      : new URL('/user-dashboard', request.url);
-    return NextResponse.redirect(dashboardUrl);
-  }
-
+  // Allow authenticated users to access landing pages and root path
+  // No automatic redirect to dashboard for landing routes
+  
   // Allow access to the requested route
   return NextResponse.next();
 }

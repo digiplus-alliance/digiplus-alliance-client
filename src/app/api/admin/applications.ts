@@ -6,7 +6,7 @@ import useFetch from "@/lib/useFetch";
 export const ApplicationSchema = z.object({
   _id: z.string(),
   name: z.string(),
-  email: z.string().email(),
+  email: z.string(),
   image: z.string().optional(),
   service: z.string(),
   service_type: z.string(),

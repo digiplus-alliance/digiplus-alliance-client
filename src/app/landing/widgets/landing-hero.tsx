@@ -3,9 +3,15 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth";
+import { getDefaultDashboard } from "@/lib/permissions";
 
 export default function LandingHero() {
   const router = useRouter();
+  const { user, accessToken } = useAuthStore();
+  
+  const isAuthenticated = !!(user && accessToken);
+  const dashboardUrl = user?.role ? getDefaultDashboard(user.role) : '/user-dashboard';
   return (
     <section className="relative w-full h-full max-h-[40rem] lg:h-[76vh] flex items-center">
       {/* Background image */}
@@ -32,8 +38,12 @@ export default function LandingHero() {
             result-focused digital boost your business deserves.
           </p>
           <div className="mt-8 justify-left gap-4 ">
-            <Button className="px-6" size="lg" onClick={() => router.push("/auth/create-account")}>
-              Start Your Growth Journey Today
+            <Button 
+              className="px-6" 
+              size="lg" 
+              onClick={() => router.push(isAuthenticated ? dashboardUrl : "/auth/create-account")}
+            >
+              {isAuthenticated ? "Go to Dashboard" : "Start Your Growth Journey Today"}
             </Button>
           </div>
         </div>

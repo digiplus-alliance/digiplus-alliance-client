@@ -120,7 +120,7 @@ export default function AdminDashboardLayout({
             navItems={items}
             personalizationItems={personalizationItems}
             basePath="/admin-dashboard"
-            logoHref="/admin-dashboard"
+            logoHref="/landing"
             showProfileMenu
           />
           <SidebarInset className="overflow-hidden min-w-0 bg-white p-4 md:space-y-10 grow flex flex-col">
