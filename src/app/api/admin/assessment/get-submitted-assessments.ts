@@ -5,11 +5,11 @@ import z from "zod";
 
 // Schema for assessment in submission
 const SubmissionAssessmentSchema = z.object({
-  _id: z.string(),
-  title: z.string(),
+  _id: z.string().optional(),
+  title: z.string().optional(),
   description: z.string().optional(),
-  total_possible_points: z.number(),
-  is_published: z.boolean(),
+  total_possible_points: z.number().optional(),
+  is_published: z.boolean().optional(),
 }).passthrough();
 
 // Schema for user in submission
@@ -29,12 +29,27 @@ const SubmissionScoresSchema = z.object({
   percentage_score: z.number(),
 }).passthrough();
 
+// Schema for answer in submission
+const SubmissionAnswerSchema = z.object({
+  question_id: z.string().optional(),
+  question_text: z.string(),
+  question_type: z.string().optional(),
+  answer: z.union([
+    z.string(),
+    z.array(z.string()),
+    z.record(z.string(), z.string()),
+    z.null(),
+    z.undefined()
+  ]).optional(),
+}).passthrough();
+
 // Schema for individual submission
 const SubmissionSchema = z.object({
   submission_id: z.string(),
   assessment: SubmissionAssessmentSchema,
   user: SubmissionUserSchema,
   scores: SubmissionScoresSchema,
+  answers: z.array(SubmissionAnswerSchema),
   completed_at: z.string(),
   completed_date: z.string(),
   completed_time: z.string(),
@@ -64,7 +79,7 @@ const SubmittedAssessmentsResponseSchema = z.object({
   submissions: z.array(SubmissionSchema),
   pagination: PaginationSchema,
   statistics: StatisticsSchema,
-  filters_applied: z.union([z.string(), z.record(z.string(), z.unknown())]).optional(),
+  search_applied: z.union([z.string(), z.record(z.string(), z.unknown()), z.null()]).optional(),
   generated_at: z.string(),
 }).passthrough();
 
@@ -72,6 +87,7 @@ const SubmittedAssessmentsResponseSchema = z.object({
 export type SubmissionAssessment = z.infer<typeof SubmissionAssessmentSchema>;
 export type SubmissionUser = z.infer<typeof SubmissionUserSchema>;
 export type SubmissionScores = z.infer<typeof SubmissionScoresSchema>;
+export type SubmissionAnswer = z.infer<typeof SubmissionAnswerSchema>;
 export type Submission = z.infer<typeof SubmissionSchema>;
 export type Pagination = z.infer<typeof PaginationSchema>;
 export type Statistics = z.infer<typeof StatisticsSchema>;
