@@ -90,7 +90,7 @@ export default function AssessmentListTable({ searchQuery = "" }: AssessmentList
           : "User Deleted",
         email: submission.user?.email || "N/A",
         business: submission.user?.business_name || "N/A",
-        assessment: submission.assessment.title,
+        assessment: submission.assessment?.title || "N/A",
         timestamp: `${submission.completed_date} ${submission.completed_time}`,
         score: submission.scores.user_score,
         percentageScore: submission.scores.percentage_score,

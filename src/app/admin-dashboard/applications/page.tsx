@@ -38,16 +38,47 @@ export default function ApplicationsPage() {
       return;
     }
 
+    // Flatten the data to include all fields including responses
+    const flattenedData = applications.map((app) => {
+      // Create base data
+      const baseData: Record<string, string> = {
+        _id: app._id,
+        form_title: app.form_title,
+        form_slug: app.form_slug,
+        name: app.name,
+        email: app.email,
+        service: app.service,
+        service_type: app.service_type,
+        status: app.status,
+        timestamp: app.timestamp,
+        payment_status: app.payment_status,
+        responses: JSON.stringify(app.responses), 
+      };
+
+      // Add each response as a separate column
+      if (app.responses && app.responses.length > 0) {
+        app.responses.forEach((response) => {
+          baseData[response.data_key || response.question] = response.answer;
+        });
+      }
+
+      return baseData;
+    });
+
+    // Collect all unique keys from all applications (to handle varying responses)
+    const allKeys = new Set<string>();
+    flattenedData.forEach((data) => {
+      Object.keys(data).forEach((key) => allKeys.add(key));
+    });
+
     // Define columns for CSV export
-    const columns = [
-      { key: "name" as const, header: "Name" },
-      { key: "email" as const, header: "Email" },
-      { key: "service" as const, header: "Service" },
-      { key: "service_type" as const, header: "Service Type" },
-      { key: "status" as const, header: "Status" },
-      { key: "payment_status" as const, header: "Payment Status" },
-      { key: "timestamp" as const, header: "Timestamp" },
-    ];
+    const columns = Array.from(allKeys).map((key) => ({
+      key: key as keyof (typeof flattenedData)[0],
+      header: key
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" "),
+    }));
 
     const filename = serviceTypeFilter
       ? `applications_${serviceTypeFilter.replace(/\s+/g, "_")}_${
@@ -55,7 +86,7 @@ export default function ApplicationsPage() {
         }`
       : `applications_${new Date().toISOString().split("T")[0]}`;
 
-    exportAsCSV(applications, filename, columns);
+    exportAsCSV(flattenedData, filename, columns);
     toast.success("Applications exported successfully!");
   };
 

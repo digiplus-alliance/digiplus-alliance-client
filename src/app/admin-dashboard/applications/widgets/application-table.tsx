@@ -31,6 +31,7 @@ type TableUser = {
   id: string;
   name: string;
   email: string;
+  formTitle: string;
   service: string;
   training?: string;
   paymentStatus: string;
@@ -69,6 +70,7 @@ export default function ApplicationTable({
         id: app._id,
         name: app.name,
         email: app.email,
+        formTitle: app.form_title,
         service: app.service,
         training: app.service_type ?? "",
         paymentStatus: app.payment_status ?? "",
@@ -140,6 +142,21 @@ export default function ApplicationTable({
           <div>
             <p className="font-medium text-[#000000] text-sm">{row.service}</p>
             <p className="text-xs text-[#B8B8B8]">{row.training}</p>
+          </div>
+        );
+      },
+    },
+    {
+      id: "formTitle",
+      header: "Form Title",
+      cell: (info: CellContext<TableUser, unknown>) => {
+        const row = info.row.original;
+        return (
+          <div>
+            <p className="font-medium text-[#000000] text-sm">
+              {row.formTitle}
+            </p>
+            {/* <p className="text-xs text-[#B8B8B8]">{row.training}</p> */}
           </div>
         );
       },

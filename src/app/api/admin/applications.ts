@@ -3,8 +3,17 @@
 import * as z from "zod";
 import useFetch from "@/lib/useFetch";
 
+export const ApplicationResponseSchema = z.object({
+  question: z.string(),
+  data_key: z.string(),
+  answer: z.string(),
+  type: z.string(),
+});
+
 export const ApplicationSchema = z.object({
   _id: z.string(),
+  form_title: z.string(),
+  form_slug: z.string(),
   name: z.string(),
   email: z.string(),
   image: z.string().optional(),
@@ -13,6 +22,7 @@ export const ApplicationSchema = z.object({
   status: z.string(),
   timestamp: z.string(),
   payment_status: z.string(),
+  responses: z.array(ApplicationResponseSchema),
 });
 
 export const AllApplicationsResponseSchema = z.array(ApplicationSchema);
