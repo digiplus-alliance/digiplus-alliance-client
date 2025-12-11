@@ -13,6 +13,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import Image from "next/image";
+import { useAuthStore } from "@/store/auth";
+import { getDefaultDashboard } from "@/lib/permissions";
 
 const navItems = [
   { label: "Home", href: "/" },
@@ -30,6 +32,10 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname() || "/";
   const router = useRouter();
+  const { user, accessToken } = useAuthStore();
+  
+  const isAuthenticated = !!(user && accessToken);
+  const dashboardUrl = user?.role ? getDefaultDashboard(user.role) : '/user-dashboard';
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -71,9 +77,9 @@ export function Navbar() {
         <div className="hidden md:flex items-center space-x-3">
           <Button
             className="font-normal"
-            onClick={() => router.push("/auth/login")}
+            onClick={() => router.push(isAuthenticated ? dashboardUrl : "/auth/login")}
           >
-            Sign In
+            {isAuthenticated ? "Dashboard" : "Sign In"}
           </Button>
           <Button
             variant="outline"
@@ -118,9 +124,9 @@ export function Navbar() {
               <div className="mt-6 px-10 flex flex-col space-y-3">
                 <Button
                   className="font-normal"
-                  onClick={() => router.push("/auth/login")}
+                  onClick={() => router.push(isAuthenticated ? dashboardUrl : "/auth/login")}
                 >
-                  Sign In
+                  {isAuthenticated ? "Dashboard" : "Sign In"}
                 </Button>
                 <Button
                   variant="outline"

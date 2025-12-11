@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -43,37 +43,62 @@ type TableUser = {
   percentageScore: number;
   maxScore: number;
   assessmentStatus: string;
+  hasUserData: boolean; // Flag to indicate if user data exists
 };
 
 // const serviceOptions = ["View Details", "Edit Assessment", "Delete Assessment"];
 
-export default function AssessmentListTable() {
+interface AssessmentListTableProps {
+  searchQuery?: string;
+}
+
+export default function AssessmentListTable({ searchQuery = "" }: AssessmentListTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   // const [selectionsById, setSelectionsById] = useState<
   //   Record<string, string[]>
   // >({});
   const pageSize = 10;
+
+  // Reset to page 1 when search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
   const { data, isLoading, isError, refetch } = useGetAllSubmittedAssessments({
     page: currentPage,
     limit: pageSize,
+    searchQuery: searchQuery.trim() || undefined,
   });
+
 
   // Transform API data to table format
   const tableData: TableUser[] = useMemo(() => {
     if (!data?.submissions) return [];
     
-    return data.submissions.map((submission: Submission) => ({
-      id: submission.user._id.slice(-6).toUpperCase(),
-      name: `${submission.user.first_name} ${submission.user.last_name}`,
-      email: submission.user.email,
-      business: submission.user.business_name,
-      assessment: submission.assessment.title,
-      timestamp: `${submission.completed_date} ${submission.completed_time}`,
-      score: submission.scores.user_score,
-      percentageScore: submission.scores.percentage_score,
-      maxScore: submission.scores.max_possible_score,
-      assessmentStatus: "Submitted",
-    }));
+    return data.submissions.map((submission: Submission) => {
+      const hasUserData = !!(
+        submission.user?._id &&
+        submission.user?.first_name &&
+        submission.user?.last_name &&
+        submission.user?.email
+      );
+
+      return {
+        id: submission.user?._id?.slice(-6).toUpperCase() || "N/A",
+        name: hasUserData
+          ? `${submission.user.first_name} ${submission.user.last_name}`
+          : "User Deleted",
+        email: submission.user?.email || "N/A",
+        business: submission.user?.business_name || "N/A",
+        assessment: submission.assessment.title,
+        timestamp: `${submission.completed_date} ${submission.completed_time}`,
+        score: submission.scores.user_score,
+        percentageScore: submission.scores.percentage_score,
+        maxScore: submission.scores.max_possible_score,
+        assessmentStatus: "Submitted",
+        hasUserData,
+      };
+    });
   }, [data]);
 
   const totalPages = data?.pagination?.total_pages || 1;
@@ -327,7 +352,16 @@ export default function AssessmentListTable() {
     return (
       <div className="p-4">
         <div className="border border-[#EBFBFF] rounded-lg p-8 text-center">
-          <p className="text-[#B8B8B8]">No submitted assessments found</p>
+          <p className="text-[#B8B8B8]">
+            {searchQuery 
+              ? `No assessments found matching "${searchQuery}"`
+              : "No submitted assessments found"}
+          </p>
+          {searchQuery && (
+            <p className="text-sm text-[#8F8F8F] mt-2">
+              Try adjusting your search terms
+            </p>
+          )}
         </div>
       </div>
     );
@@ -335,6 +369,18 @@ export default function AssessmentListTable() {
 
   return (
     <>
+      {searchQuery && (
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-800">
+            Showing results for: <span className="font-semibold">"{searchQuery}"</span>
+            {data?.pagination && (
+              <span className="ml-2">
+                ({data.pagination.total_items} result{data.pagination.total_items !== 1 ? 's' : ''} found)
+              </span>
+            )}
+          </p>
+        </div>
+      )}
       <Table className="border border-[#EBFBFF] rounded-lg">
         <TableHeader className="bg-[#FBFBFD]">
           {table.getHeaderGroups().map((hg) => (
@@ -372,9 +418,17 @@ export default function AssessmentListTable() {
         </TableBody>
       </Table>
       <div className="mt-4 flex flex-col md:flex-row md:justify-between md:items-center gap-2 px-4">
-        <p className="text-sm text-[#667085] border border-[#EBFBFF] p-2 rounded-lg">
-          10 List per Page
-        </p>
+        <div className="flex items-center gap-3">
+          <p className="text-sm text-[#667085] border border-[#EBFBFF] p-2 rounded-lg">
+            {pageSize} List per Page
+          </p>
+          {data?.pagination && (
+            <p className="text-sm text-[#667085]">
+              Showing {((currentPage - 1) * pageSize) + 1}-
+              {Math.min(currentPage * pageSize, data.pagination.total_items)} of {data.pagination.total_items} results
+            </p>
+          )}
+        </div>
         <Pagination
           totalPages={totalPages}
           currentPage={currentPage}

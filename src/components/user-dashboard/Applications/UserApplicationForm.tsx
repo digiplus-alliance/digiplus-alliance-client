@@ -1,28 +1,35 @@
-'use client';
-import { useState, useMemo, Fragment } from 'react';
-import { MultipleChoiceQuestion } from '../Assessments/MultipleChoiceQuestion';
-import { CheckboxQuestion } from '../Assessments/CheckboxQuestion';
-import { TextQuestion } from '../Assessments/TextQuestion';
-import { DropdownQuestion } from '../Assessments/DropdownQuestion';
-import { GridQuestion } from '../Assessments/GridQuestion';
-import { useSubmitAssessment } from '@/app/api/assessments';
-import { useAuthStore } from '@/store/auth';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
-import { groupApplicationQuestionsByModuleAndStep, IGroupedModule } from '@/utils/assessmentUtils';
+"use client";
+import { useState, useMemo, Fragment } from "react";
+import { MultipleChoiceQuestion } from "../Assessments/MultipleChoiceQuestion";
+import { CheckboxQuestion } from "../Assessments/CheckboxQuestion";
+import { TextQuestion } from "../Assessments/TextQuestion";
+import { DropdownQuestion } from "../Assessments/DropdownQuestion";
+import { GridQuestion } from "../Assessments/GridQuestion";
+import { useSubmitAssessment } from "@/app/api/assessments";
+import { useAuthStore } from "@/store/auth";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import {
+  groupApplicationQuestionsByModuleAndStep,
+  IGroupedModule,
+} from "@/utils/assessmentUtils";
 // Import types from the assessment types file
-import type { AssessmentQuestion } from '@/types/assessment';
-import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
-import { useGetApplicationBySlug } from '@/app/api/assessments/useGetApplicationFormBySlug';
-import { useGetAvailableApplications } from '@/app/api/assessments/useGetAvailableApplication';
-import { useCreateApplication } from '@/app/api/user';
-import ApplicationSuccessModal from './ApplicationSuccessModal';
+import type { AssessmentQuestion } from "@/types/assessment";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { useGetApplicationBySlug } from "@/app/api/assessments/useGetApplicationFormBySlug";
+import { useGetAvailableApplications } from "@/app/api/assessments/useGetAvailableApplication";
+import { useCreateApplication } from "@/app/api/user";
+import ApplicationSuccessModal from "./ApplicationSuccessModal";
 
 interface WelcomeDatas {
-  setWelcomeData: (data: { welcome_description: string; welcome_instruction: string; welcome_title: string }) => void;
+  setWelcomeData: (data: {
+    welcome_description: string;
+    welcome_instruction: string;
+    welcome_title: string;
+  }) => void;
 }
 export default function UserApplicationForm(props: WelcomeDatas) {
   const { setWelcomeData } = props;
@@ -32,7 +39,9 @@ export default function UserApplicationForm(props: WelcomeDatas) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   const [responses, setResponses] = useState<Record<string, any>>({});
-  const [completedAssessments, setCompletedAssessments] = useState<Set<string>>(new Set());
+  const [completedAssessments, setCompletedAssessments] = useState<Set<string>>(
+    new Set()
+  );
   const [allAssessmentsCompleted, setAllAssessmentsCompleted] = useState(false);
   const { user } = useAuthStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -52,33 +61,42 @@ export default function UserApplicationForm(props: WelcomeDatas) {
   } = useGetAvailableApplications();
 
   // Get the current application slug from the first available application
-  const currentApplicationSlug = availableApplications?.[0]?.id || null;
+  // Only set this when data is actually available to prevent race conditions
+  const currentApplicationSlug = useMemo(() => {
+    return availableApplications?.[0]?.id || null;
+  }, [availableApplications]);
 
-  // const {
-  //   data: applicationData,
-  //   isLoading,
-  //   error,
-  // } = useGetAssessmentById(currentApplicationSlug || '68dec54109ae0fe9fd7c43cb', !!currentApplicationSlug);
-
+  // Only fetch application details when we have a valid slug AND available applications have loaded
   const {
     data: applicationData,
-    isLoading,
+    isLoading: isLoadingApplication,
+    isFetching: isFetchingApplication,
     error,
-  } = useGetApplicationBySlug(currentApplicationSlug || '', !!currentApplicationSlug);
+  } = useGetApplicationBySlug(
+    currentApplicationSlug || "",
+    !loadingApplications && !!currentApplicationSlug
+  );
 
   // const submitAssessment = useSubmitAssessment();
 
-  const { mutate: createApplication, isPending } = useCreateApplication(currentApplicationSlug || '');
+  const { mutate: createApplication, isPending } = useCreateApplication(
+    currentApplicationSlug || ""
+  );
 
   // Group questions by module and step
   const groupedModules: IGroupedModule[] = useMemo(() => {
     if (applicationData) {
+      console.log("Application Data received:", applicationData);
       setWelcomeData({
         welcome_description: applicationData.welcome_description,
         welcome_instruction: applicationData.welcome_instruction,
         welcome_title: applicationData.welcome_title,
       });
-      return groupApplicationQuestionsByModuleAndStep(applicationData as any);
+      const grouped = groupApplicationQuestionsByModuleAndStep(
+        applicationData as any
+      );
+      console.log("Grouped modules result:", grouped);
+      return grouped;
     }
     return [];
   }, [applicationData]);
@@ -103,7 +121,9 @@ export default function UserApplicationForm(props: WelcomeDatas) {
       <div className="min-h-screen bg-muted/30 flex items-center justify-center p-6">
         <Card className="w-full max-w-4xl">
           <CardContent className="p-12 text-center">
-            <p className="text-red-600 mb-4">Error loading available applications</p>
+            <p className="text-red-600 mb-4">
+              Error loading available applications
+            </p>
             <Button onClick={() => window.location.reload()}>Retry</Button>
           </CardContent>
         </Card>
@@ -139,7 +159,24 @@ export default function UserApplicationForm(props: WelcomeDatas) {
   }
 
   // Show loading state for current assessment or if grouping is in progress
-  if (isLoading || (applicationData && groupedModules.length === 0)) {
+  // Only show loading if we're actually fetching (not if the query is just disabled)
+  const isActuallyLoading =
+    (loadingApplications || isFetchingApplication) && !applicationData;
+
+  // Debug logging
+  // console.log('Debug - Loading States:', {
+  //   loadingApplications,
+  //   isFetchingApplication,
+  //   isLoadingApplication,
+  //   hasApplicationData: !!applicationData,
+  //   applicationDataKeys: applicationData ? Object.keys(applicationData) : [],
+  //   groupedModulesLength: groupedModules.length,
+  //   isActuallyLoading,
+  // });
+
+  // Only show loading if we're actually fetching data, don't block on empty groupedModules
+  if (isActuallyLoading) {
+    // console.log('Showing loading because isActuallyLoading:', isActuallyLoading);
     return (
       <div className="min-h-screen bg-muted/30 flex items-center justify-center p-6">
         <Card className="w-full max-w-4xl">
@@ -176,9 +213,12 @@ export default function UserApplicationForm(props: WelcomeDatas) {
   const isLastStepOverall = isLastStepInModule && isLastModule;
 
   // Transform API data to match component interfaces
-  const transformOptions = (options: any[]) => options.map((opt) => ({ ...opt, id: opt._id, _id: opt.id }));
-  const transformGridColumns = (columns: any[]) => columns.map((col) => ({ ...col, id: col.id }));
-  const transformGridRows = (rows: any[]) => rows.map((row) => ({ ...row, id: row.id }));
+  const transformOptions = (options: any[]) =>
+    options.map((opt) => ({ ...opt, id: opt._id, _id: opt.id }));
+  const transformGridColumns = (columns: any[]) =>
+    columns.map((col) => ({ ...col, id: col.id }));
+  const transformGridRows = (rows: any[]) =>
+    rows.map((row) => ({ ...row, id: row.id }));
 
   // A helper to handle single or multiple question responses for a step
   const handleNext = async (stepResponses: Record<string, any>) => {
@@ -188,7 +228,10 @@ export default function UserApplicationForm(props: WelcomeDatas) {
     if (isLastStepInModule) {
       if (isLastModule) {
         // This is the last step of the last module of the current assessment
-        await submitAndProceed({ responses: updatedResponses, service: selectedService as string });
+        await submitAndProceed({
+          responses: updatedResponses,
+          service: selectedService as string,
+        });
       } else {
         // Move to the first step of the next module
         setCurrentModuleIndex(currentModuleIndex + 1);
@@ -200,14 +243,17 @@ export default function UserApplicationForm(props: WelcomeDatas) {
     }
   };
 
-  const submitAndProceed = async (payload: { responses: any; service: string }) => {
+  const submitAndProceed = async (payload: {
+    responses: any;
+    service: string;
+  }) => {
     // This function is called only at the end of an assessment.
     // It submits the responses and decides whether to show results or move to the next assessment.
     if (isLastStepOverall) {
       // Submit the current assessment
       try {
         if (!user?._id) {
-          throw new Error('User not authenticated');
+          throw new Error("User not authenticated");
         }
 
         setIsSubmitting(true);
@@ -216,11 +262,11 @@ export default function UserApplicationForm(props: WelcomeDatas) {
           onSuccess: () => {
             setShowSuccessModal(true);
             setResponses({});
-            toast.success('Application submitted successfully');
+            toast.success("Application submitted successfully");
           },
           onError: (error) => {
-            console.error('Application submission failed:', error);
-            toast.error('Application submission failed');
+            console.error("Application submission failed:", error);
+            toast.error("Application submission failed");
           },
         });
 
@@ -231,7 +277,7 @@ export default function UserApplicationForm(props: WelcomeDatas) {
 
         setAllAssessmentsCompleted(true);
       } catch (error) {
-        toast.error('Failed to submit assessment');
+        toast.error("Failed to submit assessment");
       } finally {
         setIsSubmitting(false);
       }
@@ -256,8 +302,12 @@ export default function UserApplicationForm(props: WelcomeDatas) {
   // Progress calculation across all assessments
   const totalApplicationForm = 1;
   const progressInCurrentAssessment =
-    (currentModuleIndex + currentStepIndex / totalStepsInModule) / groupedModules.length;
-  const overallProgress = ((currentAssessmentIndex + progressInCurrentAssessment) / totalApplicationForm) * 100;
+    (currentModuleIndex + currentStepIndex / totalStepsInModule) /
+    groupedModules.length;
+  const overallProgress =
+    ((currentAssessmentIndex + progressInCurrentAssessment) /
+      totalApplicationForm) *
+    100;
 
   // This component will now render all questions for the current step
   const renderCurrentStep = () => {
@@ -267,54 +317,84 @@ export default function UserApplicationForm(props: WelcomeDatas) {
     // and instead rely on a shared set of controls.
     // For this example, I'll keep them as they are, but ideally, you'd refactor them.
     return (
-      <Card className={cn('bg-transparent border-none shadow-none drop-shadow-none pt-0 ')}>
-        <CardContent className={cn('', 'bg-transparent p-0 shadow-none drop-shadow-none border-none ')}>
-          {currentQuestions.map((currentQuestion: AssessmentQuestion, index) => {
-            const findResponse =
-              validateResponseData &&
-              validateResponseData?.results?.find(
-                (resp: any) => resp.field === currentQuestion.data_key && !resp.isValid
+      <Card
+        className={cn(
+          "bg-transparent border-none shadow-none drop-shadow-none pt-0 "
+        )}
+      >
+        <CardContent
+          className={cn(
+            "",
+            "bg-transparent p-0 shadow-none drop-shadow-none border-none "
+          )}
+        >
+          {currentQuestions.map(
+            (currentQuestion: AssessmentQuestion, index) => {
+              const findResponse =
+                validateResponseData &&
+                validateResponseData?.results?.find(
+                  (resp: any) =>
+                    resp.field === currentQuestion.data_key && !resp.isValid
+                );
+              console.log("findResponse", findResponse);
+              return (
+                <div key={currentQuestion.data_key} className="mb-6 last:mb-0">
+                  {renderQuestion(currentQuestion, index + 1)}
+                  {findResponse && findResponse?.errors[0] && (
+                    <p className=" text-red-600 text-sm mt-1.5">
+                      {findResponse.errors[0].message}
+                    </p>
+                  )}
+                </div>
               );
-            console.log('findResponse', findResponse);
-            return (
-              <div key={currentQuestion.data_key} className="mb-6 last:mb-0">
-                {renderQuestion(currentQuestion, index + 1)}
-                {findResponse && findResponse?.errors[0] && (
-                  <p className=" text-red-600 text-sm mt-1.5">{findResponse.errors[0].message}</p>
-                )}
-              </div>
-            );
-          })}
+            }
+          )}
 
           {
             <>
               {/* Shared Navigation for the step */}
-              <div className="mt-8 flex justify-between">
+              <div className="mt-8 flex flex-col gap-4">
+                {/* Back Button */}
+                {(currentStepIndex > 0 || currentModuleIndex > 0) && (
+                  <Button
+                    variant="outline"
+                    className="w-full h-12 rounded-lg"
+                    onClick={handleBack}
+                    disabled={isSubmitting || validatingResponse}
+                  >
+                    Back
+                  </Button>
+                )}
+                {/* Next/Submit Button */}
                 <Button
                   className="w-full h-12 bg-[#FF5C5C] mt-6 hover:bg-[#FF4444] text-black hover:text-white  rounded-lg"
                   onClick={async () => {
-                    const stepResponses = currentQuestions.reduce((acc: any, q: any) => {
-                      acc[q.data_key] = responses[q.data_key] || null; // Use existing response or null
-                      return acc;
-                    }, {} as Record<string, any>);
+                    const stepResponses = currentQuestions.reduce(
+                      (acc: any, q: any) => {
+                        acc[q.data_key] = responses[q.data_key] || null; // Use existing response or null
+                        return acc;
+                      },
+                      {} as Record<string, any>
+                    );
 
                     const fields = currentQuestions.map((question) => {
                       return {
                         questionIdentifier: question.data_key,
-                        value: responses[question.data_key || question._id] || null,
+                        value:
+                          responses[question.data_key || question._id] || null,
                       };
                     });
 
                     setValidatingResponse(true);
 
-                    await fetch('/api/assessments/validate', {
-                      method: 'POST',
+                    await fetch("/api/assessments/validate", {
+                      method: "POST",
                       headers: {
-                        'Content-Type': 'application/json',
+                        "Content-Type": "application/json",
                       },
                       body: JSON.stringify({
                         formId: applicationData._id,
-                        formType: 'application',
+                        formType: "application",
                         fields,
                       }),
                     })
@@ -322,19 +402,27 @@ export default function UserApplicationForm(props: WelcomeDatas) {
                       .then((data) => {
                         if (!data.isValid) {
                           setValidateResponseData(data);
-                          toast.error('Please confirm your answers before proceeding.');
+                          toast.error(
+                            "Please confirm your answers before proceeding."
+                          );
                           return;
                         } else {
-                          const checkIfAnyIsNull = Object.values(stepResponses).some((value) => value === null);
+                          const checkIfAnyIsNull = Object.values(
+                            stepResponses
+                          ).some((value) => value === null);
 
                           if (checkIfAnyIsNull) {
-                            toast.error('Error validating response, please confirm your answers before proceeding.');
+                            toast.error(
+                              "Error validating response, please confirm your answers before proceeding."
+                            );
                             return;
                           }
                           handleNext(stepResponses);
                         }
                       })
-                      .catch((err) => toast.error(err.message || 'Something went wrong'))
+                      .catch((err) =>
+                        toast.error(err.message || "Something went wrong")
+                      )
                       .finally(() => {
                         setValidatingResponse(false);
                       });
@@ -343,22 +431,22 @@ export default function UserApplicationForm(props: WelcomeDatas) {
                 >
                   {isLastStepOverall ? (
                     isSubmitting ? (
-                      'Submitting Application...'
+                      "Submitting Application..."
                     ) : validatingResponse ? (
                       <p className=" flex items-center justify-center pt-3">
                         <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
                       </p>
                     ) : (
-                      'Submit Application'
+                      "Submit Application"
                     )
                   ) : isSubmitting ? (
-                    'Submitting...'
+                    "Submitting..."
                   ) : validatingResponse ? (
                     <p className=" flex items-center justify-center pt-3">
                       <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
                     </p>
                   ) : (
-                    'Next'
+                    "Next"
                   )}
                 </Button>
               </div>
@@ -369,9 +457,12 @@ export default function UserApplicationForm(props: WelcomeDatas) {
     );
   };
 
-  const renderQuestion = (currentQuestion: AssessmentQuestion, index: number) => {
+  const renderQuestion = (
+    currentQuestion: AssessmentQuestion,
+    index: number
+  ) => {
     switch (currentQuestion.type) {
-      case 'multiple_choice':
+      case "multiple_choice":
         return (
           <MultipleChoiceQuestion
             module={currentModule.moduleName}
@@ -380,14 +471,19 @@ export default function UserApplicationForm(props: WelcomeDatas) {
             instruction={currentQuestion.instruction}
             options={transformOptions(currentQuestion.options || [])}
             // currentStep={currentStepIndex + 1}
-            value={responses[currentQuestion.data_key || currentQuestion._id] || ''}
+            value={
+              responses[currentQuestion.data_key || currentQuestion._id] || ""
+            }
             onChange={(res) => {
-              setResponses((prev) => ({ ...prev, [currentQuestion.data_key || currentQuestion._id]: res }));
+              setResponses((prev) => ({
+                ...prev,
+                [currentQuestion.data_key || currentQuestion._id]: res,
+              }));
             }}
             index={index}
           />
         );
-      case 'checkbox':
+      case "checkbox":
         return (
           <CheckboxQuestion
             module={currentModule.moduleName}
@@ -398,15 +494,20 @@ export default function UserApplicationForm(props: WelcomeDatas) {
             minSelections={currentQuestion.min_selections}
             maxSelections={currentQuestion.max_selections}
             // currentStep={currentStepIndex + 1}
-            value={responses[currentQuestion.data_key || currentQuestion._id] || []}
+            value={
+              responses[currentQuestion.data_key || currentQuestion._id] || []
+            }
             onChange={(res) =>
-              setResponses((prev) => ({ ...prev, [currentQuestion.data_key || currentQuestion._id]: res }))
+              setResponses((prev) => ({
+                ...prev,
+                [currentQuestion.data_key || currentQuestion._id]: res,
+              }))
             }
             index={index}
           />
         );
-      case 'short_text':
-      case 'long_text':
+      case "short_text":
+      case "long_text":
         return (
           <TextQuestion
             module={currentModule.moduleName}
@@ -420,14 +521,19 @@ export default function UserApplicationForm(props: WelcomeDatas) {
             rows={currentQuestion.rows}
             isRequired={currentQuestion.is_required}
             // currentStep={currentStepIndex + 1}
-            value={responses[currentQuestion.data_key || currentQuestion._id] || ''}
+            value={
+              responses[currentQuestion.data_key || currentQuestion._id] || ""
+            }
             onChange={(res) =>
-              setResponses((prev) => ({ ...prev, [currentQuestion.data_key || currentQuestion._id]: res }))
+              setResponses((prev) => ({
+                ...prev,
+                [currentQuestion.data_key || currentQuestion._id]: res,
+              }))
             }
             index={index}
           />
         );
-      case 'dropdown':
+      case "dropdown":
         return (
           <DropdownQuestion
             module={currentModule.moduleName}
@@ -437,14 +543,19 @@ export default function UserApplicationForm(props: WelcomeDatas) {
             options={transformOptions(currentQuestion.options || [])}
             isRequired={currentQuestion.is_required}
             // currentStep={currentStepIndex + 1}
-            value={responses[currentQuestion.data_key || currentQuestion._id] || ''}
+            value={
+              responses[currentQuestion.data_key || currentQuestion._id] || ""
+            }
             onChange={(res) =>
-              setResponses((prev) => ({ ...prev, [currentQuestion.data_key || currentQuestion._id]: res }))
+              setResponses((prev) => ({
+                ...prev,
+                [currentQuestion.data_key || currentQuestion._id]: res,
+              }))
             }
             index={index}
           />
         );
-      case 'multiple_choice_grid':
+      case "multiple_choice_grid":
         return (
           <GridQuestion
             module={currentModule.moduleName}
@@ -455,9 +566,14 @@ export default function UserApplicationForm(props: WelcomeDatas) {
             rows={transformGridRows(currentQuestion.grid_rows || [])}
             isRequired={currentQuestion.is_required}
             // currentStep={currentStepIndex + 1}
-            value={responses[currentQuestion.data_key || currentQuestion._id] || {}}
+            value={
+              responses[currentQuestion.data_key || currentQuestion._id] || {}
+            }
             onChange={(res) =>
-              setResponses((prev) => ({ ...prev, [currentQuestion.data_key || currentQuestion._id]: res }))
+              setResponses((prev) => ({
+                ...prev,
+                [currentQuestion.data_key || currentQuestion._id]: res,
+              }))
             }
             index={index}
           />
@@ -474,7 +590,10 @@ export default function UserApplicationForm(props: WelcomeDatas) {
   return (
     <div className="w-full">
       <div className=" w-full">{renderCurrentStep()}</div>
-      <ApplicationSuccessModal isOpen={showSuccessModal} onClose={() => setShowSuccessModal(false)} />
+      <ApplicationSuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+      />
     </div>
   );
 }

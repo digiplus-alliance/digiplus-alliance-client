@@ -14,11 +14,11 @@ const SubmissionAssessmentSchema = z.object({
 
 // Schema for user in submission
 const SubmissionUserSchema = z.object({
-  _id: z.string(),
-  first_name: z.string(),
-  last_name: z.string(),
-  email: z.string(),
-  business_name: z.string(),
+  _id: z.string().optional(),
+  first_name: z.string().optional(),
+  last_name: z.string().optional(),
+  email: z.string().optional(),
+  business_name: z.string().optional(),
   profile_picture: z.string().optional(),
 }).passthrough();
 
@@ -59,12 +59,12 @@ const StatisticsSchema = z.object({
   average_percentage: z.number(),
 }).passthrough();
 
-// Schema for the main response (API returns data directly, not wrapped)
+// Schema for the main response (API returns data wrapped in a data field)
 const SubmittedAssessmentsResponseSchema = z.object({
   submissions: z.array(SubmissionSchema),
   pagination: PaginationSchema,
   statistics: StatisticsSchema,
-  filters_applied: z.record(z.string(), z.unknown()).optional(),
+  filters_applied: z.union([z.string(), z.record(z.string(), z.unknown())]).optional(),
   generated_at: z.string(),
 }).passthrough();
 
@@ -95,6 +95,7 @@ export function useGetAllSubmittedAssessments({
 
   return useFetch<SubmittedAssessmentsResponse>({
     url,
+    // queryKey: ["submitted-assessments", String(page), String(limit), searchQuery || ""],
     schema: SubmittedAssessmentsResponseSchema,
     hasAuth: true,
     errorMessage: "Failed to fetch submitted assessments.",

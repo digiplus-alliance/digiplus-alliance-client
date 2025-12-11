@@ -4,7 +4,7 @@ import { z } from 'zod';
 export const ApplicationSubmissionSchema = z.object({
   _id: z.string(),
   name: z.string(),
-  email: z.string().email(),
+  email: z.string(),
   service: z.string(),
   service_type: z.string(),
   payment_amount: z.number(),

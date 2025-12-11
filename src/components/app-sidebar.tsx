@@ -41,7 +41,7 @@ interface SidebarLayoutProps extends React.ComponentProps<typeof Sidebar> {
 export default function SidebarLayout({
   navItems,
   personalizationItems,
-  logoHref = '/',
+  logoHref = '/landing',
   basePath = '',
   footer,
   showProfileMenu = false,
@@ -55,7 +55,11 @@ export default function SidebarLayout({
   return (
     <Sidebar {...props} className="bg-white border-none">
       <SidebarHeader className="p-4 bg-white">
-        <Link href={logoHref} className="w-28 lg:w-40">
+        <Link 
+          href={logoHref} 
+          className="w-28 lg:w-40 block"
+          onClick={() => setOpenMobile(false)}
+        >
           <Image src="/mobile-logo.png" alt="App Logo" width={200} height={200} />
         </Link>
       </SidebarHeader>

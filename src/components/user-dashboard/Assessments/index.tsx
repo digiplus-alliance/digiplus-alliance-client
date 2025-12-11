@@ -606,6 +606,25 @@ export default function Assessment() {
           />
         );
       case "short_text":
+        return (
+          <TextQuestion
+            module={currentModule.moduleName}
+            title={currentQuestion.question}
+            description={currentQuestion.description}
+            instruction={currentQuestion.instruction}
+            placeholder={currentQuestion.placeholder}
+            type={currentQuestion.type}
+            maxLength={currentQuestion.max_length}
+            minLength={currentQuestion.min_length}
+            isRequired={currentQuestion.is_required}
+            // currentStep={currentStepIndex + 1}
+            value={responses[currentQuestion._id] || ""}
+            onChange={(res) =>
+              setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }))
+            }
+            index={index}
+          />
+        );
       case "long_text":
         return (
           <TextQuestion

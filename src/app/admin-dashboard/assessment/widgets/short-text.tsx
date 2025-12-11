@@ -51,7 +51,7 @@ export default function ShortText({
     initialData?.max_characters || 200
   );
   const [minCharacters, setMinCharacters] = useState<number>(
-    initialData?.min_characters || 10
+    initialData?.min_characters || 1
   );
   const [completionPoints, setCompletionPoints] = useState<number>(
     initialData?.completion_points || 0

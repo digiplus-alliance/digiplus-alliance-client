@@ -50,7 +50,7 @@ export default function LongTextQuestion({
   const [question, setQuestion] = useState(initialData?.question || "");
   const [description, setDescription] = useState(initialData?.descriptions || "");
   const [answerPlaceholder, setAnswerPlaceholder] = useState(initialData?.answer_placeholder || "Enter your detailed answer here...");
-  const [minCharacters, setMinCharacters] = useState<number>(initialData?.min_characters || 50);
+  const [minCharacters, setMinCharacters] = useState<number>(initialData?.min_characters || 1);
   const [maxCharacters, setMaxCharacters] = useState<number>(initialData?.max_characters || 1000);
   const [rows, setRows] = useState<number>(initialData?.rows || 5);
   const [completionPoints, setCompletionPoints] = useState<number>(initialData?.completion_points || 0);

@@ -632,8 +632,8 @@ export default function QuestionScreen({
               ? "Updating..."
               : "Saving..."
             : applicationId
-            ? "Update"
-            : "Save"}
+            ? "Update Form"
+            : "Save Form"}
         </Button>
       </div>
 
