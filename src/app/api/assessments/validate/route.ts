@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const apiUrl = process.env.STAGING_API_URL;
-// const apiUrl = process.env.API_URL;
+// const apiUrl = process.env.STAGING_API_URL;
+const apiUrl = process.env.API_URL;
 
 export async function POST(req: NextRequest) {
   const payload = await req.json();
@@ -18,10 +18,10 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify(payload),
     });
 
-    console.log(response);
+    // console.log(response);
     const responseData = await response.json();
 
-    console.log(responseData);
+    // console.log(responseData);
 
     if (response.ok) {
       return new NextResponse(JSON.stringify(responseData), { status: 200 });
