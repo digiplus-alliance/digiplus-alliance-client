@@ -58,7 +58,7 @@ export default function EditAssessmentForm({
       // Set modules data
       if (assessmentData.modules && Array.isArray(assessmentData.modules)) {
         const modules = assessmentData.modules.map((mod: any) => ({
-          id: mod.id || `mod-${mod.order}`,
+          id: mod._id || mod.id || `mod-${mod.order}`,
           title: mod.title,
           description: mod.description || "",
           step: mod.order || mod.step,
@@ -105,7 +105,7 @@ export default function EditAssessmentForm({
     questionNo: number
   ) => {
     const baseQuestion = {
-      id: apiQuestion.id || `q-${questionNo}`,
+      id: apiQuestion._id || apiQuestion.id || `q-${questionNo}`,
       question_no: questionNo,
       question: apiQuestion.question || "",
       descriptions: apiQuestion.description || "",

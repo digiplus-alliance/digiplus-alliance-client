@@ -10,12 +10,14 @@ import {
 } from "@/store/form-store";
 import { useCreateApplication } from "@/app/api/admin/applications/create-application";
 import { useUpdateApplication } from "@/app/api/admin/applications/update-application";
-import { cleanObject } from "@/utils/cleanQuestionObject";
-import { Question as APIQuestion } from "@/types/questions";
 import { Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCreateAssessment } from "@/app/api/admin/assessment/create-assessment";
 import { useUpdateAssessment } from "@/app/api/admin/assessment/edit-assessment";
+import {
+  buildApplicationPayload,
+  buildAssessmentPayload,
+} from "@/utils/formSubmissionHelpers";
 
 interface PreviewModalProps {
   showPreview: boolean;
@@ -52,6 +54,10 @@ export default function PreviewModal({
     serviceRecommendations,
     clearQuestions,
     clearAll,
+    getModifiedAndNewQuestions,
+    getModifiedAndNewModules,
+    getDeletedQuestions,
+    getDeletedModules,
   } = useFormStore();
 
   const { mutate: createApplication, isPending: isCreating } =
@@ -343,85 +349,21 @@ export default function PreviewModal({
 
   const handleFinalSave = () => {
     if (formType === "application") {
-      const payload = {
-        welcome_title: welcomeScreen?.title,
-        welcome_description: welcomeScreen?.description,
-        welcome_instruction: welcomeScreen?.instruction,
-        modules: modules.map((mod) => ({
-          temp_id: mod.title,
-          title: mod.title,
-          description: mod.description,
-          order: mod.step,
-        })),
-        questions: questions.map((q) => {
-          const apiQuestion: APIQuestion = {
-            type: q?.type,
-            question: q?.question,
-            description: q?.descriptions,
-            placeholder:
-              q.type === "short_text" || q.type === "long_text"
-                ? q.answer_placeholder
-                : q.type === "dropdown"
-                ? q.dropdown_placeholder
-                : undefined,
-            options:
-              "options" in q && q.options
-                ? q.type === "dropdown"
-                  ? q.options?.map((opt, idx) => ({
-                      id: `opt-${idx + 1}`,
-                      text: opt?.optiondesc,
-                    }))
-                  : q.options?.map((opt, idx) => ({
-                      id: `opt-${idx + 1}`,
-                      text: opt?.option,
-                      value: opt?.option.toLowerCase().replace(/\s+/g, "_"),
-                    }))
-                : undefined,
-            grid_columns:
-              "grid_columns" in q && q.grid_columns
-                ? q.grid_columns.map((col) => ({
-                    id: col?.id,
-                    text: col?.text,
-                    ...("points" in col &&
-                      col?.points !== undefined && { points: col.points }),
-                  }))
-                : undefined,
-            grid_rows:
-              "grid_rows" in q && q.grid_rows
-                ? q.grid_rows.map((row) => ({
-                    id: row?.id,
-                    text: row?.text,
-                    ...("weight" in row &&
-                      row?.weight !== undefined && { weight: row.weight }),
-                  }))
-                : undefined,
-            min_selections: q?.min_selections,
-            max_selections:
-              q.type === "checkbox" ? q.max_selections : undefined,
-            min_characters:
-              q.type === "long_text" || q.type === "short_text"
-                ? q.min_characters
-                : undefined,
-            max_characters:
-              q.type === "short_text" || q.type === "long_text"
-                ? q.max_characters
-                : undefined,
-            is_required: q?.required_option,
-            step: q?.module
-              ? modules.find((m) => m.title === q?.module)?.step
-              : 1,
-            module_ref: q?.module,
-            accepted_file_types: q?.acceptedFileTypes,
-            max_file_size:
-              q.type === "file_upload" ? q.max_file_size : undefined,
-            max_files: q.type === "file_upload" ? q.max_files : undefined,
-            upload_instruction:
-              q.type === "file_upload" ? q.upload_instruction : undefined,
-          };
+      const payload = buildApplicationPayload(
+        {
+          welcomeScreen,
+          modules,
+          questions,
+          serviceRecommendations,
+        },
+        !!applicationId,
+        getModifiedAndNewQuestions,
+        getModifiedAndNewModules,
+        getDeletedQuestions,
+        getDeletedModules,
+      );
 
-          return cleanObject(apiQuestion);
-        }),
-      };
+      // console.log("Application Payload:", payload);
 
       const mutationFn = applicationId ? updateApplication : createApplication;
 
@@ -433,137 +375,31 @@ export default function PreviewModal({
           router.push("/admin-dashboard/applications");
         },
       });
-      return;
     } else if (formType === "assessment") {
-      const payload = {
-        title: welcomeScreen?.title || "New Assessment",
-        description:
-          welcomeScreen?.description ||
-          "Evaluate your digital transformation readiness",
-        instruction:
-          welcomeScreen?.instruction || "Please complete all sections honestly",
-        modules: modules.map((mod) => ({
-          temp_id: `mod-${mod.title.toLowerCase().replace(/\s+/g, "_")}`,
-          title: mod.title,
-          description: mod.description,
-          order: mod.step,
-        })),
-        questions: questions
-          .filter((q) => q.type !== "service_recommendations") // Exclude service_recommendations from questions
-          .map((q) => {
-            const apiQuestion: APIQuestion = {
-              type: q?.type,
-              question: q?.question,
-              description: q?.descriptions,
-              instruction: q?.descriptions,
-              placeholder:
-                q.type === "short_text" || q.type === "long_text"
-                  ? q.answer_placeholder
-                  : q.type === "dropdown"
-                  ? q.dropdown_placeholder
-                  : undefined,
-              options:
-                "options" in q && q.options
-                  ? q.type === "dropdown"
-                    ? q.options?.map((opt, idx) => ({
-                        id: `opt-${idx + 1}`,
-                        text: opt?.optiondesc,
-                        points: opt?.point_value || 0,
-                      }))
-                    : q.options?.map((opt, idx) => ({
-                        id: `opt-${idx + 1}`,
-                        text: opt?.option,
-                        points: opt?.point_value || 0,
-                      }))
-                  : undefined,
-              keyword_scoring:
-                "keyword_scoring" in q &&
-                Array.isArray(q.keyword_scoring) &&
-                q.keyword_scoring.length > 0
-                  ? q.keyword_scoring.map((kw: any) => ({
-                      keyword: kw?.keyword,
-                      points: kw?.points || 0,
-                    }))
-                  : undefined,
-              grid_columns:
-                "grid_columns" in q && q.grid_columns
-                  ? q.grid_columns.map((col) => ({
-                      id: col?.id,
-                      text: col?.text,
-                      ...("points" in col &&
-                        col?.points !== undefined && { points: col.points }),
-                    }))
-                  : undefined,
-              grid_rows:
-                "grid_rows" in q && q.grid_rows
-                  ? q.grid_rows.map((row) => ({
-                      id: row?.id,
-                      text: row?.text,
-                      ...("weight" in row &&
-                        row?.weight !== undefined && { weight: row.weight }),
-                    }))
-                  : undefined,
-              min_selections: q?.min_selections,
-              max_selections:
-                q.type === "checkbox" ? q.max_selections : undefined,
-              min_characters:
-                q.type === "long_text" || q.type === "short_text"
-                  ? q.min_characters
-                  : undefined,
-              max_characters:
-                q.type === "short_text" || q.type === "long_text"
-                  ? q.max_characters
-                  : undefined,
-              completion_points:
-                q.type === "short_text" || q.type === "long_text"
-                  ? "completion_points" in q
-                    ? q.completion_points || 0
-                    : 0
-                  : undefined,
-              is_required: q?.required_option,
-              step: q?.module
-                ? modules.find((m) => m.title === q?.module)?.step
-                : 1,
-              module_ref: `mod-${(q?.module)
-                .toLowerCase()
-                .replace(/\s+/g, "_")}`,
-              acceptedFileTypes: q?.acceptedFileTypes,
-              max_file_size:
-                q.type === "file_upload" ? q.max_file_size : undefined,
-              max_files: q.type === "file_upload" ? q.max_files : undefined,
-              upload_instruction:
-                q.type === "file_upload" ? q.upload_instruction : undefined,
-              // isActive: true,
-            };
-            return cleanObject(apiQuestion);
-          }),
-        // Add service_recommendations as a separate top-level field
-        service_recommendations:
-          serviceRecommendations.length > 0
-            ? serviceRecommendations.map((rec) => ({
-                service_id: rec.service_id,
-                service_name: rec.service_name,
-                description: rec.description,
-                min_points: rec.min_points,
-                max_points: rec.max_points,
-                levels: rec.levels,
-              }))
-            : undefined,
-      };
-
-      // console.log("Assessment Payload:", payload);
-      const mutationFn = assessmentId ? updateAssessment : createAssessment;
-      // console.log("Using mutation function:", assessmentId ? "Update" : "Create");
-      // console.log("Payload being sent for ID:", assessmentId);
-
-      mutationFn(payload, {
-        onSuccess: () => {
-          onClose();
-          clearQuestions();
-          clearAll();
-          router.push("/admin-dashboard/assessment");
+      const payload = buildAssessmentPayload(
+        {
+          welcomeScreen,
+          modules,
+          questions,
+          serviceRecommendations,
         },
-      });
+        !!assessmentId,
+        getModifiedAndNewQuestions,
+        getModifiedAndNewModules
+      );
+
+      console.log("Assessment Payload:", payload);
+
+      // const mutationFn = assessmentId ? updateAssessment : createAssessment;
+
+      // mutationFn(payload, {
+      //   onSuccess: () => {
+      //     onClose();
+      //     clearQuestions();
+      //     clearAll();
+      //     router.push("/admin-dashboard/assessment");
+      //   },
+      // });
     }
   };
 

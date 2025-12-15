@@ -6,6 +6,6 @@ export const useUpdateApplication = (id: string) => {
     method: "PATCH",
     hasAuth: true,
     successMessage: "Application updated successfully",
-    invalidateKeys: ["applicationList", "allApplicationForms", `application-${id}`],
+    invalidateKeys: ["applicationList", "allApplicationForms", `application-${id}`, "application", `${id}`],
   });
 };

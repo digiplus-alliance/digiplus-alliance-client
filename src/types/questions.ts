@@ -47,7 +47,11 @@ export interface Question {
   max_file_size?: number; // in MB
   max_files?: number;
   upload_instruction?: string;
-  
+
+  // Completion points for long text questions
+  data_key?: string;
+  active?: boolean;
+
   // Any additional properties that might be added in the future
   [key: string]: any;
 }

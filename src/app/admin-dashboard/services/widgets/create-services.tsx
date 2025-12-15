@@ -437,11 +437,20 @@ export default function CreateService({
                 <p className="text-sm text-[#171616]">
                   {watchAll.shortDescription || "Short description here"}
                 </p>
-                <p className="font-bold mt-2 flex justify-end text-[#171616]">
-                  {watchAll.price
-                    ? `NGN ${Number(watchAll.price).toLocaleString()}`
-                    : "NGN 0"}
-                </p>
+                <div className="mt-2 flex flex-col items-end gap-1">
+                  <p className="font-bold text-[#171616]">
+                    {watchAll.discountedPrice
+                      ? `NGN ${Number(watchAll.discountedPrice).toLocaleString()}`
+                      : watchAll.price
+                      ? `NGN ${Number(watchAll.price).toLocaleString()}`
+                      : "NGN 0"}
+                  </p>
+                  {watchAll.discountedPrice && watchAll.price && (
+                    <p className="text-sm text-red-600 line-through">
+                      NGN {Number(watchAll.price).toLocaleString()}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           </CardContent>

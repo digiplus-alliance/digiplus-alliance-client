@@ -51,6 +51,7 @@ export default function EditApplication({
           title: mod.title,
           description: mod.description || "",
           step: mod.order || mod.step,
+          active: mod.active, // All loaded modules are active
         }));
         setModules(modules);
         // Set original modules for change tracking
@@ -60,7 +61,7 @@ export default function EditApplication({
       // Set questions data
       const loadedQuestions: any[] = [];
       if (appData.questions && Array.isArray(appData.questions)) {
-        console.log("Loading questions:", appData.questions.length);
+        // console.log("Loading questions:", appData.questions.length);
         appData.questions.forEach((q: any, index: number) => {
           const questionData = mapAPIQuestionToStoreQuestion(q, index + 1);
           if (questionData) {
@@ -93,6 +94,8 @@ export default function EditApplication({
       required_score: 0,
       module: apiQuestion.module_ref || "",
       required_option: apiQuestion.is_required || false,
+      data_key: apiQuestion.data_key || undefined, // Preserve data_key from API (undefined if not present)
+      active: true, // All loaded questions are active
     };
 
     switch (apiQuestion.type) {

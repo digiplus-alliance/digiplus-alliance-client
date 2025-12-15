@@ -102,9 +102,9 @@ export function groupApplicationQuestionsByModuleAndStep(
   }
 
   const { questions, modules, assessment } = assessmentData;
-  console.log("Questions", questions);
-  console.log("Modules", modules);
-  console.log("Assessment", assessment);
+  // console.log("Questions", questions);
+  // console.log("Modules", modules);
+  // console.log("Assessment", assessment);
 
   // Use a Map for efficient grouping: ModuleID -> StepNumber -> Questions[]
   const groupedData = new Map<string, Map<number, AssessmentQuestion[]>>();
@@ -131,15 +131,15 @@ export function groupApplicationQuestionsByModuleAndStep(
     stepGroup.push(question);
   }
 
-  console.log("Grouped Data", groupedData);
-  console.log(
-    "Available module_ref keys in questions:",
-    Array.from(groupedData.keys())
-  );
-  console.log(
-    "Modules in assessment:",
-    modules.map((m) => ({ temp_id: m.temp_id, title: m.title }))
-  );
+  // console.log("Grouped Data", groupedData);
+  // console.log(
+  //   "Available module_ref keys in questions:",
+  //   Array.from(groupedData.keys())
+  // );
+  // console.log(
+  //   "Modules in assessment:",
+  //   modules.map((m) => ({ temp_id: m.temp_id, title: m.title }))
+  // );
 
   // Convert the map to the final array structure, ordered by the assessment's modules array
   const result: IGroupedModule[] = [];
@@ -156,11 +156,11 @@ export function groupApplicationQuestionsByModuleAndStep(
       moduleQuestions = groupedData.get(moduleInfo.title);
     }
 
-    console.log(`Trying to match module:`, {
-      temp_id: moduleInfo.temp_id,
-      title: moduleInfo.title,
-      foundQuestions: !!moduleQuestions,
-    });
+    // console.log(`Trying to match module:`, {
+    //   temp_id: moduleInfo.temp_id,
+    //   title: moduleInfo.title,
+    //   foundQuestions: !!moduleQuestions,
+    // });
 
     if (moduleQuestions) {
       const steps: IGroupedStep[] = [];
@@ -223,6 +223,6 @@ export function groupApplicationQuestionsByModuleAndStep(
     }
   }
 
-  console.log("Final grouped result:", result);
+  // console.log("Final grouped result:", result);
   return result;
 }

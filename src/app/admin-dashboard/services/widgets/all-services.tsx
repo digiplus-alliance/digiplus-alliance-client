@@ -83,6 +83,7 @@ export default function AllServices({ onEdit }: AllServicesProps) {
             title={it.name}
             body={it.short_description ?? ""}
             footer={it.price ?? ""}
+            discountedPrice={it.discounted_price}
           />
         ))
       ) : (

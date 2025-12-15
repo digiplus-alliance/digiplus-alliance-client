@@ -18,7 +18,7 @@ interface ServiceCardProps {
   name: string;
 }
 const ServiceCard: FC<ServiceCardProps> = (props) => {
-  const { _id: id, price, image, onClick, short_description, name } = props;
+  const { _id: id, price, image, onClick, short_description, name, discounted_price } = props;
   const show = short_description?.length > 80 ? short_description?.slice(0, 80) + '...' : short_description;
   return (
     <Card
@@ -40,7 +40,16 @@ const ServiceCard: FC<ServiceCardProps> = (props) => {
           <h3 className="font-semibold text-base sm:text-lg text-[#5E5B5B] mb-1 sm:mb-2 line-clamp-2">{name}</h3>
           <p className="text-[#171616] text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-3">{show}</p>
         </div>
-        <div className="text-base sm:text-lg text-end font-bold text-foreground">NGN {price?.toLocaleString()}</div>
+        <div className="text-end">
+          <div className="text-base sm:text-lg font-bold text-foreground">
+            NGN {(discounted_price || price)?.toLocaleString()}
+          </div>
+          {discounted_price && (
+            <div className="text-sm text-red-600 line-through">
+              NGN {price?.toLocaleString()}
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

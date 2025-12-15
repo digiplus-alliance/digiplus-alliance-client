@@ -80,9 +80,16 @@ Vivamus adipiscing nisl ut dolor dignissim semper. Nulla luctus malesuada tincid
 
           <p className="text-[#706C6C] text-sm sm:text-base leading-relaxed">{service.short_description}</p>
 
-          <div className="text-2xl sm:text-3xl lg:text-4xl flex items-center font-bold text-[#D63A3A] mb-4 sm:mb-6">
-            NGN {service.price.toLocaleString()}
-            <p className="text-[#706C6C] text-base "> {pricing_unit ? `/${pricing_unit}` : ''}</p>
+          <div className="space-y-1">
+            <div className="text-2xl sm:text-3xl lg:text-4xl flex items-center font-bold text-[#D63A3A] mb-4 sm:mb-6">
+              NGN {(service.discounted_price || service.price).toLocaleString()}
+              <p className="text-[#706C6C] text-base "> {pricing_unit ? `/${pricing_unit}` : ''}</p>
+            </div>
+            {service.discounted_price && (
+              <div className="text-lg sm:text-xl text-red-600 line-through">
+                NGN {service.price.toLocaleString()}
+              </div>
+            )}
           </div>
 
           <button
