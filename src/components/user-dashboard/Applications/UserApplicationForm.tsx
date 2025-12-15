@@ -578,6 +578,31 @@ export default function UserApplicationForm(props: WelcomeDatas) {
             index={index}
           />
         );
+      case "file_upload":
+        return (
+          <TextQuestion
+            module={currentModule.moduleName}
+            title={currentQuestion.question}
+            description={currentQuestion.description}
+            instruction={
+              currentQuestion.upload_instruction ||
+              "Please upload your documents to a cloud storage service (Google Drive, Dropbox, OneDrive, etc.) and paste the shareable link below. Ensure the link has proper viewing permissions enabled."
+            }
+            placeholder="Enter the shareable link to your uploaded documents"
+            type="short_text"
+            isRequired={currentQuestion.is_required}
+            value={
+              responses[currentQuestion.data_key || currentQuestion._id] || ""
+            }
+            onChange={(res) =>
+              setResponses((prev) => ({
+                ...prev,
+                [currentQuestion.data_key || currentQuestion._id]: res,
+              }))
+            }
+            index={index}
+          />
+        );
       default:
         return (
           <div key={currentQuestion.data_key || currentQuestion._id}>

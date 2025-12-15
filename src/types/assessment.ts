@@ -40,6 +40,7 @@ export const AssessmentQuestionSchema = z.object({
     'long_text',
     'dropdown',
     'multiple_choice_grid',
+    'file_upload',
   ]),
   question: z.string(),
   options: z.array(AssessmentOptionSchema).default([]),
@@ -71,6 +72,11 @@ export const AssessmentQuestionSchema = z.object({
   max_points: z.number().optional(),
   scoring_categories: z.array(z.string()).optional(),
   data_key: z.string().optional(),
+  // File upload specific fields
+  upload_instruction: z.string().optional(),
+  accepted_file_types: z.array(z.string()).optional(),
+  max_file_size: z.number().optional(),
+  max_files: z.number().optional(),
 });
 
 // Assessment Module Schema
