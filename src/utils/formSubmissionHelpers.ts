@@ -29,23 +29,23 @@ export function buildApplicationPayload(
   const questionsToSend = isUpdate
     ? [...getModifiedAndNewQuestions(), ...getDeletedQuestions()]
     : data.questions;
-  const modulesToSend = isUpdate 
-    ? [...getModifiedAndNewModules(), ...getDeletedModules()] 
+  const modulesToSend = isUpdate
+    ? [...getModifiedAndNewModules(), ...getDeletedModules()]
     : data.modules;
 
-//   console.log("Building Application Payload:");
-//   console.log("isUpdate:", isUpdate);
-//   console.log("questionsToSend:", questionsToSend);
-//   console.log("Questions with data_key:", questionsToSend.filter(q => q.data_key).map(q => ({ id: q.id, data_key: q.data_key, active: q.active })));
-//   console.log("modulesToSend:", modulesToSend);
-//   console.log("Modules with active status:", modulesToSend.map(m => ({ id: m.id, title: m.title, active: m.active })));
+  //   console.log("Building Application Payload:");
+  //   console.log("isUpdate:", isUpdate);
+  //   console.log("questionsToSend:", questionsToSend);
+  //   console.log("Questions with data_key:", questionsToSend.filter(q => q.data_key).map(q => ({ id: q.id, data_key: q.data_key, active: q.active })));
+  //   console.log("modulesToSend:", modulesToSend);
+  //   console.log("Modules with active status:", modulesToSend.map(m => ({ id: m.id, title: m.title, active: m.active })));
 
   return {
     welcome_title: data.welcomeScreen?.title,
     welcome_description: data.welcomeScreen?.description,
     welcome_instruction: data.welcomeScreen?.instruction,
     modules: modulesToSend.map((mod) => ({
-      temp_id: `mod-${mod.step}`,
+      temp_id: mod.title.toLowerCase().replace(/\s+/g, "_"),
       title: mod.title,
       description: mod.description,
       order: mod.step,
@@ -103,7 +103,9 @@ export function buildApplicationPayload(
         step: q?.module
           ? data.modules.find((m) => m.title === q?.module)?.step
           : 1,
-        module_ref: q?.module,
+        module_ref: q?.module
+          ? q.module.toLowerCase().replace(/\s+/g, "_")
+          : undefined,
         accepted_file_types: q?.acceptedFileTypes,
         max_file_size: q.type === "file_upload" ? q.max_file_size : undefined,
         max_files: q.type === "file_upload" ? q.max_files : undefined,
