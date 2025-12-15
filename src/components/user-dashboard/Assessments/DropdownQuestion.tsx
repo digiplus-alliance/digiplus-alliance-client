@@ -53,7 +53,7 @@ export function DropdownQuestion({
           </SelectTrigger>
           <SelectContent className="text-[#5E5B5B]">
             {options.map((option) => (
-              <SelectItem key={option.id} value={option.id}>
+              <SelectItem key={option.id} value={option.text}>
                 {option.text}
               </SelectItem>
             ))}

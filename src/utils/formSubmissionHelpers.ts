@@ -126,13 +126,19 @@ export function buildAssessmentPayload(
   data: FormSubmissionData,
   isUpdate: boolean,
   getModifiedAndNewQuestions: () => StoreQuestion[],
-  getModifiedAndNewModules: () => Module[]
+  getModifiedAndNewModules: () => Module[],
+  getDeletedModules: () => Module[]
 ) {
-  // When updating, only send modified and new questions/modules
+  // When updating, we need:
+  // 1. Modified modules (with id, is_active: true)
+  // 2. New modules (without id, is_active: true)
+  // 3. Deleted modules (with id, is_active: false)
   const questionsToSend = isUpdate
     ? getModifiedAndNewQuestions()
     : data.questions;
-  const modulesToSend = isUpdate ? getModifiedAndNewModules() : data.modules;
+  const modulesToSend = isUpdate
+    ? [...getModifiedAndNewModules(), ...getDeletedModules()]
+    : data.modules;
 
   return {
     title: data.welcomeScreen?.title || "New Assessment",
@@ -142,12 +148,23 @@ export function buildAssessmentPayload(
     instruction:
       data.welcomeScreen?.instruction ||
       "Please complete all sections honestly",
-    modules: modulesToSend.map((mod) => ({
-      temp_id: `mod-${mod.title.toLowerCase().replace(/\s+/g, "_")}`,
-      title: mod.title,
-      description: mod.description,
-      order: mod.step,
-    })),
+    modules: modulesToSend.map((mod) => {
+      // Existing modules have MongoDB ObjectId (24 char hex string)
+      // New modules have either 'mod-' prefix or timestamp (numeric string)
+      const isExistingModule =
+        mod.id &&
+        !mod.id.startsWith("mod-") &&
+        mod.id.length === 24 &&
+        /^[a-f0-9]{24}$/i.test(mod.id);
+      return {
+        ...(isExistingModule ? { id: mod.id } : {}),
+        temp_id: `mod-${mod.title.toLowerCase().replace(/\s+/g, "_")}`,
+        title: mod.title,
+        description: mod.description,
+        order: mod.step,
+        ...(isExistingModule ? { toDelete: mod?.active === false } : {}),
+      };
+    }),
     questions: questionsToSend
       .filter((q) => q.type !== "service_recommendations")
       .map((q) => {
@@ -224,6 +241,18 @@ export function buildAssessmentPayload(
             ? data.modules.find((m) => m.title === q?.module)?.step
             : 1,
           module_ref: `mod-${q?.module.toLowerCase().replace(/\s+/g, "_")}`,
+          ...(q?.module &&
+            (() => {
+              const selectedModule = data.modules.find(
+                (m) => m.title === q?.module
+              );
+              const isExistingModule =
+                selectedModule?.id &&
+                !selectedModule.id.startsWith("mod-") &&
+                selectedModule.id.length === 24 &&
+                /^[a-f0-9]{24}$/i.test(selectedModule.id);
+              return isExistingModule ? { module_id: selectedModule.id } : {};
+            })()),
           acceptedFileTypes: q?.acceptedFileTypes,
           max_file_size: q.type === "file_upload" ? q.max_file_size : undefined,
           max_files: q.type === "file_upload" ? q.max_files : undefined,
@@ -235,7 +264,10 @@ export function buildAssessmentPayload(
     service_recommendations:
       data.serviceRecommendations.length > 0
         ? data.serviceRecommendations.map((rec) => ({
-            service_id: rec.service_id,
+            ...(rec.id && rec.id.length === 24 && /^[a-f0-9]{24}$/i.test(rec.id)
+              ? { _id: rec.id }
+              : {}),
+            id: rec.service_id,
             service_name: rec.service_name,
             description: rec.description,
             min_points: rec.min_points,

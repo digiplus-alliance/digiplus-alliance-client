@@ -72,7 +72,7 @@ export default function AddModule({
       reset();
 
       onSubmit?.(data);
-      console.log("Module added:", newModule);
+      // console.log("Module added:", newModule);
     } catch (error) {
       console.error("Error submitting form:", error);
     } finally {
@@ -107,14 +107,14 @@ export default function AddModule({
   };
 
   const handleSaveModules = () => {
-    console.log(
-      "Modules and steps:",
-      modules.map((module) => ({
-        title: module.title,
-        description: module.description,
-        step: module.step,
-      }))
-    );
+    // console.log(
+    //   "Modules and steps:",
+    //   modules.map((module) => ({
+    //     title: module.title,
+    //     description: module.description,
+    //     step: module.step,
+    //   }))
+    // );
     navigateNext();
   };
 

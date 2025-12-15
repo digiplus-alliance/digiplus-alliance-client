@@ -62,6 +62,7 @@ export default function EditAssessmentForm({
           title: mod.title,
           description: mod.description || "",
           step: mod.order || mod.step,
+          active: mod.is_active !== undefined ? mod.is_active : true,
         }));
         setModules(modules);
         // Set original modules for change tracking
@@ -71,7 +72,7 @@ export default function EditAssessmentForm({
       // Set questions data
       const loadedQuestions: any[] = [];
       if (assessmentData.questions && Array.isArray(assessmentData.questions)) {
-        console.log("Loading questions:", assessmentData.questions.length);
+        // console.log("Loading questions:", assessmentData.questions.length);
         assessmentData.questions.forEach((q: any, index: number) => {
           const questionData = mapAPIQuestionToStoreQuestion(q, index + 1);
           if (questionData) {
@@ -89,6 +90,29 @@ export default function EditAssessmentForm({
         Array.isArray(assessmentData.service_recommendations)
       ) {
         setServiceRecommendations(assessmentData.service_recommendations);
+        
+        // Add service recommendations as a question to render in the UI
+        const serviceRecommendationQuestion = {
+          id: 'service-recommendations',
+          question_no: loadedQuestions.length + 1,
+          question: 'Service Recommendations',
+          descriptions: 'Configure service recommendations based on assessment scores',
+          required_score: 0,
+          module: '',
+          required_option: false,
+          type: 'service_recommendations' as const,
+          recommendations: assessmentData.service_recommendations.map((rec: any) => ({
+            id: rec._id || rec.id,
+            service_id: rec.service_id,
+            service_name: rec.service_name,
+            description: rec.description,
+            min_points: rec.min_points,
+            max_points: rec.max_points,
+            levels: rec.levels,
+          })),
+        };
+        addQuestion(serviceRecommendationQuestion);
+        loadedQuestions.push(serviceRecommendationQuestion);
       }
     }
   }, [assessmentData]);

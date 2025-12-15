@@ -345,7 +345,8 @@ export default function QuestionScreen({
         },
         !!assessmentId,
         getModifiedAndNewQuestions,
-        getModifiedAndNewModules
+        getModifiedAndNewModules,
+        getDeletedModules
       );
 
       // console.log("Payload", payload)

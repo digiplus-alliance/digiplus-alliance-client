@@ -157,6 +157,7 @@ export type QuestionType = Question["type"];
 
 // Service Recommendation type (separate from questions)
 export type ServiceRecommendation = {
+  id?: string; // For existing service recommendations from the database
   service_id: string;
   service_name: string;
   description: string;

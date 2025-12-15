@@ -385,21 +385,22 @@ export default function PreviewModal({
         },
         !!assessmentId,
         getModifiedAndNewQuestions,
-        getModifiedAndNewModules
+        getModifiedAndNewModules,
+        getDeletedModules
       );
 
-      console.log("Assessment Payload:", payload);
+      // console.log("Assessment Payload:", payload);
 
-      // const mutationFn = assessmentId ? updateAssessment : createAssessment;
+      const mutationFn = assessmentId ? updateAssessment : createAssessment;
 
-      // mutationFn(payload, {
-      //   onSuccess: () => {
-      //     onClose();
-      //     clearQuestions();
-      //     clearAll();
-      //     router.push("/admin-dashboard/assessment");
-      //   },
-      // });
+      mutationFn(payload, {
+        onSuccess: () => {
+          onClose();
+          clearQuestions();
+          clearAll();
+          router.push("/admin-dashboard/assessment");
+        },
+      });
     }
   };
 
