@@ -12,6 +12,7 @@ interface CustomCardProps {
   title: string;
   body: string;
   footer: string | number;
+  discountedPrice?: number;
 }
 
 export default function ServiceCard({
@@ -19,6 +20,7 @@ export default function ServiceCard({
   title,
   body,
   footer,
+  discountedPrice,
 }: CustomCardProps) {
   return (
     <Card className="md:w-[13rem] max-w-[400px] min-h-[10rem] overflow-hidden p-0 flex flex-col justify-between bg-transparent border-none shadow-none drop-shadow-none hover:shadow-md transition-shadow duration-200">
@@ -40,8 +42,15 @@ export default function ServiceCard({
       </CardContent>
 
       {/* Footer */}
-      <CardFooter className="justify-end py-4">
-        <span className="text-lg text-[#171616] font-semibold">NGN {footer}</span>
+      <CardFooter className="justify-end py-4 flex-col items-end gap-1">
+        <span className="text-lg text-[#171616] font-semibold">
+          NGN {(discountedPrice || footer)?.toLocaleString()}
+        </span>
+        {discountedPrice && (
+          <span className="text-sm text-red-600 line-through">
+            NGN {typeof footer === 'number' ? footer.toLocaleString() : footer}
+          </span>
+        )}
       </CardFooter>
     </Card>
   );

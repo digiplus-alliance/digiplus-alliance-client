@@ -86,7 +86,7 @@ export default function UserApplicationForm(props: WelcomeDatas) {
   // Group questions by module and step
   const groupedModules: IGroupedModule[] = useMemo(() => {
     if (applicationData) {
-      console.log("Application Data received:", applicationData);
+      // console.log("Application Data received:", applicationData);
       setWelcomeData({
         welcome_description: applicationData.welcome_description,
         welcome_instruction: applicationData.welcome_instruction,
@@ -95,7 +95,7 @@ export default function UserApplicationForm(props: WelcomeDatas) {
       const grouped = groupApplicationQuestionsByModuleAndStep(
         applicationData as any
       );
-      console.log("Grouped modules result:", grouped);
+      // console.log("Grouped modules result:", grouped);
       return grouped;
     }
     return [];
@@ -213,8 +213,9 @@ export default function UserApplicationForm(props: WelcomeDatas) {
   const isLastStepOverall = isLastStepInModule && isLastModule;
 
   // Transform API data to match component interfaces
+  // API returns options with 'id', but components expect '_id'
   const transformOptions = (options: any[]) =>
-    options.map((opt) => ({ ...opt, id: opt._id, _id: opt.id }));
+    options.map((opt) => ({ ...opt, _id: opt.id }));
   const transformGridColumns = (columns: any[]) =>
     columns.map((col) => ({ ...col, id: col.id }));
   const transformGridRows = (rows: any[]) =>
@@ -336,7 +337,7 @@ export default function UserApplicationForm(props: WelcomeDatas) {
                   (resp: any) =>
                     resp.field === currentQuestion.data_key && !resp.isValid
                 );
-              console.log("findResponse", findResponse);
+              // console.log("findResponse", findResponse);
               return (
                 <div key={currentQuestion.data_key} className="mb-6 last:mb-0">
                   {renderQuestion(currentQuestion, index + 1)}
@@ -540,9 +541,8 @@ export default function UserApplicationForm(props: WelcomeDatas) {
             title={currentQuestion.question}
             description={currentQuestion.description}
             placeholder={currentQuestion.placeholder}
-            options={transformOptions(currentQuestion.options || [])}
+            options={currentQuestion.options || []}
             isRequired={currentQuestion.is_required}
-            // currentStep={currentStepIndex + 1}
             value={
               responses[currentQuestion.data_key || currentQuestion._id] || ""
             }

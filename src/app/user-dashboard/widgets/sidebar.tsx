@@ -60,7 +60,22 @@ const personalizationItems = [
     iconLogo: '/icons/sidebar-icon-three.svg',
   },
 ];
-const UserSidebar = ({ children }: { children: React.ReactNode }) => {
+interface UserSidebarProps {
+  children: React.ReactNode;
+  onNotificationClick?: () => void;
+}
+
+const UserSidebar: React.FC<UserSidebarProps> = ({ children, onNotificationClick }) => {
+  const personalizationItemsWithClick = personalizationItems.map(item => {
+    if (item.title === 'Notifications' && onNotificationClick) {
+      return {
+        ...item,
+        onClick: onNotificationClick,
+      };
+    }
+    return item;
+  });
+
   return (
     <SidebarProvider defaultOpen className="relative _max-w-[1392px] mx-auto">
       {/* Mobile Header */}
@@ -76,7 +91,7 @@ const UserSidebar = ({ children }: { children: React.ReactNode }) => {
 
       <SidebarLayout
         navItems={items}
-        personalizationItems={personalizationItems}
+        personalizationItems={personalizationItemsWithClick}
         basePath="/user-dashboard"
         logoHref="/landing"
         showProfileMenu

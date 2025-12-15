@@ -72,7 +72,7 @@ export default function WelcomePageQuestion({
 
       // Call the optional onSubmit callback
       onSubmit?.(data);
-      console.log("Form data:", data);
+      // console.log("Form data:", data);
     } catch (error) {
       console.error("Error submitting form:", error);
     } finally {

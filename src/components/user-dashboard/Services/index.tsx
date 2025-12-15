@@ -149,7 +149,7 @@ export default function ServicesComponent() {
 
   const [currentSuggestedServices, setCurrentSuggestedServices] = useState<string[]>(suggestedServices);
 
-  console.log(currentSuggestedServices);
+  // console.log(currentSuggestedServices);
 
   useEffect(() => {
     if (data) {

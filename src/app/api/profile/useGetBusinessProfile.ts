@@ -23,7 +23,7 @@ export type BusinessProfileResponse = z.infer<typeof BusinessProfileResponseSche
 
 // Business Profile Data Schema (without message and success)
 export const BusinessProfileDataSchema = z.object({
-  business_name: z.string(),
+  business_name: z.string().optional(),
   industry: z.string().optional(),
   email: z.string().email(),
   phone_number: z.string().optional(),

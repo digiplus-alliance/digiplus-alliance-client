@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { CiBellOn } from "react-icons/ci";
 import { IoClose } from "react-icons/io5";
 import { LuCalendarDays } from "react-icons/lu";
@@ -17,6 +18,7 @@ import {
 } from "./ui/dropdown-menu";
 import { useGetNotifications } from "@/app/api/admin/notifications/get-notifications";
 import { Button } from "./ui/button";
+import { useReadNotification } from "@/app/api/admin/notifications/read-notifications";
 
 interface NotificationsProps {
   open?: boolean;
@@ -27,11 +29,18 @@ export default function Notifications({
   open,
   onOpenChange,
 }: NotificationsProps) {
+  const [notificationId, setNotificationId] = useState<string>("");
   const { data, error, isPending, refetch } = useGetNotifications();
+  const { mutate: markAsRead } = useReadNotification(notificationId);
 
-  const notifications = data?.data?.notifications || [];
-  const unreadCount = data?.data?.unread_count || 0;
+  const notifications = data?.notifications || [];
+  const unreadCount = data?.unread_count || 0;
   const isLoading = Boolean(isPending);
+
+  const handleNotificationClick = (id: string) => {
+    setNotificationId(id);
+    markAsRead();
+  };
 
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
@@ -44,11 +53,11 @@ export default function Notifications({
         )}
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent className="border border-[#D9D9D9] md:absolute md:-right-[16rem] md:-top-16 font-secondary bg-white w-[90vw] max-w-[400px] rounded-none">
+      <DropdownMenuContent className="border border-[#D9D9D9] md:absolute md:-right-[10rem] md:-top-16 font-secondary bg-white w-[90vw] max-w-[400px] rounded-none">
         {/* Header */}
         <div className="flex items-center justify-between relative">
           <h2 className="text-xl text-[#667085] font-normal font-primary py-3 px-4">
-            Notification
+            Notification(s)
           </h2>
           <DropdownMenuClose>
             <button className="text-[#6E6D6D] size-4 absolute right-4 top-4 cursor-pointer">
@@ -119,6 +128,8 @@ export default function Notifications({
                 {notifications.map((notification) => (
                   <DropdownMenuItem
                     key={notification.id}
+                    onClick={() => handleNotificationClick(notification.id)}
+                    onSelect={(e) => e.preventDefault()}
                     className={`flex items-start gap-3 rounded-none p-4 cursor-pointer ${
                       !notification.is_read ? "bg-[#EBFBFF]" : ""
                     }`}

@@ -16,6 +16,7 @@ export interface Module {
   title: string;
   description?: string;
   step: number;
+  active?: boolean; // For marking modules as active/inactive
 }
 
 // Base question interface
@@ -27,6 +28,8 @@ interface BaseQuestion {
   required_score: number;
   module: string;
   required_option: boolean;
+  data_key?: string; // For existing questions from the API
+  active?: boolean; // For marking questions as active/inactive
   // Optional properties that may apply to various question types
   grid_columns?: Array<{
     id: string;
@@ -175,11 +178,15 @@ interface AssessmentStore {
   // Track which questions have been modified or are new
   modifiedQuestionIds: Set<string>;
   newQuestionIds: Set<string>;
+  // Track deleted questions (for marking as inactive)
+  deletedQuestions: Question[];
   // Track original modules when editing
   originalModules: Module[];
   // Track which modules have been modified or are new
   modifiedModuleIds: Set<string>;
   newModuleIds: Set<string>;
+  // Track deleted modules (for marking as inactive)
+  deletedModules: Module[];
 
   // Actions
   setFormType: (type: FormType) => void;
@@ -200,12 +207,14 @@ interface AssessmentStore {
   // New actions for tracking question changes
   setOriginalQuestions: (questions: Question[]) => void;
   getModifiedAndNewQuestions: () => Question[];
+  getDeletedQuestions: () => Question[];
   markQuestionAsModified: (id: string) => void;
   markQuestionAsNew: (id: string) => void;
   resetChangeTracking: () => void;
   // New actions for tracking module changes
   setOriginalModules: (modules: Module[]) => void;
   getModifiedAndNewModules: () => Module[];
+  getDeletedModules: () => Module[];
   markModuleAsModified: (id: string) => void;
   markModuleAsNew: (id: string) => void;
 }
@@ -221,9 +230,11 @@ export const useAssessmentStore = create<AssessmentStore>((set, get) => ({
   originalQuestions: [],
   modifiedQuestionIds: new Set<string>(),
   newQuestionIds: new Set<string>(),
+  deletedQuestions: [],
   originalModules: [],
   modifiedModuleIds: new Set<string>(),
   newModuleIds: new Set<string>(),
+  deletedModules: [],
 
   setFormType: (type: FormType) =>
     set({
@@ -270,8 +281,23 @@ export const useAssessmentStore = create<AssessmentStore>((set, get) => ({
 
   removeModule: (id: string) =>
     set((state) => {
+      const moduleToRemove = state.modules.find((m) => m.id === id);
+      const isOriginalModule = state.originalModules.some((m) => m.id === id);
+      
+      // If it's an original module, mark it as deleted (inactive)
+      if (isOriginalModule && moduleToRemove) {
+        const filtered = state.modules.filter((m) => m.id !== id);
+        return {
+          modules: filtered.map((module, index) => ({
+            ...module,
+            step: index + 1,
+          })),
+          deletedModules: [...state.deletedModules, { ...moduleToRemove, active: false }],
+        };
+      }
+      
+      // If it's a new module, just remove it
       const filtered = state.modules.filter((m) => m.id !== id);
-      // Update step numbers after deletion
       return {
         modules: filtered.map((module, index) => ({
           ...module,
@@ -319,9 +345,23 @@ export const useAssessmentStore = create<AssessmentStore>((set, get) => ({
     }),
 
   removeQuestion: (id: string) =>
-    set((state) => ({
-      questions: state.questions.filter((q) => q.id !== id),
-    })),
+    set((state) => {
+      const questionToRemove = state.questions.find((q) => q.id === id);
+      const isOriginalQuestion = state.originalQuestions.some((q) => q.id === id);
+      
+      // If it's an original question, mark it as deleted (inactive)
+      if (isOriginalQuestion && questionToRemove) {
+        return {
+          questions: state.questions.filter((q) => q.id !== id),
+          deletedQuestions: [...state.deletedQuestions, { ...questionToRemove, active: false }],
+        };
+      }
+      
+      // If it's a new question, just remove it
+      return {
+        questions: state.questions.filter((q) => q.id !== id),
+      };
+    }),
 
   clearQuestions: () =>
     set({
@@ -345,9 +385,11 @@ export const useAssessmentStore = create<AssessmentStore>((set, get) => ({
       originalQuestions: [],
       modifiedQuestionIds: new Set<string>(),
       newQuestionIds: new Set<string>(),
+      deletedQuestions: [],
       originalModules: [],
       modifiedModuleIds: new Set<string>(),
       newModuleIds: new Set<string>(),
+      deletedModules: [],
     }),
 
   setCurrentQuestionIndex: (index: number) =>
@@ -379,6 +421,11 @@ export const useAssessmentStore = create<AssessmentStore>((set, get) => ({
     return questions.filter(
       (q) => modifiedQuestionIds.has(q.id) || newQuestionIds.has(q.id)
     );
+  },
+
+  getDeletedQuestions: () => {
+    const { deletedQuestions } = get();
+    return deletedQuestions;
   },
 
   markQuestionAsModified: (id: string) =>
@@ -421,6 +468,11 @@ export const useAssessmentStore = create<AssessmentStore>((set, get) => ({
     return modules.filter(
       (m) => modifiedModuleIds.has(m.id) || newModuleIds.has(m.id)
     );
+  },
+
+  getDeletedModules: () => {
+    const { deletedModules } = get();
+    return deletedModules;
   },
 
   markModuleAsModified: (id: string) =>
