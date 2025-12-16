@@ -6,7 +6,11 @@ import useFetch from "@/lib/useFetch";
 export const ApplicationResponseSchema = z.object({
   question: z.string(),
   data_key: z.string(),
-  answer: z.string(),
+  answer: z.union([
+    z.string(),
+    z.array(z.string()),
+    z.record(z.string(), z.string()),
+  ]),
   type: z.string(),
 });
 
