@@ -1,19 +1,32 @@
-'use client';
-import React, { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
-import { Calendar, Filter, Search } from 'lucide-react';
-import { Input } from '../../ui/input';
-import { Button } from '../../ui/button';
-import { ApplicationsTable } from './ApplicationsTable';
-import PageHeader from '@/components/PageHeader';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import Link from 'next/link';
-import StatsCards from '@/app/admin-dashboard/widgets/stats-card';
-import { useGetApplicationStatusCounts } from '@/app/api/user/useGetApplicationStatusCounts';
-import { useGetServices } from '@/app/api/services/useGetServices';
-import { format } from 'date-fns';
+"use client";
+import React, { useState, useMemo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
+import { Calendar, Filter, Search } from "lucide-react";
+import { Input } from "../../ui/input";
+import { Button } from "../../ui/button";
+import { ApplicationsTable } from "./ApplicationsTable";
+import PageHeader from "@/components/PageHeader";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import Link from "next/link";
+import StatsCards from "@/app/admin-dashboard/widgets/stats-card";
+import { useGetApplicationStatusCounts } from "@/app/api/user/useGetApplicationStatusCounts";
+import { useGetServices } from "@/app/api/services/useGetServices";
+import { format } from "date-fns";
+import { useRouter } from "next/navigation";
 
 export interface ApplicationFilters {
   search?: string;
@@ -24,7 +37,9 @@ export interface ApplicationFilters {
 }
 
 const Applications = () => {
-  const { data: statusCounts, isLoading: isLoadingStats } = useGetApplicationStatusCounts();
+  const router = useRouter();
+  const { data: statusCounts, isLoading: isLoadingStats } =
+    useGetApplicationStatusCounts();
   const { data: services, isLoading: isLoadingServices } = useGetServices();
 
   // Filter states
@@ -34,11 +49,14 @@ const Applications = () => {
   // Transform API data to display format
   const statsData = statusCounts
     ? [
-        { label: 'Applications Submitted', value: statusCounts.Submitted },
-        { label: 'Applications Being Processed', value: statusCounts['Being Processed'] },
-        { label: 'Applications Approved', value: statusCounts.Approved },
-        { label: 'Applications Rejected', value: statusCounts.Rejected },
-        { label: 'Applications Completed', value: statusCounts.Completed },
+        { label: "Applications Submitted", value: statusCounts.Submitted },
+        {
+          label: "Applications Being Processed",
+          value: statusCounts["Being Processed"],
+        },
+        { label: "Applications Approved", value: statusCounts.Approved },
+        { label: "Applications Rejected", value: statusCounts.Rejected },
+        { label: "Applications Completed", value: statusCounts.Completed },
       ]
     : [];
 
@@ -49,7 +67,13 @@ const Applications = () => {
   }, [services]);
 
   // Status options
-  const statusOptions = ['Submitted', 'Being Processed', 'Approved', 'Rejected', 'Completed'];
+  const statusOptions = [
+    "Submitted",
+    "Being Processed",
+    "Approved",
+    "Rejected",
+    "Completed",
+  ];
 
   // Handle filter changes
   const handleSearchChange = (value: string) => {
@@ -57,11 +81,17 @@ const Applications = () => {
   };
 
   const handleServiceChange = (value: string) => {
-    setFilters((prev) => ({ ...prev, service: value === 'all' ? undefined : value }));
+    setFilters((prev) => ({
+      ...prev,
+      service: value === "all" ? undefined : value,
+    }));
   };
 
   const handleStatusChange = (value: string) => {
-    setFilters((prev) => ({ ...prev, status: value === 'all' ? undefined : value }));
+    setFilters((prev) => ({
+      ...prev,
+      status: value === "all" ? undefined : value,
+    }));
   };
 
   const handleDateRangeChange = (from?: Date, to?: Date) => {
@@ -78,8 +108,16 @@ const Applications = () => {
       <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 flex-wrap gap-y-3">
         <PageHeader title="Applications" />
         <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:gap-4 sm:space-y-0">
-          <Button className="w-full sm:w-auto text-sm sm:text-base">Take Assessments</Button>
-          <Link href="/user-dashboard/applications/apply" className="w-full sm:w-auto">
+          <Button
+            className="w-full sm:w-auto text-sm sm:text-base"
+            onClick={() => router.push("/user-dashboard/assessment")}
+          >
+            Take Assessments
+          </Button>
+          <Link
+            href="/user-dashboard/applications/apply"
+            className="w-full sm:w-auto"
+          >
             <Button
               variant="ghost"
               className="w-full sm:w-auto border border-[#FF5C5C] font-normal text-sm sm:text-base"
@@ -133,7 +171,10 @@ const Applications = () => {
                 {/* Service Filter */}
                 <Select onValueChange={handleServiceChange}>
                   <SelectTrigger className="w-full sm:w-[180px] bg-white border-[#DDDDDD] text-sm sm:text-base">
-                    <SelectValue placeholder="Filter by Service" className="text-[#706C6C]" />
+                    <SelectValue
+                      placeholder="Filter by Service"
+                      className="text-[#706C6C]"
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Services</SelectItem>
@@ -148,7 +189,10 @@ const Applications = () => {
                 {/* Status Filter */}
                 <Select onValueChange={handleStatusChange}>
                   <SelectTrigger className="w-full sm:w-[150px] bg-white border-[#DDDDDD] text-sm sm:text-base">
-                    <SelectValue placeholder="Filter Status" className="text-[#706C6C]" />
+                    <SelectValue
+                      placeholder="Filter Status"
+                      className="text-[#706C6C]"
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Status</SelectItem>
@@ -171,20 +215,23 @@ const Applications = () => {
                       {dateRange.from ? (
                         dateRange.to ? (
                           <>
-                            {format(dateRange.from, 'LLL dd, y')} - {format(dateRange.to, 'LLL dd, y')}
+                            {format(dateRange.from, "LLL dd, y")} -{" "}
+                            {format(dateRange.to, "LLL dd, y")}
                           </>
                         ) : (
-                          format(dateRange.from, 'LLL dd, y')
+                          format(dateRange.from, "LLL dd, y")
                         )
                       ) : (
-                        'Filter Date Range'
+                        "Filter Date Range"
                       )}
                       <Calendar className="w-4 h-4 ml-2" />
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-fit p-4 sm:p-6">
                     <DialogHeader>
-                      <DialogTitle className="text-center sm:text-left">Select Date Range</DialogTitle>
+                      <DialogTitle className="text-center sm:text-left">
+                        Select Date Range
+                      </DialogTitle>
                     </DialogHeader>
                     <div className="flex justify-center">
                       <CalendarComponent
