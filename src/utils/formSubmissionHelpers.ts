@@ -168,7 +168,16 @@ export function buildAssessmentPayload(
     questions: questionsToSend
       .filter((q) => q.type !== "service_recommendations")
       .map((q) => {
+        // Check if this is an existing question (has MongoDB ObjectId)
+        const isExistingQuestion =
+          q.id &&
+          !q.id.startsWith("q-") &&
+          q.id.length === 24 &&
+          /^[a-f0-9]{24}$/i.test(q.id);
+
         const apiQuestion: APIQuestion = {
+          // Include id for existing questions
+          ...(isExistingQuestion ? { id: q.id } : {}),
           type: q?.type,
           question: q?.question,
           description: q?.descriptions,
@@ -240,7 +249,6 @@ export function buildAssessmentPayload(
           step: q?.module
             ? data.modules.find((m) => m.title === q?.module)?.step
             : 1,
-          module_ref: `mod-${q?.module.toLowerCase().replace(/\s+/g, "_")}`,
           ...(q?.module &&
             (() => {
               const selectedModule = data.modules.find(
@@ -251,7 +259,12 @@ export function buildAssessmentPayload(
                 !selectedModule.id.startsWith("mod-") &&
                 selectedModule.id.length === 24 &&
                 /^[a-f0-9]{24}$/i.test(selectedModule.id);
-              return isExistingModule ? { module_id: selectedModule.id } : {};
+              return isExistingModule 
+                ? { module_id: selectedModule.id } 
+                : { 
+                    module_id: `mod-${q?.module.toLowerCase().replace(/\s+/g, "_")}`,
+                    module_ref: `mod-${q?.module.toLowerCase().replace(/\s+/g, "_")}`
+                  };
             })()),
           acceptedFileTypes: q?.acceptedFileTypes,
           max_file_size: q.type === "file_upload" ? q.max_file_size : undefined,
