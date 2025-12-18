@@ -69,6 +69,146 @@ export default function EditAssessmentForm({
         setOriginalModules(modules);
       }
 
+      // Helper function to map API question to store question
+      const mapAPIQuestionToStoreQuestion = (
+        apiQuestion: any,
+        questionNo: number
+      ) => {
+        // Convert module_id or module_ref back to module title
+        let moduleTitle = "";
+        if (assessmentData?.modules) {
+          // First try to find by module_id (database ID)
+          if (apiQuestion.module_id) {
+            const matchingModule = assessmentData.modules.find((mod: any) => 
+              mod._id === apiQuestion.module_id || mod.id === apiQuestion.module_id
+            );
+            if (matchingModule) {
+              moduleTitle = matchingModule.title;
+            }
+          }
+          
+          // If not found by module_id, try module_ref
+          if (!moduleTitle && apiQuestion.module_ref) {
+            // module_ref is in format "mod-module_title" or just the title
+            // First try to find by exact title match
+            let matchingModule = assessmentData.modules.find((mod: any) => 
+              mod.title === apiQuestion.module_ref
+            );
+            
+            // If not found, try to match by transformed title
+            if (!matchingModule) {
+              matchingModule = assessmentData.modules.find((mod: any) => {
+                const transformedTitle = mod.title.toLowerCase().replace(/\s+/g, "_");
+                return transformedTitle === apiQuestion.module_ref || 
+                       `mod-${transformedTitle}` === apiQuestion.module_ref;
+              });
+            }
+            
+            if (matchingModule) {
+              moduleTitle = matchingModule.title;
+            }
+          }
+        }
+
+        const baseQuestion = {
+          id: apiQuestion._id || apiQuestion.id || `q-${questionNo}`,
+          question_no: questionNo,
+          question: apiQuestion.question || "",
+          descriptions: apiQuestion.description || "",
+          required_score: 0,
+          module: moduleTitle,
+          required_option: apiQuestion.is_required !== undefined ? apiQuestion.is_required : false,
+        };
+
+        switch (apiQuestion.type) {
+          case "multiple_choice":
+            return {
+              ...baseQuestion,
+              type: "multiple_choice" as const,
+              options: (apiQuestion.options || []).map((opt: any, idx: number) => ({
+                option: opt.text || String.fromCharCode(65 + idx),
+                optiondesc: opt.text || "",
+                point_value: opt.points || 0,
+              })),
+            };
+
+          case "checkbox":
+            return {
+              ...baseQuestion,
+              type: "checkbox" as const,
+              options: (apiQuestion.options || []).map((opt: any, idx: number) => ({
+                option: opt.text || String.fromCharCode(65 + idx),
+                optiondesc: opt.text || "",
+                point_value: opt.points || 0,
+              })),
+              max_selections: apiQuestion.max_selections || 0,
+              min_selections: apiQuestion.min_selections || 0,
+            };
+
+          case "short_text":
+            return {
+              ...baseQuestion,
+              type: "short_text" as const,
+              answer_placeholder: apiQuestion.placeholder || "",
+              max_characters: apiQuestion.max_characters || 200,
+              min_characters: apiQuestion.min_characters || 10,
+              completion_points: apiQuestion.completion_points || 0,
+            };
+
+          case "long_text":
+            return {
+              ...baseQuestion,
+              type: "long_text" as const,
+              answer_placeholder: apiQuestion.placeholder || "",
+              max_characters: apiQuestion.max_characters || 1000,
+              min_characters: apiQuestion.min_characters || 50,
+              rows: 4,
+              completion_points: apiQuestion.completion_points || 0,
+              keyword_scoring: apiQuestion.keyword_scoring || [],
+            };
+
+          case "dropdown":
+            return {
+              ...baseQuestion,
+              type: "dropdown" as const,
+              dropdown_placeholder: apiQuestion.placeholder || "Select an option",
+              options: (apiQuestion.options || []).map((opt: any, idx: number) => ({
+                option: opt.text || `Option ${idx + 1}`,
+                optiondesc: opt.text || "",
+                point_value: opt.points || 0,
+              })),
+            };
+
+          case "multiple_choice_grid":
+            return {
+              ...baseQuestion,
+              type: "multiple_choice_grid" as const,
+              grid_columns: apiQuestion.grid_columns || [],
+              grid_rows: apiQuestion.grid_rows || [],
+            };
+
+          case "file_upload":
+            return {
+              ...baseQuestion,
+              type: "file_upload" as const,
+              acceptedFileTypes: apiQuestion.acceptedFileTypes || [],
+              max_file_size: apiQuestion.max_file_size || 5,
+              max_files: apiQuestion.max_files || 1,
+              upload_instruction: apiQuestion.upload_instruction || "",
+            };
+
+          case "service_recommendations":
+            return {
+              ...baseQuestion,
+              type: "service_recommendations" as const,
+              recommendations: apiQuestion.recommendations || [],
+            };
+
+          default:
+            return null;
+        }
+      };
+
       // Set questions data
       const loadedQuestions: any[] = [];
       if (assessmentData.questions && Array.isArray(assessmentData.questions)) {
@@ -123,109 +263,6 @@ export default function EditAssessmentForm({
       clearAll();
     };
   }, []);
-
-  const mapAPIQuestionToStoreQuestion = (
-    apiQuestion: any,
-    questionNo: number
-  ) => {
-    const baseQuestion = {
-      id: apiQuestion._id || apiQuestion.id || `q-${questionNo}`,
-      question_no: questionNo,
-      question: apiQuestion.question || "",
-      descriptions: apiQuestion.description || "",
-      required_score: 0,
-      module: apiQuestion.module_ref || "",
-      required_option: apiQuestion.is_required || false,
-    };
-
-    switch (apiQuestion.type) {
-      case "multiple_choice":
-        return {
-          ...baseQuestion,
-          type: "multiple_choice" as const,
-          options: (apiQuestion.options || []).map((opt: any, idx: number) => ({
-            option: opt.text || String.fromCharCode(65 + idx),
-            optiondesc: opt.text || "",
-            point_value: opt.points || 0,
-          })),
-        };
-
-      case "checkbox":
-        return {
-          ...baseQuestion,
-          type: "checkbox" as const,
-          options: (apiQuestion.options || []).map((opt: any, idx: number) => ({
-            option: opt.text || String.fromCharCode(65 + idx),
-            optiondesc: opt.text || "",
-            point_value: opt.points || 0,
-          })),
-          max_selections: apiQuestion.max_selections || 0,
-          min_selections: apiQuestion.min_selections || 0,
-        };
-
-      case "short_text":
-        return {
-          ...baseQuestion,
-          type: "short_text" as const,
-          answer_placeholder: apiQuestion.placeholder || "",
-          max_characters: apiQuestion.max_characters || 200,
-          min_characters: apiQuestion.min_characters || 10,
-          completion_points: apiQuestion.completion_points || 0,
-        };
-
-      case "long_text":
-        return {
-          ...baseQuestion,
-          type: "long_text" as const,
-          answer_placeholder: apiQuestion.placeholder || "",
-          max_characters: apiQuestion.max_characters || 1000,
-          min_characters: apiQuestion.min_characters || 50,
-          rows: 4,
-          completion_points: apiQuestion.completion_points || 0,
-          keyword_scoring: apiQuestion.keyword_scoring || [],
-        };
-
-      case "dropdown":
-        return {
-          ...baseQuestion,
-          type: "dropdown" as const,
-          dropdown_placeholder: apiQuestion.placeholder || "Select an option",
-          options: (apiQuestion.options || []).map((opt: any, idx: number) => ({
-            option: opt.text || `Option ${idx + 1}`,
-            optiondesc: opt.text || "",
-            point_value: opt.points || 0,
-          })),
-        };
-
-      case "multiple_choice_grid":
-        return {
-          ...baseQuestion,
-          type: "multiple_choice_grid" as const,
-          grid_columns: apiQuestion.grid_columns || [],
-          grid_rows: apiQuestion.grid_rows || [],
-        };
-
-      case "file_upload":
-        return {
-          ...baseQuestion,
-          type: "file_upload" as const,
-          acceptedFileTypes: apiQuestion.acceptedFileTypes || [],
-          max_file_size: apiQuestion.max_file_size || 5,
-          max_files: apiQuestion.max_files || 1,
-          upload_instruction: apiQuestion.upload_instruction || "",
-        };
-
-      case "service_recommendations":
-        return {
-          ...baseQuestion,
-          type: "service_recommendations" as const,
-          recommendations: apiQuestion.recommendations || [],
-        };
-
-      default:
-        return null;
-    }
-  };
 
   const navigateToModule = ({
     step,

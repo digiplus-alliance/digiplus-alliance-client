@@ -24,10 +24,13 @@ export default function TrainingsPage() {
     useSendTimetable(selectedService);
 
   // Transform services data into filter options
-  const serviceOptions = (services || []).map((service) => ({
-    value: service.name,
-    label: service.name,
-  }));
+  const serviceOptions = [
+    { value: "All", label: "All" },
+    ...(services || []).map((service) => ({
+      value: service.name,
+      label: service.name,
+    })),
+  ];
 
   const handleSearch = (value: string) => {
     setSearchQuery(value);

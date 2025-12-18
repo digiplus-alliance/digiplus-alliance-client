@@ -86,14 +86,38 @@ export default function EditApplication({
     apiQuestion: any,
     questionNo: number
   ) => {
+    // Convert module_ref back to module title
+    let moduleTitle = "";
+    if (apiQuestion.module_ref && application) {
+      const appData = application as any;
+      if (appData.modules && Array.isArray(appData.modules)) {
+        // module_ref is in format "mod-module_title" or just the title
+        // First try to find by exact title match
+        let matchingModule = appData.modules.find((mod: any) => 
+          mod.title === apiQuestion.module_ref
+        );
+        
+        // If not found, try to match by transformed title
+        if (!matchingModule) {
+          matchingModule = appData.modules.find((mod: any) => {
+            const transformedTitle = mod.title.toLowerCase().replace(/\s+/g, "_");
+            return transformedTitle === apiQuestion.module_ref || 
+                   `mod-${transformedTitle}` === apiQuestion.module_ref;
+          });
+        }
+        
+        moduleTitle = matchingModule?.title || "";
+      }
+    }
+
     const baseQuestion = {
       id: apiQuestion.id || `q-${questionNo}`,
       question_no: questionNo,
       question: apiQuestion.question || "",
       descriptions: apiQuestion.description || "",
       required_score: 0,
-      module: apiQuestion.module_ref || "",
-      required_option: apiQuestion.is_required || false,
+      module: moduleTitle,
+      required_option: apiQuestion.is_required !== undefined ? apiQuestion.is_required : false,
       data_key: apiQuestion.data_key || undefined, // Preserve data_key from API (undefined if not present)
       active: true, // All loaded questions are active
     };

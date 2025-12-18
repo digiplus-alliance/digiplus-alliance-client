@@ -190,6 +190,7 @@ export function ApplicationsTable({ filters = {} }: ApplicationsTableProps) {
               <TableHead className="text-xs xl:text-sm">Paid</TableHead>
               <TableHead className="text-xs xl:text-sm">Timetable</TableHead>
               <TableHead className="text-xs xl:text-sm">Start Date</TableHead>
+              <TableHead className="text-xs xl:text-sm">End Date</TableHead>
               <TableHead className="text-xs xl:text-sm">Status</TableHead>
             </TableRow>
           </TableHeader>
@@ -222,6 +223,7 @@ export function ApplicationsTable({ filters = {} }: ApplicationsTableProps) {
                   )}
                 </TableCell>
                 <TableCell className="text-xs xl:text-sm">{formatStartDate(app.start_date)}</TableCell>
+                <TableCell className="text-xs xl:text-sm">{formatStartDate(app.end_date)}</TableCell>
                 <TableCell>{getStatusBadge(app.status)}</TableCell>
               </TableRow>
             ))}

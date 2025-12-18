@@ -49,12 +49,13 @@ export default function TrainingManagementTable({
   const pageSize = 5;
 
   // Pass training name filter to the hook for server-side filtering
+  // Don't pass "All" as a filter - it should show all results
   const {
     data: trainingUsers,
     isPending,
     error,
   } = useGetAllTrainingUsers({
-    trainingName: serviceFilter.trim() || undefined,
+    trainingName: serviceFilter && serviceFilter !== "All" ? serviceFilter.trim() : undefined,
   });
 
   // Use actual data from hook or empty array

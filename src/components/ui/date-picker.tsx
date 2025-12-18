@@ -50,6 +50,10 @@ export function DatePicker({
   const [month, setMonth] = React.useState<Date | undefined>(date);
   const [internalValue, setInternalValue] = React.useState(formatDate(date));
 
+  // Calculate year range: current year + 2 years
+  const currentYear = new Date().getFullYear();
+  const toYear = currentYear + 3;
+
   const handleDateChange = (newDate: Date | undefined) => {
     setDate(newDate);
     setInternalValue(formatDate(newDate));
@@ -111,6 +115,8 @@ export function DatePicker({
                 handleDateChange(selectedDate);
                 setOpen(false);
               }}
+              fromYear={2015}
+              toYear={toYear}
             />
           </PopoverContent>
         </Popover>

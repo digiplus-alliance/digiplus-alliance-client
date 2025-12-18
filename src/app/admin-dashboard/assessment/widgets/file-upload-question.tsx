@@ -36,34 +36,38 @@ interface FileUploadQuestionProps {
 
 // Common file type groups
 const FILE_TYPE_PRESETS = {
-  documents: {
-    label: "Documents",
-    types: [".pdf", ".doc", ".docx", ".txt", ".rtf"],
-  },
-  images: {
-    label: "Images",
-    types: [".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp"],
-  },
-  spreadsheets: {
-    label: "Spreadsheets",
-    types: [".xlsx", ".xls", ".csv"],
-  },
-  presentations: {
-    label: "Presentations",
-    types: [".ppt", ".pptx"],
-  },
-  archives: {
-    label: "Archives",
-    types: [".zip", ".rar", ".7z", ".tar", ".gz"],
-  },
-  videos: {
-    label: "Videos",
-    types: [".mp4", ".avi", ".mov", ".wmv", ".flv", ".webm"],
-  },
-  audio: {
-    label: "Audio",
-    types: [".mp3", ".wav", ".aac", ".flac", ".ogg"],
-  },
+  // documents: {
+  //   label: "Documents",
+  //   types: [".pdf", ".doc", ".docx", ".txt", ".rtf"],
+  // },
+  // images: {
+  //   label: "Images",
+  //   types: [".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp"],
+  // },
+  // spreadsheets: {
+  //   label: "Spreadsheets",
+  //   types: [".xlsx", ".xls", ".csv"],
+  // },
+  // presentations: {
+  //   label: "Presentations",
+  //   types: [".ppt", ".pptx"],
+  // },
+  // archives: {
+  //   label: "Archives",
+  //   types: [".zip", ".rar", ".7z", ".tar", ".gz"],
+  // },
+  // videos: {
+  //   label: "Videos",
+  //   types: [".mp4", ".avi", ".mov", ".wmv", ".flv", ".webm"],
+  // },
+  // audio: {
+  //   label: "Audio",
+  //   types: [".mp3", ".wav", ".aac", ".flac", ".ogg"],
+  // },
+  links: {
+    label: "Links",
+    types: ["url"],
+  }
 };
 
 export default function FileUploadQuestion({
@@ -82,7 +86,7 @@ export default function FileUploadQuestion({
     initialData?.upload_instruction || ""
   );
   const [acceptedFileTypes, setAcceptedFileTypes] = useState<string[]>(
-    initialData?.acceptedFileTypes || [".pdf", ".doc", ".docx"]
+    initialData?.acceptedFileTypes || ["url"]
   );
   const [maxFileSize, setMaxFileSize] = useState<number>(
     initialData?.max_file_size || 10

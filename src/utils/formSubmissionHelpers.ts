@@ -127,14 +127,17 @@ export function buildAssessmentPayload(
   isUpdate: boolean,
   getModifiedAndNewQuestions: () => StoreQuestion[],
   getModifiedAndNewModules: () => Module[],
-  getDeletedModules: () => Module[]
+  getDeletedModules: () => Module[],
+  getDeletedQuestions: () => StoreQuestion[]
 ) {
   // When updating, we need:
   // 1. Modified modules (with id, is_active: true)
   // 2. New modules (without id, is_active: true)
   // 3. Deleted modules (with id, is_active: false)
+  // 4. Modified and new questions
+  // 5. Deleted questions (with id, toDelete: true)
   const questionsToSend = isUpdate
-    ? getModifiedAndNewQuestions()
+    ? [...getModifiedAndNewQuestions(), ...getDeletedQuestions()]
     : data.questions;
   const modulesToSend = isUpdate
     ? [...getModifiedAndNewModules(), ...getDeletedModules()]
@@ -156,19 +159,49 @@ export function buildAssessmentPayload(
         !mod.id.startsWith("mod-") &&
         mod.id.length === 24 &&
         /^[a-f0-9]{24}$/i.test(mod.id);
+      
+      const isBeingDeleted = isExistingModule && mod?.active === false;
+      
+      // If deleting, only send id and toDelete
+      if (isBeingDeleted) {
+        return {
+          id: mod.id,
+          toDelete: true,
+        };
+      }
+      
+      // Otherwise, send full module data
       return {
         ...(isExistingModule ? { id: mod.id } : {}),
         temp_id: `mod-${mod.title.toLowerCase().replace(/\s+/g, "_")}`,
         title: mod.title,
         description: mod.description,
         order: mod.step,
-        ...(isExistingModule ? { toDelete: mod?.active === false } : {}),
       };
     }),
     questions: questionsToSend
       .filter((q) => q.type !== "service_recommendations")
       .map((q) => {
+        // Check if this is an existing question (has MongoDB ObjectId)
+        const isExistingQuestion =
+          q.id &&
+          !q.id.startsWith("q-") &&
+          q.id.length === 24 &&
+          /^[a-f0-9]{24}$/i.test(q.id);
+
+        const isBeingDeleted = isExistingQuestion && q?.active === false;
+        
+        // If deleting, only send id and toDelete
+        if (isBeingDeleted) {
+          return {
+            id: q.id,
+            toDelete: true,
+          };
+        }
+
         const apiQuestion: APIQuestion = {
+          // Include id for existing questions
+          ...(isExistingQuestion ? { id: q.id } : {}),
           type: q?.type,
           question: q?.question,
           description: q?.descriptions,
@@ -240,7 +273,6 @@ export function buildAssessmentPayload(
           step: q?.module
             ? data.modules.find((m) => m.title === q?.module)?.step
             : 1,
-          module_ref: `mod-${q?.module.toLowerCase().replace(/\s+/g, "_")}`,
           ...(q?.module &&
             (() => {
               const selectedModule = data.modules.find(
@@ -251,7 +283,12 @@ export function buildAssessmentPayload(
                 !selectedModule.id.startsWith("mod-") &&
                 selectedModule.id.length === 24 &&
                 /^[a-f0-9]{24}$/i.test(selectedModule.id);
-              return isExistingModule ? { module_id: selectedModule.id } : {};
+              return isExistingModule 
+                ? { module_id: selectedModule.id } 
+                : { 
+                    module_id: `mod-${q?.module.toLowerCase().replace(/\s+/g, "_")}`,
+                    module_ref: `mod-${q?.module.toLowerCase().replace(/\s+/g, "_")}`
+                  };
             })()),
           acceptedFileTypes: q?.acceptedFileTypes,
           max_file_size: q.type === "file_upload" ? q.max_file_size : undefined,

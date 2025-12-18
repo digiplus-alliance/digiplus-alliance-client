@@ -13,7 +13,7 @@ import LongTextQuestion from "./long-text-question";
 import DropDownQuestion from "./drop-down-question";
 import CheckboxQuestion from "./checkbox-question";
 import PreviewModal from "./preview-modal";
-import { Lock, Edit2, Trash2, Eye } from "lucide-react";
+import { Lock, Edit2, Trash2, Eye, AlertCircle } from "lucide-react";
 import MultipleChoiceGridQuestion from "./multiple-choice-grid-question";
 import FileUploadQuestion from "./file-upload-question";
 import ServiceRecommendation from "./service-recommendation";
@@ -26,6 +26,7 @@ import {
   buildAssessmentPayload,
 } from "@/utils/formSubmissionHelpers";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 // Simple ID generator
 const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -86,6 +87,7 @@ export default function QuestionScreen({
   const [activeQuestions, setActiveQuestions] = useState<ActiveQuestion[]>([]);
   const [showPreview, setShowPreview] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [questionsWithoutModule, setQuestionsWithoutModule] = useState<string[]>([]);
 
   // Load questions from store on mount ONLY (not on every question change)
   useEffect(() => {
@@ -96,6 +98,21 @@ export default function QuestionScreen({
           type: q.type,
           isLocked: applicationId || assessmentId ? true : false,
         }));
+        
+        // Check if there are service recommendations to add
+        const hasServiceRecs = questions.some(q => q.type === "service_recommendations");
+        
+        // If service recommendations exist in questions, they're already included above
+        // If service recommendations exist in the store but not in questions array, add them
+        if (serviceRecommendations.length > 0 && !hasServiceRecs) {
+          // Add service recommendations as a pseudo-question
+          loadedQuestions.push({
+            id: "service_recommendations",
+            type: "service_recommendations",
+            isLocked: applicationId || assessmentId ? true : false,
+          });
+        }
+        
         setActiveQuestions(loadedQuestions);
       } else {
         // If no questions in store, start with one empty question
@@ -105,7 +122,7 @@ export default function QuestionScreen({
       }
       setIsInitialized(true);
     }
-  }, [questions, applicationId, assessmentId, isInitialized]);
+  }, [questions, serviceRecommendations, applicationId, assessmentId, isInitialized]);
 
   // Reset activeQuestions when store is cleared (e.g., after successful submission)
   useEffect(() => {
@@ -116,6 +133,24 @@ export default function QuestionScreen({
       ]);
     }
   }, [questions.length, isInitialized, activeQuestions.length]);
+
+  // Check for questions without modules whenever questions or modules change
+  useEffect(() => {
+    // Find questions whose module no longer exists in the modules array
+    const questionsWithoutMods = questions
+      .filter((q) => {
+        // Skip service recommendations
+        if (q.type === "service_recommendations") return false;
+        // Check if question has a module assigned
+        if (!q.module) return true;
+        // Check if that module exists in the current modules array
+        const moduleExists = modules.some((m) => m.title === q.module);
+        return !moduleExists;
+      })
+      .map((q) => q.id);
+
+    setQuestionsWithoutModule(questionsWithoutMods);
+  }, [questions, modules]);
 
   const handleClearAllQuestions = () => {
     clearQuestions();
@@ -309,7 +344,22 @@ export default function QuestionScreen({
     }
   };
 
+  const validateQuestionsHaveModules = (): boolean => {
+    if (questionsWithoutModule.length > 0) {
+      toast.error(
+        `${questionsWithoutModule.length} question(s) without module. Please add modules to all questions.`
+      );
+      return false;
+    }
+    return true;
+  };
+
   const handleFinalSave = () => {
+    // Validate questions have modules
+    if (!validateQuestionsHaveModules()) {
+      return;
+    }
+
     if (formType === "application") {
       const payload = buildApplicationPayload(
         {
@@ -346,7 +396,8 @@ export default function QuestionScreen({
         !!assessmentId,
         getModifiedAndNewQuestions,
         getModifiedAndNewModules,
-        getDeletedModules
+        getDeletedModules,
+        getDeletedQuestions
       );
 
       // console.log("Payload", payload)
@@ -365,6 +416,16 @@ export default function QuestionScreen({
 
   return (
     <div className="space-y-8">
+      {/* Warning Banner for Questions without Module */}
+      {questionsWithoutModule.length > 0 && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
+          <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
+          <p className="text-red-700 font-medium">
+            {questionsWithoutModule.length} question(s) without a module assigned. Please add modules to all questions before submitting.
+          </p>
+        </div>
+      )}
+
       {/* Header Actions */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Assessment Builder</h1>
@@ -393,9 +454,22 @@ export default function QuestionScreen({
       <div className="space-y-8">
         {activeQuestions.map((activeQuestion, index) => {
           const questionNumber = index + 1;
+          const isMissingModule = questionsWithoutModule.includes(activeQuestion.id);
+          const borderColor = isMissingModule ? "border-red-400 border-2" : "border";
+          const bgColor = isMissingModule ? "bg-red-50" : "bg-gray-50";
 
           return (
             <div key={activeQuestion.id} className="space-y-4">
+              {/* Missing Module Warning */}
+              {isMissingModule && (
+                <div className="bg-red-50 border border-red-300 rounded-lg p-3 flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
+                  <p className="text-red-700 text-sm font-medium">
+                    Question {questionNumber} is missing a module. Please select a module for this question.
+                  </p>
+                </div>
+              )}
+
               {/* Question Type Selector */}
               {!activeQuestion.isLocked && (
                 <div className="flex flex-wrap gap-2">
@@ -423,7 +497,7 @@ export default function QuestionScreen({
               )}
 
               {/* Question Component */}
-              <div className="border rounded-lg p-1 bg-gray-50">
+              <div className={`${borderColor} rounded-lg p-1 ${bgColor}`}>
                 {renderQuestionComponent(
                   activeQuestion.id,
                   activeQuestion.type,
@@ -455,7 +529,13 @@ export default function QuestionScreen({
           <Eye className="h-4 w-4" />
           Preview ({questions.length})
         </Button> */}
-        <Button variant="default" className="m-2" onClick={handleFinalSave}>
+        <Button 
+          variant="default" 
+          className="m-2" 
+          onClick={handleFinalSave}
+          disabled={questionsWithoutModule.length > 0}
+          title={questionsWithoutModule.length > 0 ? "Please add modules to all questions" : ""}
+        >
           {isPending
             ? applicationId
               ? "Updating..."
