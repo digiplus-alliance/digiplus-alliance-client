@@ -18,6 +18,9 @@ import {
   buildApplicationPayload,
   buildAssessmentPayload,
 } from "@/utils/formSubmissionHelpers";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
+import { AlertCircle } from "lucide-react";
 
 interface PreviewModalProps {
   showPreview: boolean;
@@ -76,6 +79,26 @@ export default function PreviewModal({
 
   const isPending =
     isCreating || isUpdating || isCreatingAssessment || isUpdatingAssessment;
+
+  const [questionsWithoutModule, setQuestionsWithoutModule] = useState<string[]>([]);
+
+  // Check for questions without modules whenever questions or modules change
+  useEffect(() => {
+    // Find questions whose module no longer exists in the modules array
+    const questionsWithoutMods = questions
+      .filter((q) => {
+        // Skip service recommendations
+        if (q.type === "service_recommendations") return false;
+        // Check if question has a module assigned
+        if (!q.module) return true;
+        // Check if that module exists in the current modules array
+        const moduleExists = modules.some((m) => m.title === q.module);
+        return !moduleExists;
+      })
+      .map((q) => q.id);
+
+    setQuestionsWithoutModule(questionsWithoutMods);
+  }, [questions, modules]);
 
   const getQuestionTypeLabel = (type: QuestionType): string => {
     return (
@@ -386,7 +409,8 @@ export default function PreviewModal({
         !!assessmentId,
         getModifiedAndNewQuestions,
         getModifiedAndNewModules,
-        getDeletedModules
+        getDeletedModules,
+        getDeletedQuestions
       );
 
       // console.log("Assessment Payload:", payload);
@@ -433,6 +457,16 @@ export default function PreviewModal({
           </div>
         </div>
         <div className="p-6 space-y-6">
+          {/* Warning Banner for Questions without Module */}
+          {questionsWithoutModule.length > 0 && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
+              <p className="text-red-700 font-medium">
+                {questionsWithoutModule.length} question(s) without a module assigned. Please go back and add modules to all questions before submitting.
+              </p>
+            </div>
+          )}
+
           {questions.length === 0 ? (
             <p className="text-gray-500 text-center py-8">
               No questions saved yet.
@@ -481,7 +515,13 @@ export default function PreviewModal({
           )}
         </div>
         <div className="border-t p-4 flex items-center justify-center">
-          <Button variant="default" className="m-2" onClick={handleFinalSave}>
+          <Button 
+            variant="default" 
+            className="m-2" 
+            onClick={handleFinalSave}
+            disabled={questionsWithoutModule.length > 0}
+            title={questionsWithoutModule.length > 0 ? "Please add modules to all questions" : ""}
+          >
             {isPending
               ? applicationId
                 ? "Updating..."

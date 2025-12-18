@@ -127,14 +127,17 @@ export function buildAssessmentPayload(
   isUpdate: boolean,
   getModifiedAndNewQuestions: () => StoreQuestion[],
   getModifiedAndNewModules: () => Module[],
-  getDeletedModules: () => Module[]
+  getDeletedModules: () => Module[],
+  getDeletedQuestions: () => StoreQuestion[]
 ) {
   // When updating, we need:
   // 1. Modified modules (with id, is_active: true)
   // 2. New modules (without id, is_active: true)
   // 3. Deleted modules (with id, is_active: false)
+  // 4. Modified and new questions
+  // 5. Deleted questions (with id, toDelete: true)
   const questionsToSend = isUpdate
-    ? getModifiedAndNewQuestions()
+    ? [...getModifiedAndNewQuestions(), ...getDeletedQuestions()]
     : data.questions;
   const modulesToSend = isUpdate
     ? [...getModifiedAndNewModules(), ...getDeletedModules()]
@@ -156,13 +159,24 @@ export function buildAssessmentPayload(
         !mod.id.startsWith("mod-") &&
         mod.id.length === 24 &&
         /^[a-f0-9]{24}$/i.test(mod.id);
+      
+      const isBeingDeleted = isExistingModule && mod?.active === false;
+      
+      // If deleting, only send id and toDelete
+      if (isBeingDeleted) {
+        return {
+          id: mod.id,
+          toDelete: true,
+        };
+      }
+      
+      // Otherwise, send full module data
       return {
         ...(isExistingModule ? { id: mod.id } : {}),
         temp_id: `mod-${mod.title.toLowerCase().replace(/\s+/g, "_")}`,
         title: mod.title,
         description: mod.description,
         order: mod.step,
-        ...(isExistingModule ? { toDelete: mod?.active === false } : {}),
       };
     }),
     questions: questionsToSend
@@ -174,6 +188,16 @@ export function buildAssessmentPayload(
           !q.id.startsWith("q-") &&
           q.id.length === 24 &&
           /^[a-f0-9]{24}$/i.test(q.id);
+
+        const isBeingDeleted = isExistingQuestion && q?.active === false;
+        
+        // If deleting, only send id and toDelete
+        if (isBeingDeleted) {
+          return {
+            id: q.id,
+            toDelete: true,
+          };
+        }
 
         const apiQuestion: APIQuestion = {
           // Include id for existing questions

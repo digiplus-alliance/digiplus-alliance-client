@@ -12,6 +12,8 @@ import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
 import Image from "next/image";
 import Navbar from "./widgets/navbar";
 import { useState } from "react";
+import Notifications from "@/components/Notifications";
+import ProfileMenu from "@/components/profile-menu";
 
 export default function AdminDashboardLayout({
   children,
@@ -19,6 +21,7 @@ export default function AdminDashboardLayout({
   children: React.ReactNode;
 }) {
   const [notificationOpen, setNotificationOpen] = useState(false);
+  const [mobileNotificationOpen, setMobileNotificationOpen] = useState(false);
 
   const handleNotificationClick = () => {
     console.log("Notification clicked from sidebar!");
@@ -112,7 +115,16 @@ export default function AdminDashboardLayout({
                 width={80}
                 height={80}
               />
-              <SidebarTrigger className=" top-4 left-4 z-20" />
+              <div className="flex flex-row items-center gap-4">
+                <div className="flex items-center space-x-4">
+                  <Notifications
+                    open={mobileNotificationOpen}
+                    onOpenChange={setMobileNotificationOpen}
+                  />
+                  <ProfileMenu />
+                </div>
+                <SidebarTrigger className=" top-4 left-4 z-20" />
+              </div>
             </div>
           </SidebarInset>
 
