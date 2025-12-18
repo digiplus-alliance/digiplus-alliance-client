@@ -17,6 +17,7 @@ import { useGetAllServices } from "@/app/api/admin/services/get-all-services";
 import { Loader2, Plus, Trash2, Save } from "lucide-react";
 
 type ServiceRecommendation = {
+  id?: string; // For existing service recommendations from the database
   service_id: string;
   service_name: string;
   description: string;
@@ -38,7 +39,7 @@ export default function ServiceRecommendation({
   onSave,
   initialData,
 }: ServiceRecommendationProps) {
-  const { serviceRecommendations, setServiceRecommendations } = useFormStore();
+  const { serviceRecommendations, setServiceRecommendations, removeServiceRecommendation } = useFormStore();
   const { data: services, isLoading: servicesLoading } = useGetAllServices();
   
   // Check if there's already a saved recommendation in the store
@@ -89,6 +90,13 @@ export default function ServiceRecommendation({
   };
 
   const removeRecommendation = (index: number) => {
+    const recToRemove = recommendations[index];
+    
+    // If this recommendation has an id (from database), mark it as deleted in store
+    if (recToRemove.id) {
+      removeServiceRecommendation(recToRemove.id);
+    }
+    
     if (recommendations.length > 1) {
       setRecommendations((prev) => prev.filter((_, i) => i !== index));
       // Rebuild selectedLevels with new indices

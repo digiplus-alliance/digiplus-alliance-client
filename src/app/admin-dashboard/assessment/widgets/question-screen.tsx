@@ -60,11 +60,13 @@ export default function QuestionScreen({
     clearQuestions,
     clearAll,
     setServiceRecommendations,
+    removeServiceRecommendation,
     getModifiedAndNewQuestions,
     setOriginalQuestions,
     getModifiedAndNewModules,
     getDeletedQuestions,
     getDeletedModules,
+    getDeletedServiceRecommendations,
   } = useFormStore();
 
   const { mutate: createApplication, isPending: isCreating } =
@@ -292,7 +294,9 @@ export default function QuestionScreen({
           <div className="absolute inset-0 bg-gray-100/80 z-10 rounded-lg flex items-center justify-center">
             <div className="bg-white p-4 rounded-lg shadow-lg flex items-center gap-3">
               <Lock className="h-5 w-5 text-gray-500" />
-              <span className="text-gray-700 font-medium">Question Saved</span>
+              <span className="text-gray-700 font-medium">
+                {type === "service_recommendations" ? "Recommendations Saved" : "Question Saved"}
+              </span>
               <Button
                 size="sm"
                 variant="outline"
@@ -302,15 +306,17 @@ export default function QuestionScreen({
                 <Edit2 className="h-4 w-4 mr-1" />
                 Edit
               </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => removeActiveQuestion(questionId)}
-                className="text-red-600 hover:text-red-700"
-              >
-                <Trash2 className="h-4 w-4 mr-1" />
-                Delete
-              </Button>
+              {type !== "service_recommendations" && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => removeActiveQuestion(questionId)}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Delete
+                </Button>
+              )}
             </div>
           </div>
           {renderQuestionByType(type, commonProps)}
@@ -367,6 +373,7 @@ export default function QuestionScreen({
           modules,
           questions,
           serviceRecommendations,
+          deletedServiceRecommendations: getDeletedServiceRecommendations(),
         },
         !!applicationId,
         getModifiedAndNewQuestions,
@@ -392,6 +399,7 @@ export default function QuestionScreen({
           modules,
           questions,
           serviceRecommendations,
+          deletedServiceRecommendations: getDeletedServiceRecommendations(),
         },
         !!assessmentId,
         getModifiedAndNewQuestions,
@@ -400,7 +408,7 @@ export default function QuestionScreen({
         getDeletedQuestions
       );
 
-      // console.log("Payload", payload)
+      console.log("Payload", payload)
 
       const mutationFn = assessmentId ? updateAssessment : createAssessment;
 

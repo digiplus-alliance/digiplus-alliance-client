@@ -164,6 +164,7 @@ export type ServiceRecommendation = {
   min_points: number;
   max_points: number;
   levels: string[];
+  active?: boolean; // For marking recommendations as active/inactive (deleted)
 };
 
 // Assessment store interface
@@ -188,6 +189,8 @@ interface AssessmentStore {
   newModuleIds: Set<string>;
   // Track deleted modules (for marking as inactive)
   deletedModules: Module[];
+  // Track deleted service recommendations (for marking as inactive)
+  deletedServiceRecommendations: ServiceRecommendation[];
 
   // Actions
   setFormType: (type: FormType) => void;
@@ -201,6 +204,8 @@ interface AssessmentStore {
   removeQuestion: (id: string) => void;
   clearQuestions: () => void;
   setServiceRecommendations: (recommendations: ServiceRecommendation[]) => void;
+  removeServiceRecommendation: (id: string) => void;
+  getDeletedServiceRecommendations: () => ServiceRecommendation[];
   clearAll: () => void;
   setCurrentQuestionIndex: (index: number) => void;
   getNextQuestionNumber: () => number;
@@ -236,6 +241,7 @@ export const useAssessmentStore = create<AssessmentStore>((set, get) => ({
   modifiedModuleIds: new Set<string>(),
   newModuleIds: new Set<string>(),
   deletedModules: [],
+  deletedServiceRecommendations: [],
 
   setFormType: (type: FormType) =>
     set({
@@ -375,6 +381,25 @@ export const useAssessmentStore = create<AssessmentStore>((set, get) => ({
       serviceRecommendations: recommendations,
     }),
 
+  removeServiceRecommendation: (id: string) =>
+    set((state) => {
+      const recToRemove = state.serviceRecommendations.find((r) => r.id === id);
+      if (!recToRemove) return state;
+      
+      return {
+        serviceRecommendations: state.serviceRecommendations.filter((r) => r.id !== id),
+        deletedServiceRecommendations: [
+          ...state.deletedServiceRecommendations,
+          { ...recToRemove, active: false },
+        ],
+      };
+    }),
+
+  getDeletedServiceRecommendations: () => {
+    const { deletedServiceRecommendations } = get();
+    return deletedServiceRecommendations;
+  },
+
   clearAll: () =>
     set({
       formType: "assessment", // reset to default
@@ -391,6 +416,7 @@ export const useAssessmentStore = create<AssessmentStore>((set, get) => ({
       modifiedModuleIds: new Set<string>(),
       newModuleIds: new Set<string>(),
       deletedModules: [],
+      deletedServiceRecommendations: [],
     }),
 
   setCurrentQuestionIndex: (index: number) =>

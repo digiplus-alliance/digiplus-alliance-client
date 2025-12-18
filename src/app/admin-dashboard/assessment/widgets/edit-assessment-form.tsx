@@ -229,7 +229,17 @@ export default function EditAssessmentForm({
         assessmentData.service_recommendations &&
         Array.isArray(assessmentData.service_recommendations)
       ) {
-        setServiceRecommendations(assessmentData.service_recommendations);
+        // Map _id to id for consistency in the store
+        const mappedServiceRecs = assessmentData.service_recommendations.map((rec: any) => ({
+          id: rec._id || rec.id,
+          service_id: rec.service_id,
+          service_name: rec.service_name,
+          description: rec.description,
+          min_points: rec.min_points,
+          max_points: rec.max_points,
+          levels: rec.levels,
+        }));
+        setServiceRecommendations(mappedServiceRecs);
         
         // Add service recommendations as a question to render in the UI
         const serviceRecommendationQuestion = {
@@ -241,15 +251,7 @@ export default function EditAssessmentForm({
           module: '',
           required_option: false,
           type: 'service_recommendations' as const,
-          recommendations: assessmentData.service_recommendations.map((rec: any) => ({
-            id: rec._id || rec.id,
-            service_id: rec.service_id,
-            service_name: rec.service_name,
-            description: rec.description,
-            min_points: rec.min_points,
-            max_points: rec.max_points,
-            levels: rec.levels,
-          })),
+          recommendations: mappedServiceRecs,
         };
         addQuestion(serviceRecommendationQuestion);
         loadedQuestions.push(serviceRecommendationQuestion);

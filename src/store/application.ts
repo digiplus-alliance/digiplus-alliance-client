@@ -147,12 +147,14 @@ export type QuestionType = Question["type"];
 
 // Service Recommendation type (separate from questions)
 export type ServiceRecommendation = {
+  id?: string; // For existing service recommendations from the database
   service_id: string;
   service_name: string;
   description: string;
   min_points: number;
   max_points: number;
   levels: string[];
+  active?: boolean; // For marking recommendations as active/inactive (deleted)
 };
 
 // Application store interface
@@ -177,6 +179,8 @@ interface ApplicationStore {
   newModuleIds: Set<string>;
   // Track deleted modules (for marking as inactive)
   deletedModules: Module[];
+  // Track deleted service recommendations (for marking as inactive)
+  deletedServiceRecommendations: ServiceRecommendation[];
 
   // Actions
   setFormType: (type: FormType) => void;
@@ -190,6 +194,8 @@ interface ApplicationStore {
   removeQuestion: (id: string) => void;
   clearQuestions: () => void;
   setServiceRecommendations: (recommendations: ServiceRecommendation[]) => void;
+  removeServiceRecommendation: (id: string) => void;
+  getDeletedServiceRecommendations: () => ServiceRecommendation[];
   clearAll: () => void;
   setCurrentQuestionIndex: (index: number) => void;
   getNextQuestionNumber: () => number;
@@ -225,6 +231,7 @@ export const useApplicationStore = create<ApplicationStore>((set, get) => ({
   modifiedModuleIds: new Set<string>(),
   newModuleIds: new Set<string>(),
   deletedModules: [],
+  deletedServiceRecommendations: [],
 
   setFormType: (type: FormType) =>
     set({
@@ -364,6 +371,25 @@ export const useApplicationStore = create<ApplicationStore>((set, get) => ({
       serviceRecommendations: recommendations,
     }),
 
+  removeServiceRecommendation: (id: string) =>
+    set((state) => {
+      const recToRemove = state.serviceRecommendations.find((r) => r.id === id);
+      if (!recToRemove) return state;
+      
+      return {
+        serviceRecommendations: state.serviceRecommendations.filter((r) => r.id !== id),
+        deletedServiceRecommendations: [
+          ...state.deletedServiceRecommendations,
+          { ...recToRemove, active: false },
+        ],
+      };
+    }),
+
+  getDeletedServiceRecommendations: () => {
+    const { deletedServiceRecommendations } = get();
+    return deletedServiceRecommendations;
+  },
+
   clearAll: () =>
     set({
       formType: "application", // reset to default
@@ -380,6 +406,7 @@ export const useApplicationStore = create<ApplicationStore>((set, get) => ({
       modifiedModuleIds: new Set<string>(),
       newModuleIds: new Set<string>(),
       deletedModules: [],
+      deletedServiceRecommendations: [],
     }),
 
   setCurrentQuestionIndex: (index: number) =>

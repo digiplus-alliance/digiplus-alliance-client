@@ -61,6 +61,7 @@ export default function PreviewModal({
     getModifiedAndNewModules,
     getDeletedQuestions,
     getDeletedModules,
+    getDeletedServiceRecommendations,
   } = useFormStore();
 
   const { mutate: createApplication, isPending: isCreating } =
@@ -378,6 +379,7 @@ export default function PreviewModal({
           modules,
           questions,
           serviceRecommendations,
+          deletedServiceRecommendations: getDeletedServiceRecommendations(),
         },
         !!applicationId,
         getModifiedAndNewQuestions,
@@ -405,6 +407,7 @@ export default function PreviewModal({
           modules,
           questions,
           serviceRecommendations,
+          deletedServiceRecommendations: getDeletedServiceRecommendations(),
         },
         !!assessmentId,
         getModifiedAndNewQuestions,
