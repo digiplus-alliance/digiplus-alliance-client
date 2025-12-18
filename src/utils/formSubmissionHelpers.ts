@@ -12,6 +12,7 @@ interface FormSubmissionData {
   modules: Module[];
   questions: StoreQuestion[];
   serviceRecommendations: ServiceRecommendation[];
+  deletedServiceRecommendations: ServiceRecommendation[];
 }
 
 export function buildApplicationPayload(
@@ -299,18 +300,28 @@ export function buildAssessmentPayload(
         return cleanObject(apiQuestion);
       }),
     service_recommendations:
-      data.serviceRecommendations.length > 0
-        ? data.serviceRecommendations.map((rec) => ({
-            ...(rec.id && rec.id.length === 24 && /^[a-f0-9]{24}$/i.test(rec.id)
-              ? { _id: rec.id }
-              : {}),
-            id: rec.service_id,
-            service_name: rec.service_name,
-            description: rec.description,
-            min_points: rec.min_points,
-            max_points: rec.max_points,
-            levels: rec.levels,
-          }))
+      data.serviceRecommendations.length > 0 || data.deletedServiceRecommendations.length > 0
+        ? [
+            ...data.serviceRecommendations.map((rec) => {
+              // Check if this is an existing recommendation (has id from backend)
+              const isExistingRecommendation = rec.id;
+
+              return {
+                // For existing recommendations, include id for updates
+                ...(isExistingRecommendation ? { id: rec.id } : {}),
+                service_name: rec.service_name,
+                description: rec.description,
+                min_points: rec.min_points,
+                max_points: rec.max_points,
+                levels: rec.levels,
+              };
+            }),
+            // Add deleted service recommendations with toDelete flag
+            ...data.deletedServiceRecommendations.map((rec) => ({
+              id: rec.id,
+              toDelete: true,
+            })),
+          ]
         : undefined,
   };
 }
