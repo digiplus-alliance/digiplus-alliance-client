@@ -291,7 +291,7 @@ export function buildAssessmentPayload(
                     module_ref: `mod-${q?.module.toLowerCase().replace(/\s+/g, "_")}`
                   };
             })()),
-          acceptedFileTypes: q?.acceptedFileTypes,
+          allowed_file_types: q?.acceptedFileTypes,
           max_file_size: q.type === "file_upload" ? q.max_file_size : undefined,
           max_files: q.type === "file_upload" ? q.max_files : undefined,
           upload_instruction:
