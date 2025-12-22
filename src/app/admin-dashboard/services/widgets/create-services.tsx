@@ -45,19 +45,19 @@ type ServiceFormData = z.infer<typeof serviceSchema>;
 
 const serviceTypes = [
   { value: "Ecosystem Building", label: "Ecosystem Building" },
-  { value: "Digital Skills & Training", label: "Digital Skills & Training" },
+  { value: "Skills and Development", label: "Skills and Development" },
   {
-    value: "Digital Infrastructure / Tools",
-    label: "Digital Infrastructure / Tools",
+    value: "Access to Finance",
+    label: "Access to Finance",
   },
   {
-    value: "Business Advisory & Ecosystem Support",
-    label: "Business Advisory & Ecosystem Support",
+    value: "Test Before Invest",
+    label: "Test Before Invest",
   },
-  { value: "Research & Insights", label: "Research & Insights" },
+  { value: "Market and Policy Insight", label: "Market and Policy Insight" },
   {
-    value: "Innovation & Co-creation Labs",
-    label: "Innovation & Co-creation Labs",
+    value: "Research Commercialisation",
+    label: "Research Commercialisation",
   },
 ];
 
