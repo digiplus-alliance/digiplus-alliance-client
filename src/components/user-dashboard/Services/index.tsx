@@ -134,6 +134,8 @@ const getPricingUnit = (unit: string) => {
       return 'Per Day';
     case 'per_month':
       return 'Per Month';
+    case 'per_quarter':
+      return 'Per Quarter';
     default:
       return '';
   }

@@ -67,6 +67,7 @@ const pricingUnits = [
   { value: "one_time_payment", label: "One Time Payment" },
   { value: "per_day", label: "Per Day" },
   { value: "per_month", label: "Per Month" },
+  { value: "per_quarter", label: "Per Quarter" },
 ];
 
 interface CreateServiceProps {
