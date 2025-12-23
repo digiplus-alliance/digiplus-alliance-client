@@ -7,7 +7,7 @@ const createServicePayloadSchema = z.object({
   service_type: z.string().min(1, "Service type is required"),
   short_description: z.string().min(1, "Short description is required"),
   long_description: z.string().min(1, "Long description is required"),
-  price: z.number().min(0, "Price must be zero or a positive number"), // Changed this
+  price: z.number().min(0).optional(),
   discounted_price: z.number().positive().optional(),
   pricing_unit: z.string().min(1, "Pricing unit is required"),
   images: z.array(z.instanceof(File)).optional(),
@@ -20,7 +20,7 @@ const createServiceResponseSchema = z.object({
   service_type: z.string(),
   image: z.string(),
   images: z.array(z.string()),
-  price: z.number(),
+ price: z.number().optional(),
   formatted_price: z.string(),
   discounted_price: z.number().optional(),
   formatted_discounted_price: z.string().optional(),
