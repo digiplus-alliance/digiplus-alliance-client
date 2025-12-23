@@ -26,10 +26,14 @@ const serviceSchema = z.object({
   name: z.string().min(2, "Service name is required"),
   shortDescription: z.string().min(5, "Short description is required"),
   longDescription: z.string().min(10, "Long description is required"),
+    // Make price optional but validate format if provided
   price: z
     .string()
-    .min(1, "Product price is required")
-    .regex(/^\d+$/, "Price must be a number"),
+    .optional()
+    .refine(
+      (val) => !val || /^\d+$/.test(val),
+      { message: "Price must be a number" }
+    ),
   discountedPrice: z
     .string()
     .optional()
@@ -39,7 +43,21 @@ const serviceSchema = z.object({
   serviceType: z.string().min(1, "Service type is required"),
   pricingUnit: z.string().min(1, "Pricing unit is required"),
   image: z.instanceof(File, { message: "Image file is required" }).optional(),
-});
+})
+.refine(
+  (data) => {
+    // If pricing unit is NOT equity_based, price is required and must be a valid number
+    if (data.pricingUnit !== "equity_based") {
+      return data.price && data.price.length > 0 && /^\d+$/.test(data.price);
+    }
+    return true;
+  },
+  {
+    message: "Product price is required for paid services",
+    path: ["price"],
+  }
+);
+
 
 type ServiceFormData = z.infer<typeof serviceSchema>;
 
@@ -142,7 +160,8 @@ export default function CreateService({
         name: serviceData.name,
         shortDescription: serviceData.short_description,
         longDescription: serviceData.long_description,
-        price: serviceData.price.toString(),
+       // Handle null/undefined price for equity-based services
+      price: serviceData.price != null ? serviceData.price.toString() : "",
         discountedPrice: serviceData.discounted_price?.toString() || "",
         serviceType: serviceTypeValue,
         pricingUnit: pricingUnitValue,
@@ -164,11 +183,16 @@ export default function CreateService({
     formData.append("service_type", data.serviceType);
     formData.append("short_description", data.shortDescription);
     formData.append("long_description", data.longDescription);
-    formData.append("price", data.price);
 
-    if (data.discountedPrice) {
-      formData.append("discounted_price", data.discountedPrice);
-    }
+  // Only append price if it exists and is not empty
+  if (data.price && data.price.trim() !== "") {
+    formData.append("price", data.price);
+  }
+
+  // Only append discounted price if it exists and is not empty
+  if (data.discountedPrice && data.discountedPrice.trim() !== "") {
+    formData.append("discounted_price", data.discountedPrice);
+  }
 
     formData.append("pricing_unit", data.pricingUnit);
 
@@ -441,11 +465,14 @@ export default function CreateService({
                 </p>
                 <div className="mt-2 flex flex-col items-end gap-1">
                   <p className="font-bold text-[#171616]">
-                    {watchAll.discountedPrice
-                      ? `NGN ${Number(watchAll.discountedPrice).toLocaleString()}`
-                      : watchAll.price
-                      ? `NGN ${Number(watchAll.price).toLocaleString()}`
-                      : "NGN 0"}
+                    {watchAll.pricingUnit === "equity_based" 
+      ? "Equity-based"
+      : watchAll.discountedPrice
+        ? `NGN ${Number(watchAll.discountedPrice).toLocaleString()}`
+        : watchAll.price
+          ? `NGN ${Number(watchAll.price).toLocaleString()}`
+          : "NGN 0"
+    }
                   </p>
                   {watchAll.discountedPrice && watchAll.price && (
                     <p className="text-sm text-red-600 line-through">
