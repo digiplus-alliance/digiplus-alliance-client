@@ -68,6 +68,7 @@ const pricingUnits = [
   { value: "per_day", label: "Per Day" },
   { value: "per_month", label: "Per Month" },
   { value: "per_quarter", label: "Per Quarter" },
+  { value: "equity_based", label: "Equity Based" },
 ];
 
 interface CreateServiceProps {

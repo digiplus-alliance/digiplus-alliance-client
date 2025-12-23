@@ -136,6 +136,8 @@ const getPricingUnit = (unit: string) => {
       return 'Per Month';
     case 'per_quarter':
       return 'Per Quarter';
+    case 'equity_based':
+      return 'Equity Based';
     default:
       return '';
   }
