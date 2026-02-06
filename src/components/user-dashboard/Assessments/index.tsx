@@ -585,6 +585,7 @@ export default function Assessment() {
               setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }));
             }}
             index={index}
+            isRequired={currentQuestion.is_required}
           />
         );
       case "checkbox":
@@ -603,6 +604,7 @@ export default function Assessment() {
               setResponses((prev) => ({ ...prev, [currentQuestion._id]: res }))
             }
             index={index}
+            isRequired={currentQuestion.is_required}
           />
         );
       case "short_text":
