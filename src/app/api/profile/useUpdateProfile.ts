@@ -17,15 +17,13 @@ export const UpdateProfileRequestSchema = z.object({
     .refine(
       (val) => {
         if (!val) return true;
-        try {
-          new URL(val);
-          return true;
-        } catch {
-          return false;
-        }
+        // Allow plain domain names like "example.com" or full URLs
+        const domainPattern = /^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
+        const urlPattern = /^https?:\/\/.+/;
+        return domainPattern.test(val) || urlPattern.test(val);
       },
       {
-        message: 'Invalid website URL',
+        message: 'Invalid website URL or domain name',
       }
     ),
   company_address: z.string().optional(),

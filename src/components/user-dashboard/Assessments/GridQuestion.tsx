@@ -40,6 +40,7 @@ export function GridQuestion({
   value,
   onChange,
   index,
+  isRequired,
 }: GridQuestionProps) {
   const handleResponseChange = (rowId: string, columnId: string) => {
     onChange({ ...value, [rowId]: columnId });
@@ -50,6 +51,7 @@ export function GridQuestion({
       <CardHeader className="text-left space-y-2 p-0 mb-4">
         <h2 className="text-sm font-medium  text-[#706C6C] ">
           {index + 1}. {title}
+          {isRequired && <span className="text-red-500 ml-1">*</span>}
         </h2>
         {description && <p className="text-sm text-[#5E5B5B] leading-relaxed">{description}</p>}
         {instruction && <p className="text-sm text-[#5E5B5B]">{instruction}</p>}

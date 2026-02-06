@@ -49,6 +49,7 @@ export function TextQuestion({
       <div className="p-0 space-y-2">
         <Label htmlFor="text-input" className="text-sm  text-[#706C6C]">
           {index + 1}. {title}
+          {isRequired && <span className="text-red-500 ml-1">*</span>}
         </Label>
         {type === 'short_text' ? (
           <Input

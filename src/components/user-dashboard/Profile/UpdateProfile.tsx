@@ -283,8 +283,7 @@ const UpdateProfileCompo = ({ onClose }: UpdateProfileModalProps) => {
               <label className="text-sm text-[#706C6C]">Company Website</label>
               <Input
                 {...register('company_website')}
-                type="url"
-                placeholder="https://www.digiplus.africa"
+                placeholder="digiplus.africa or https://www.digiplus.africa"
                 className="h-11 py-3 border-[#EBEBEB] rounded-lg placeholder:text-[#8F8F8F]"
               />
               {errors.company_website && <p className="text-red-500 text-xs">{errors.company_website.message}</p>}

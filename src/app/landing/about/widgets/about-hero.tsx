@@ -26,7 +26,7 @@ export default function AboutHero() {
           <p className="mt-6 text-[#EBEBEB] text-base sm:text-lg md:text-xl leading-relaxed">
             Digiplus Alliance is a bold digital innovation hub created to enable
             <strong> MSMEs </strong> across <strong> Southwest Nigeria </strong> with the tools, training, and support
-            they need to grow, digitally and sustainably. Led by <strong>8thGear Hub & Venture Studio</strong>,
+            they need to grow, digitally and sustainably. Led by <a href="https://www.8thgearpartners.com/" target="_blank" rel="noopener noreferrer"><strong>8thGear Hub & Venture Studio</strong></a>,
             Digiplus brings together mission-aligned partners to provide real,
             practical solutions that help businesses not just survive, but scale,
             leveraging digital technology.
