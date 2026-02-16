@@ -20,6 +20,7 @@ interface MultipleChoiceQuestionProps {
   value: string;
   onChange: (value: string) => void;
   index: number;
+  isRequired?: boolean;
 }
 
 export function MultipleChoiceQuestion({
@@ -31,15 +32,16 @@ export function MultipleChoiceQuestion({
   value,
   onChange,
   index,
+  isRequired,
 }: MultipleChoiceQuestionProps) {
   return (
     <Card className="w-full shadow-none drop-shadow-none border-none bg-transparent p-0">
       <CardHeader className="text-left space-y-0 mb-0 p-0">
         <h2 className="text-sm font-medium  text-[#706C6C] ">
           {index + 1}. {title}
+          {isRequired && <span className="text-red-500 ml-1">*</span>}
         </h2>
-        {description && <p className="text-sm text-[#5E5B5B]">{description}</p>}
-        {instruction && <p className="text-sm text-[#5E5B5B] italic">{instruction}</p>}
+        {description || instruction ? <p className="text-sm text-[#5E5B5B]">{description}</p> : null}
       </CardHeader>
       <CardContent className="p-0 -mt-2">
         <RadioGroup value={value} onValueChange={onChange} className="space-y-4">

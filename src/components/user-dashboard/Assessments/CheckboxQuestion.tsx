@@ -24,6 +24,7 @@ interface CheckboxQuestionProps {
   value: string[];
   onChange: (value: string[]) => void;
   index: number;
+  isRequired?: boolean;
 }
 
 export function CheckboxQuestion({
@@ -37,6 +38,7 @@ export function CheckboxQuestion({
   value,
   onChange,
   index,
+  isRequired,
 }: CheckboxQuestionProps) {
   const handleSelectionChange = (optionId: string, checked: boolean) => {
     const newSelections = checked ? [...value, optionId] : value.filter((id) => id !== optionId);
@@ -48,6 +50,7 @@ export function CheckboxQuestion({
       <CardHeader className="text-left space-y-2 p-0 mb-4">
         <h2 className="text-sm font-medium  text-[#706C6C] ">
           {index + 1}. {question || title}
+          {isRequired && <span className="text-red-500 ml-1">*</span>}
         </h2>
         {description && <p className="text-sm text-[#5E5B5B]">{description}</p>}
         {instruction && <p className="text-sm text-[#5E5B5B]">{instruction}</p>}

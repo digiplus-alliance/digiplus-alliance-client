@@ -46,6 +46,7 @@ export function DropdownQuestion({
       <CardContent className="p-0">
         <Label htmlFor="dropdown" className="text-sm  text-[#706C6C] font-medium">
           {index + 1}. {title}
+          {isRequired && <span className="text-red-500 ml-1">*</span>}
         </Label>
         <Select value={value} onValueChange={onChange} required={isRequired}>
           <SelectTrigger className="w-full h-14 border-[#EBEBEB] rounded-lg py-5">
